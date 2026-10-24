@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: seam-note-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: seam_note
+      POSTGRES_USER: seam_note
+      POSTGRES_PASSWORD: local_dev_only
+    ports:
+      - "127.0.0.1:15439:5432"
+    volumes:
+      - seam_note_pgdata:/var/lib/postgresql/data
+
+volumes:
+  seam_note_pgdata:
