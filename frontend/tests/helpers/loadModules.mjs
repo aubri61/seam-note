@@ -11,6 +11,7 @@ for (const name of [
   'lib/api/types', 'lib/api/client', 'lib/query/queryKeys', 'lib/query/queryClient',
   'features/folders/folderApi', 'features/folders/folderQueries',
   'features/notes/noteApi', 'features/notes/noteQueries', 'features/notes/notePresentation',
+  'features/notes/noteDrafts', 'features/notes/draftNavigation',
   'features/workspace/workspaceActions', 'features/workspace/workspaceMutations',
   'features/workspace/workspaceApi', 'features/workspace/workspaceQueries', 'features/workspace/workspaceTree',
 ]) {

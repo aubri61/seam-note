@@ -2,6 +2,7 @@ import type { Ref } from 'react'
 import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
 import { IconButton } from '@/components/primitives'
+import type { DraftStatus } from '@/features/notes/noteDrafts'
 import { SyncStatus } from '@/features/sync/SyncStatus'
 
 const Header = styled.header(({ theme }) => ({
@@ -35,9 +36,10 @@ interface AppHeaderProps {
   onToggleSidebar: () => void
   toggleRef: Ref<HTMLButtonElement>
   path: string[]
+  status: DraftStatus
 }
 
-export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, toggleRef, path }: AppHeaderProps) {
+export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, toggleRef, path, status }: AppHeaderProps) {
   return (
     <Header>
       <div>
@@ -56,7 +58,7 @@ export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, t
         <p>Personal{path.map((name, index) => <span key={index} style={{ display: 'contents' }}><Icon name="chevron" size={12} />{name}</span>)}</p>
       </div>
       <div>
-        <SyncStatus />
+        <SyncStatus status={status} />
         <IconButton type="button" disabled aria-label="More note options (coming later)" title="Note options are not connected">
           <Icon name="more" />
         </IconButton>

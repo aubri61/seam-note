@@ -10,6 +10,8 @@ import { SidebarDrawer } from '@/app/sidebar/SidebarDrawer'
 import { WorkspaceActionDialog } from '@/features/workspace/WorkspaceActionDialog'
 import type { WorkspaceAction } from '@/features/workspace/WorkspaceActionDialog'
 import { ApiError } from '@/lib/api/client'
+import { useNoteDrafts } from '@/features/notes/useNoteDrafts'
+import { draftStatus } from '@/features/notes/noteDrafts'
 import { NoteEditor } from '@/features/notes/NoteEditor'
 
 const Shell = styled.div(({ theme }) => ({
@@ -39,6 +41,10 @@ export function AppLayout() {
   const previousFocusMode = useRef(isMobile)
   const toggleRef = useRef<HTMLButtonElement>(null)
   const folders = useFolders()
+  const drafts = useNoteDrafts(folders.selectedNoteId, folders.activeNote)
+  const editorLoading = folders.workspace.isPending || !!folders.selectedNoteId && folders.noteQuery.isFetching
+  const editorError = (!folders.workspace.data ? folders.workspace.error : null) ?? folders.noteQuery.error
+  const status = draftStatus(drafts.draft, editorLoading, editorError)
   const [action, setAction] = useState<WorkspaceAction | null>(null)
   const [creationMessage, setCreationMessage] = useState('')
   const titleRef = useRef<HTMLInputElement>(null)
@@ -140,13 +146,14 @@ export function AppLayout() {
           sidebarId={sidebarId}
           onToggleSidebar={() => setSidebarOpen(open => !open)}
           toggleRef={toggleRef}
+          status={status}
           path={folders.ancestors.map(item => item.name)}
         />
         {(!isMobile || !sidebarOpen) && creationFeedback}
         <NoteEditor
-          note={folders.activeNote} selectedNoteId={folders.selectedNoteId} titleRef={titleRef}
-          loading={folders.workspace.isPending || folders.noteQuery.isFetching && !folders.activeNote}
-          error={(!folders.workspace.data ? folders.workspace.error : null) ?? folders.noteQuery.error}
+          draft={drafts.draft} onEdit={drafts.edit} selectedNoteId={folders.selectedNoteId} titleRef={titleRef}
+          loading={editorLoading}
+          error={editorError}
           busy={folders.busy} canCreate={!!folders.workspace.data} onCreateNote={openCreateNote} onDeleteNote={openDeleteNote}
           onRetry={() => void (folders.workspace.isError ? folders.workspace.refetch() : folders.noteQuery.refetch())}
         />

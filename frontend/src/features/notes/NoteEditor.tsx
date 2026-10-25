@@ -2,7 +2,7 @@ import type { RefObject } from 'react'
 import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
 import { IconButton } from '@/components/primitives'
-import type { Note } from '@/lib/api/types'
+import type { DraftPatch, NoteDraft } from './noteDrafts'
 
 const Panel = styled.section(({ theme }) => ({
   position: 'relative',
@@ -103,8 +103,9 @@ const NewDocumentButton = styled.button(({ theme }) => ({
   [`@media (max-width: ${theme.breakpoints.mobile})`]: { right: theme.spacing.md, bottom: theme.spacing.md },
 }))
 
-export function NoteEditor({ note, selectedNoteId, titleRef, loading, error, onRetry, busy, canCreate, onCreateNote, onDeleteNote }: {
-  note: Note | null
+export function NoteEditor({ draft, onEdit, selectedNoteId, titleRef, loading, error, onRetry, busy, canCreate, onCreateNote, onDeleteNote }: {
+  draft: NoteDraft | null
+  onEdit: (noteId: string, patch: DraftPatch) => void
   selectedNoteId: string | null
   titleRef: RefObject<HTMLInputElement | null>
   loading: boolean
@@ -115,14 +116,15 @@ export function NoteEditor({ note, selectedNoteId, titleRef, loading, error, onR
   onCreateNote: () => void
   onDeleteNote: () => void
 }) {
-  const visible = note?.id === selectedNoteId ? note : null
+  const visible = draft?.noteId === selectedNoteId ? draft : null
   return (
-    <Panel aria-label="노트 편집기" data-note-id={visible?.id ?? undefined} aria-busy={loading}>
+    <Panel aria-label="노트 편집기" data-note-id={visible?.noteId ?? undefined} aria-busy={loading}>
       <Document>
-        {loading && <p role="status">원고를 불러오는 중입니다.</p>}
-        {error && <div role="alert"><p>조회에 실패했습니다: {error.message}</p><button type="button" onClick={onRetry}>다시 시도</button></div>}
+        {loading && <p role="status">원고 로딩 중</p>}
+        {error && <div role="alert"><p>원고 조회 실패: {error.message}</p><button type="button" onClick={onRetry}>다시 시도</button></div>}
         {!loading && !error && !visible && <p role="status">{selectedNoteId ? '원고를 선택해주세요.' : '표시할 원고가 없습니다.'}</p>}
-        <Title ref={titleRef} aria-label="문서 제목" placeholder={visible ? '제목 없는 문서' : ''} value={visible?.title ?? ''} readOnly />
+        <Title ref={titleRef} aria-label="문서 제목" placeholder={visible ? '제목 없음' : ''} value={visible?.title ?? ''} maxLength={200}
+          readOnly={!visible} onChange={event => { if (visible) onEdit(visible.noteId, { title: event.target.value }) }} />
         <Toolbar role="group" aria-label="Formatting preview (not connected)">
           <IconButton type="button" disabled aria-label="Bold (coming later)" title="Formatting is not connected">
             <strong style={{ fontSize: 18 }}>B</strong>
@@ -139,10 +141,11 @@ export function NoteEditor({ note, selectedNoteId, titleRef, loading, error, onR
           <IconButton type="button" aria-label="원고 삭제" title="원고 삭제" disabled={busy || !selectedNoteId} onClick={onDeleteNote} style={{ marginLeft: 'auto' }}><Icon name="trash" size={18} /></IconButton>
         </Toolbar>
         <Writing>
-          <textarea aria-label="문서 내용" placeholder="" value={visible?.content ?? ''} readOnly />
+          <textarea aria-label="문서 내용" placeholder="" value={visible?.content ?? ''} readOnly={!visible}
+            onChange={event => { if (visible) onEdit(visible.noteId, { content: event.target.value }) }} />
         </Writing>
         <Footer>
-          <span>본문 읽기 전용 · 생성·삭제는 서버에 반영되며 내용 편집은 아직 지원하지 않습니다.</span>
+          <span>편집 내용은 현재 브라우저 메모리에만 있으며 새로고침·탭 종료 시 사라집니다. 이탈 경고는 브라우저에 따라 표시되지 않을 수 있습니다.</span>
         </Footer>
       </Document>
       <NewDocumentButton type="button" disabled={busy || !canCreate} onClick={onCreateNote} aria-label="새 문서" title="빈 원고 생성"><Icon name="pencil" size={24} /></NewDocumentButton>

@@ -168,7 +168,7 @@ export function Sidebar({ onClose, folders, onSelectNote, onCreate, creationFeed
           openFolders={folders.openFolders} onFolderOpen={folders.setFolderOpen} onSelect={onSelectNote}
         />}
       </nav>
-      <Footnote>A little room for everything on your mind.<br />서버 원고를 읽기 전용으로 보고 있습니다.</Footnote>
+      <Footnote>A little room for everything on your mind.<br />편집 내용은 현재 브라우저 메모리에만 있습니다.</Footnote>
     </Panel>
   )
 }

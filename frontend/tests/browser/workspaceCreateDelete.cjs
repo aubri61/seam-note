@@ -104,7 +104,8 @@ async function main() {
     assert.equal(state.notePosts[0].folderId, root.id)
     assert.equal(await page.getByRole('dialog').count(), 0)
     assert.equal(await page.getByLabel('문서 내용').inputValue(), '')
-    assert.notEqual(await page.getByLabel('문서 내용').getAttribute('readonly'), null)
+    assert.equal(await page.getByLabel('문서 내용').getAttribute('readonly'), null)
+    await page.getByText('변경사항 없음', { exact: true }).waitFor()
     await until(async () => state.metadata > metaBefore, 'Infinity refresh')
     state.failNote = true
     await fab.click()
@@ -261,7 +262,7 @@ async function main() {
     await mobile.getByRole('button', { name: '사이드바 펼치기', exact: true }).waitFor()
     await mobile.close()
     assert.deepEqual(errors, [])
-    console.log('PASS: original plus dropdown, selected Folder/Note destination, inline folder rename, root/nested Folder, blank Note + auto selection, 204 DELETE, cancel/failure/empty recovery, Infinity refresh, duplicate guard, ambiguous network, mobile; mock writes only')
+    console.log('PASS: original plus dropdown, selected Folder/Note destination, inline folder rename, root/nested Folder, blank clean editable Draft + auto selection, 204 DELETE, cancel/failure/empty recovery, Infinity refresh, duplicate guard, ambiguous network, mobile; mock writes only')
   } finally { await browser.close() }
 }
 main().catch(error => { console.error(error); process.exitCode = 1 })

@@ -39,8 +39,8 @@ async function main() {
     await until(async () => await editor.getAttribute('data-note-id') === 'auto', 'first sorted descendant was not selected')
     assert.equal(await page.getByLabel('문서 제목').inputValue(), '첫 원고')
     assert.equal(await page.getByLabel('문서 내용').inputValue(), 'body:auto')
-    assert.notEqual(await page.getByLabel('문서 내용').getAttribute('readonly'), null)
-    assert.notEqual(await page.getByLabel('문서 제목').getAttribute('readonly'), null)
+    assert.equal(await page.getByLabel('문서 내용').getAttribute('readonly'), null)
+    assert.equal(await page.getByLabel('문서 제목').getAttribute('readonly'), null)
     assert.equal(await page.locator('[data-node-key="note:auto"]').getAttribute('aria-current'), 'page')
     // Tree has one tab stop and exposes hierarchy; arrows move focus without selecting notes.
     assert.equal(await page.locator('[role="treeitem"][tabindex="0"]').count(), 1)
@@ -72,7 +72,7 @@ async function main() {
     await page.locator('[data-node-key="note:auto"]').click()
     await until(async () => await editor.getAttribute('data-note-id') === 'auto', 'cached note not selected')
     assert.equal(calls.filter(p => p === '/api/notes/auto').length, before)
-    assert.equal(await page.getByText('읽기 전용', { exact: true }).count(), 1)
+    assert.equal(await page.getByText('변경사항 없음', { exact: true }).count(), 1)
     assert.equal(await page.locator('[data-node-key="note:auto"]').getAttribute('aria-current'), 'page')
     assert.equal(await page.getByRole('button', { name: '새 문서', exact: true }).last().isEnabled(), true)
     await pause(150) // Let the existing row background transition settle for the screenshot.
@@ -158,7 +158,7 @@ async function main() {
       console.log('PASS: live Vite proxy -> backend GET, selected ID and full editor content match')
     }
     assert.deepEqual(errors, [])
-    console.log('PASS: sorted auto selection, readonly, collapse, fast switch, cache, detail error recovery, empty/folders-only, metadata retry; GET only')
+    console.log('PASS: sorted auto selection, editable clean draft, collapse, fast switch, cache, detail error recovery, empty/folders-only, metadata retry; GET only')
   } finally { await browser.close() }
 }
 main().catch(error => { console.error(error); process.exitCode = 1 })
