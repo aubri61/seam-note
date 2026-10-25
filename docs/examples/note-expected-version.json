@@ -1,0 +1,172 @@
+{
+  "environment": "isolated PostgreSQL 17; synthetic notes only",
+  "exchanges": [
+    {
+      "method": "POST",
+      "path": "/api/folders",
+      "request": {
+        "name": "expectedVersion 검증"
+      },
+      "status": 201,
+      "response": {
+        "createdAt": "2026-10-25T05:40:44.688951Z",
+        "id": "f7cbf370-9f48-4540-adb7-cefb3e00939a",
+        "name": "expectedVersion 검증",
+        "parentId": null,
+        "sortOrder": 13,
+        "updatedAt": "2026-10-25T05:40:44.688951Z",
+        "version": 0
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/notes",
+      "request": {
+        "folderId": "f7cbf370-9f48-4540-adb7-cefb3e00939a",
+        "title": "",
+        "content": ""
+      },
+      "status": 201,
+      "response": {
+        "content": "",
+        "createdAt": "2026-10-25T05:40:44.760640Z",
+        "folderId": "f7cbf370-9f48-4540-adb7-cefb3e00939a",
+        "id": "ebaaade4-1199-49a8-90cb-a1e6bfea72ec",
+        "sortOrder": 0,
+        "title": "",
+        "updatedAt": "2026-10-25T05:40:44.760640Z",
+        "version": 0
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/ebaaade4-1199-49a8-90cb-a1e6bfea72ec",
+      "request": {
+        "title": "1화",
+        "content": "수정한 원고 내용",
+        "expectedVersion": 0
+      },
+      "status": 200,
+      "response": {
+        "content": "수정한 원고 내용",
+        "createdAt": "2026-10-25T05:40:44.760640Z",
+        "folderId": "f7cbf370-9f48-4540-adb7-cefb3e00939a",
+        "id": "ebaaade4-1199-49a8-90cb-a1e6bfea72ec",
+        "sortOrder": 0,
+        "title": "1화",
+        "updatedAt": "2026-10-25T05:40:44.778716Z",
+        "version": 1
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/notes/ebaaade4-1199-49a8-90cb-a1e6bfea72ec",
+      "request": {
+        "title": "",
+        "content": "",
+        "expectedVersion": 1
+      },
+      "status": 200,
+      "response": {
+        "content": "",
+        "createdAt": "2026-10-25T05:40:44.760640Z",
+        "folderId": "f7cbf370-9f48-4540-adb7-cefb3e00939a",
+        "id": "ebaaade4-1199-49a8-90cb-a1e6bfea72ec",
+        "sortOrder": 0,
+        "title": "",
+        "updatedAt": "2026-10-25T05:40:44.793238Z",
+        "version": 2
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/ebaaade4-1199-49a8-90cb-a1e6bfea72ec",
+      "request": {
+        "title": "오래된 로컬 제목",
+        "content": "오래된 로컬 내용",
+        "expectedVersion": 0
+      },
+      "status": 409,
+      "response": {
+        "code": "VERSION_CONFLICT",
+        "message": "다른 요청이 먼저 데이터를 변경했습니다.",
+        "errors": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/ebaaade4-1199-49a8-90cb-a1e6bfea72ec",
+      "request": null,
+      "status": 200,
+      "response": {
+        "content": "",
+        "createdAt": "2026-10-25T05:40:44.760640Z",
+        "folderId": "f7cbf370-9f48-4540-adb7-cefb3e00939a",
+        "id": "ebaaade4-1199-49a8-90cb-a1e6bfea72ec",
+        "sortOrder": 0,
+        "title": "",
+        "updatedAt": "2026-10-25T05:40:44.793238Z",
+        "version": 2
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/notes/ebaaade4-1199-49a8-90cb-a1e6bfea72ec",
+      "request": {
+        "title": "",
+        "content": "",
+        "expectedVersion": null
+      },
+      "status": 400,
+      "response": {
+        "code": "INVALID_REQUEST",
+        "message": "입력값을 확인해주세요.",
+        "errors": [
+          {
+            "field": "expectedVersion",
+            "message": "널이어서는 안됩니다"
+          }
+        ]
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/notes/ebaaade4-1199-49a8-90cb-a1e6bfea72ec",
+      "request": {
+        "title": "",
+        "content": "",
+        "expectedVersion": -1
+      },
+      "status": 400,
+      "response": {
+        "code": "INVALID_REQUEST",
+        "message": "입력값을 확인해주세요.",
+        "errors": [
+          {
+            "field": "expectedVersion",
+            "message": "0 이상이어야 합니다"
+          }
+        ]
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/ebaaade4-1199-49a8-90cb-a1e6bfea72ec",
+      "request": {
+        "title": "",
+        "content": ""
+      },
+      "status": 400,
+      "response": {
+        "code": "INVALID_REQUEST",
+        "message": "입력값을 확인해주세요.",
+        "errors": [
+          {
+            "field": "expectedVersion",
+            "message": "널이어서는 안됩니다"
+          }
+        ]
+      }
+    }
+  ]
+}
