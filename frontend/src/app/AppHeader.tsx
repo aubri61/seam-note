@@ -3,7 +3,6 @@ import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
 import { IconButton } from '@/components/primitives'
 import { SyncStatus } from '@/features/sync/SyncStatus'
-import type { SyncStatusValue } from '@/features/sync/SyncStatus'
 
 const Header = styled.header(({ theme }) => ({
   display: 'flex',
@@ -36,10 +35,9 @@ interface AppHeaderProps {
   onToggleSidebar: () => void
   toggleRef: Ref<HTMLButtonElement>
   path: string[]
-  syncStatus?: SyncStatusValue
 }
 
-export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, toggleRef, path, syncStatus = 'saving-locally' }: AppHeaderProps) {
+export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, toggleRef, path }: AppHeaderProps) {
   return (
     <Header>
       <div>
@@ -58,7 +56,7 @@ export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, t
         <p>Personal{path.map((name, index) => <span key={index} style={{ display: 'contents' }}><Icon name="chevron" size={12} />{name}</span>)}</p>
       </div>
       <div>
-        <SyncStatus status={syncStatus} />
+        <SyncStatus />
         <IconButton type="button" disabled aria-label="More note options (coming later)" title="Note options are not connected">
           <Icon name="more" />
         </IconButton>

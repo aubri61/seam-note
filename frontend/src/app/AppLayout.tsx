@@ -7,6 +7,9 @@ import { Sidebar } from '@/app/sidebar/Sidebar'
 import { useFolders } from '@/features/folders/useFolders'
 import { DesktopSidebar } from '@/app/sidebar/DesktopSidebar'
 import { SidebarDrawer } from '@/app/sidebar/SidebarDrawer'
+import { WorkspaceActionDialog } from '@/features/workspace/WorkspaceActionDialog'
+import type { WorkspaceAction } from '@/features/workspace/WorkspaceActionDialog'
+import { ApiError } from '@/lib/api/client'
 import { NoteEditor } from '@/features/notes/NoteEditor'
 
 const Shell = styled.div(({ theme }) => ({
@@ -31,11 +34,13 @@ const EditorArea = styled.main(({ theme }) => ({
 export function AppLayout() {
   const theme = useTheme()
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.tablet})`)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile)
   const [previousMode, setPreviousMode] = useState(isMobile)
   const previousFocusMode = useRef(isMobile)
   const toggleRef = useRef<HTMLButtonElement>(null)
   const folders = useFolders()
+  const [action, setAction] = useState<WorkspaceAction | null>(null)
+  const [creationMessage, setCreationMessage] = useState('')
   const titleRef = useRef<HTMLInputElement>(null)
   const pendingEditorFocus = useRef(false)
   const sidebarId = 'folders-sidebar'
@@ -69,17 +74,50 @@ export function AppLayout() {
     }
   }
 
-  function createItem(kind: 'folder' | 'document') {
-    folders.create(kind)
-    if (kind === 'document' && isMobile && sidebarOpen) {
-      pendingEditorFocus.current = true
-      setSidebarOpen(false)
+  function showCreatedNote() {
+    if (isMobile) { pendingEditorFocus.current = true; setSidebarOpen(false) }
+  }
+  function create(kind: 'folder' | 'document') {
+    if (folders.busy || !folders.workspace.data) return
+    setCreationMessage('')
+    if (kind === 'folder') {
+      void folders.createFolder({ id: crypto.randomUUID(), parentId: folders.creationParentId, name: '새 폴더' })
+    } else if (folders.creationParentId) {
+      void folders.createEmptyNote(folders.creationParentId).then(success => { if (success) showCreatedNote() })
+    } else {
+      setCreationMessage('먼저 폴더를 만들거나 원고를 넣을 폴더를 선택해주세요.')
     }
   }
+  function openCreateNote() { create('document') }
+  const creationError = folders.createFolderMutation.error ?? folders.createNoteMutation.error
+  async function retryCreation() {
+    if (folders.createFolderMutation.isError && folders.createFolderMutation.variables) {
+      await folders.createFolder(folders.createFolderMutation.variables)
+    } else if (folders.createNoteMutation.isError && folders.createNoteMutation.variables) {
+      const request = folders.createNoteMutation.variables
+      if (await folders.createEmptyNote(request.folderId, request.id ?? undefined)) showCreatedNote()
+    }
+  }
+  function openDeleteNote() {
+    if (folders.busy || !folders.selectedNoteId) return
+    const node = folders.tree.notes.get(folders.selectedNoteId)
+    if (!node) return
+    folders.resetMutationErrors()
+    setAction({ kind: 'delete-note', note: node.note })
+  }
 
-  const sidebar = (
-    <Sidebar onClose={closeSidebar} folders={folders} onSelectNote={selectNote} onCreate={createItem} />
-  )
+  const creationFeedback = (creationMessage || creationError) && <div role="alert" style={{ padding: '8px 24px', fontSize: 13 }}>
+          <p>{creationMessage || creationError?.message}</p>
+          {creationError && <>
+            {creationError instanceof ApiError && creationError.status === 0 && <p>서버에 반영됐지만 응답만 유실됐을 수 있습니다. 목록을 먼저 확인해주세요.</p>}
+            {creationError instanceof ApiError && creationError.code === 'DUPLICATE_ENTITY_ID' && <p>이전 요청이 반영됐을 수 있습니다. 목록에서 확인해주세요.</p>}
+            <button type="button" disabled={folders.busy} onClick={() => void folders.workspace.refetch()}>목록 새로고침</button>
+            <button type="button" disabled={folders.busy} onClick={() => void retryCreation()}>같은 요청 다시 시도</button>
+          </>}
+        </div>
+
+  const sidebar = <Sidebar onClose={closeSidebar} folders={folders} onSelectNote={selectNote}
+    onCreate={create} creationFeedback={isMobile ? creationFeedback : undefined} />
 
   return (
     <Shell>
@@ -102,14 +140,19 @@ export function AppLayout() {
           sidebarId={sidebarId}
           onToggleSidebar={() => setSidebarOpen(open => !open)}
           toggleRef={toggleRef}
-          path={folders.ancestors.map(item => item.title)}
+          path={folders.ancestors.map(item => item.name)}
         />
+        {(!isMobile || !sidebarOpen) && creationFeedback}
         <NoteEditor
-          note={folders.activeNote} titleRef={titleRef} focusTitleId={folders.focusTitleId}
-          onChange={patch => folders.update(folders.activeId, patch)}
-          onCreateNote={() => createItem('document')}
+          note={folders.activeNote} selectedNoteId={folders.selectedNoteId} titleRef={titleRef}
+          loading={folders.workspace.isPending || folders.noteQuery.isFetching && !folders.activeNote}
+          error={(!folders.workspace.data ? folders.workspace.error : null) ?? folders.noteQuery.error}
+          busy={folders.busy} canCreate={!!folders.workspace.data} onCreateNote={openCreateNote} onDeleteNote={openDeleteNote}
+          onRetry={() => void (folders.workspace.isError ? folders.workspace.refetch() : folders.noteQuery.refetch())}
         />
       </EditorArea>
+      {folders.busy && <div role="status" style={{ position: 'fixed', bottom: 16, left: 24 }}>요청을 처리하는 중입니다.</div>}
+      {action && <WorkspaceActionDialog key={action.kind} action={action} folders={folders} onClose={() => setAction(null)} />}
     </Shell>
   )
 }

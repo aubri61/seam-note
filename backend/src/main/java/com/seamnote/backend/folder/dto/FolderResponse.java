@@ -20,6 +20,15 @@ public class FolderResponse {
         this.createdAt = entity.getCreatedAt();
         this.updatedAt = entity.getUpdatedAt();
     }
+    public FolderResponse(UUID id, UUID parentId, String name, long sortOrder, Long version, Instant createdAt, Instant updatedAt) {
+        this.id = id;
+        this.parentId = parentId;
+        this.name = name;
+        this.sortOrder = sortOrder;
+        this.version = version;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
     public UUID getId() { return id; }
     public UUID getParentId() { return parentId; }
     public String getName() { return name; }

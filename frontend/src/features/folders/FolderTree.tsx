@@ -1,22 +1,20 @@
-import { useEffect, useMemo, useRef } from 'react'
-import { useTheme } from '@emotion/react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { KeyboardEvent } from 'react'
 import styled from '@emotion/styled'
-import { Tree } from 'react-arborist'
-import type { CursorProps, NodeRendererProps, TreeApi } from 'react-arborist'
 import { Icon } from '@/components/Icon'
-import { buildTree, matchesSearch } from '@/features/folders/folderModel'
-import type { FolderItem, FolderTreeNode } from '@/features/folders/folderModel'
+import { nodeLabel, visibleWorkspaceRows } from '@/features/workspace/workspaceTree'
+import type { WorkspaceTreeModel } from '@/features/workspace/workspaceTree'
 
 const Frame = styled.div(({ theme }) => ({
-  marginTop: theme.spacing.md,
+  marginTop: theme.spacing.md, maxHeight: '480px', minHeight: '160px', overflowY: 'auto',
   '> p': { padding: theme.spacing.md, color: theme.colors.mutedText, fontSize: '12px' },
   '[role="tree"]:focus-visible': { outlineOffset: 0 },
   '[role="treeitem"]:focus-visible': { outlineOffset: '-2px', borderRadius: theme.radii.sm },
 }))
-const Row = styled.div<{ selected: boolean; dropping: boolean }>(({ theme, selected, dropping }) => ({
+const Row = styled.div<{ selected: boolean }>(({ theme, selected }) => ({
   display: 'flex', alignItems: 'center', gap: theme.spacing.sm,
-  height: '100%', paddingRight: theme.spacing.sm, borderRadius: theme.radii.sm,
-  background: dropping ? theme.colors.accent : selected ? theme.colors.selected : 'transparent',
+  height: '40px', width: '100%', border: 0, textAlign: 'left', paddingRight: theme.spacing.sm, borderRadius: theme.radii.sm,
+  background: selected ? theme.colors.selected : 'transparent',
   color: selected ? theme.colors.text : theme.colors.mutedText,
   fontSize: '12px', cursor: 'pointer',
   transition: `background ${theme.motion.duration[100]} ${theme.motion.easing.standard}`,
@@ -30,126 +28,121 @@ const Chevron = styled.span(({ theme }) => ({
   '&[data-open="true"]': { transform: 'rotate(90deg)' },
 }))
 
-const DropLine = styled.div(({ theme }) => ({
-  position: 'absolute', right: 0, height: '2px',
-  pointerEvents: 'none', zIndex: 1,
-  background: theme.colors.border, borderRadius: theme.radii.pill,
-  '&::before': {
-    content: '""', position: 'absolute', left: '-2px', top: '-1px',
-    width: '4px', height: '4px', borderRadius: theme.radii.pill,
-    background: theme.colors.border,
-  },
-}))
-
-function DropCursor({ top, left, indent }: CursorProps) {
-  return <DropLine aria-hidden="true" style={{ top: top - 1, left, right: indent }} />
-}
-
-function Node({ node, style, dragHandle, tree }: NodeRendererProps<FolderTreeNode>) {
-  const theme = useTheme()
-  const expandOnHover = node.isInternal && !node.isOpen && node.willReceiveDrop
-
-  useEffect(() => {
-    if (!expandOnHover) return
-    const timer = window.setTimeout(() => tree.open(node.id), Number.parseInt(theme.motion.duration[200], 10))
-    return () => window.clearTimeout(timer)
-  }, [expandOnHover, node.id, tree, theme.motion.duration])
-
-  return (
-    <Row
-      ref={dragHandle}
-      style={style}
-      selected={node.isSelected}
-      dropping={node.willReceiveDrop}
-      title={node.data.name}
-      onClick={event => {
-        node.handleClick(event)
-        if (node.isInternal) node.toggle()
-      }}
-    >
-      <Chevron data-open={node.isOpen}>{node.isInternal && <Icon name="chevron" size={13} />}</Chevron>
-      <Icon name={node.isInternal ? 'folder' : 'note'} size={16} />
-      {node.isEditing ? (
-        <input
-          autoFocus aria-label="이름 변경" defaultValue={node.data.title}
-          onClick={event => event.stopPropagation()}
-          onFocus={event => event.currentTarget.select()}
-          onBlur={() => node.reset()}
-          onKeyDown={event => {
-            event.stopPropagation()
-            if (event.key === 'Enter') node.submit(event.currentTarget.value.trim() || (node.isInternal ? '새 폴더' : '제목 없는 문서'))
-            if (event.key === 'Escape') node.reset()
-          }}
-        />
-      ) : <span>{node.data.name}</span>}
-    </Row>
-  )
-}
 
 interface FolderTreeProps {
-  items: FolderItem[]
-  selectedId: string
-  createdId: string | null
-  movedId: string | null
+  tree: WorkspaceTreeModel
+  selectedNoteId: string | null
+  selectedFolderId: string | null
+  editingFolderId: string | null
+  onFolderName: (id: string, name: string) => Promise<boolean | null>
+  onCancelFolderName: () => void
+  namingBusy: boolean
+  namingError?: string
+  onFolderSelect: (id: string) => void
   search: string
   openFolders: Record<string, boolean>
   onFolderOpen: (id: string, open: boolean) => void
-  onSelectionHandled: () => void
   onSelect: (id: string) => void
-  onTreeSelect: (id: string) => void
-  onRename: (id: string, title: string) => void
-  onMove: (ids: string[], parentId: string | null, index: number) => void
 }
 
-export function FolderTree({ items, selectedId, createdId, movedId, search, openFolders, onFolderOpen, onSelectionHandled, onSelect, onTreeSelect, onRename, onMove }: FolderTreeProps) {
-  const treeRef = useRef<TreeApi<FolderTreeNode>>(null)
-  const data = useMemo(() => buildTree(items), [items])
+export function FolderTree({ tree, selectedNoteId, selectedFolderId, onFolderSelect, search, openFolders, onFolderOpen, onSelect, editingFolderId, onFolderName, onCancelFolderName, namingBusy, namingError }: FolderTreeProps) {
+  const rows = useMemo(() => visibleWorkspaceRows(tree, openFolders, search), [tree, openFolders, search])
+  const [focusedKey, setFocusedKey] = useState<string | null>(null)
+  const selectedKey = selectedFolderId ? `folder:${selectedFolderId}` : selectedNoteId ? `note:${selectedNoteId}` : null
+  const tabKey = rows.some(row => row.node.key === focusedKey) ? focusedKey
+    : rows.some(row => row.node.key === selectedKey) ? selectedKey : rows[0]?.node.key
 
-  useEffect(() => {
-    const id = createdId ?? movedId
-    if (!id) return
-    const tree = treeRef.current
-    tree?.openParents(id)
-    // Opening ancestors rebuilds Arborist's visible-node index on the next render.
-    // Select/edit only after the new row is visible, rather than reselecting its parent.
-    const frame = window.requestAnimationFrame(() => {
-      const rename = !!createdId && tree?.get(id)?.isInternal
-      tree?.select(id, { focus: !!rename || !!movedId })
-      if (rename) void tree?.edit(id)
-      onSelectionHandled()
-    })
-    return () => window.cancelAnimationFrame(frame)
-  }, [createdId, movedId, onSelectionHandled])
+  function navigate(event: KeyboardEvent<HTMLDivElement>) {
+    const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[data-node-key]'))
+    const index = buttons.findIndex(button => button === event.target)
+    if (index < 0) return
+    const row = rows[index]
+    let target = index
+    if (event.key === 'ArrowDown') target = Math.min(index + 1, rows.length - 1)
+    else if (event.key === 'ArrowUp') target = Math.max(index - 1, 0)
+    else if (event.key === 'Home') target = 0
+    else if (event.key === 'End') target = rows.length - 1
+    else if (event.key === 'ArrowRight' && row.node.kind === 'folder') {
+      if (!openFolders[row.node.folder.id] && !search.trim()) onFolderOpen(row.node.folder.id, true)
+      else if (rows[index + 1]?.parentKey === row.node.key) target = index + 1
+    } else if (event.key === 'ArrowLeft') {
+      if (row.node.kind === 'folder' && openFolders[row.node.folder.id] && !search.trim()) onFolderOpen(row.node.folder.id, false)
+      else target = rows.findIndex(parent => parent.node.key === row.parentKey)
+    } else return
+    event.preventDefault()
+    if (target >= 0) buttons[target]?.focus()
+  }
 
   return (
-    <Frame onKeyDownCapture={event => {
-      if ((event.target as HTMLElement).tagName === 'INPUT') return
-      const focused = treeRef.current?.focusedNode
-      if (!focused || (event.key !== 'Enter' && event.key !== 'F2')) return
-      event.preventDefault()
-      event.stopPropagation()
-      if (event.key === 'F2') void focused.edit()
-      else if (focused.isInternal) focused.toggle()
-      else focused.activate()
-    }}>
-      <Tree<FolderTreeNode>
-        ref={treeRef} data={data} width="100%" height={Math.min(480, Math.max(160, items.length * 40))}
-        rowHeight={40} indent={20} padding={2} openByDefault={false}
-        renderCursor={DropCursor}
-        initialOpenState={openFolders} selection={selectedId}
-        disableMultiSelection disableDeselectOnClick
-        searchTerm={search.trim()}
-        searchMatch={(node, term) => matchesSearch(node.data, term)}
-        disableDrag={!!search.trim()}
-        disableDrop={({ parentNode }) => !!search.trim() || (!parentNode.isRoot && parentNode.isLeaf)}
-        onToggle={id => { if (!search.trim()) onFolderOpen(id, treeRef.current?.isOpen(id) ?? false) }}
-        onActivate={node => { if (node.isLeaf) onSelect(node.id) }}
-        onSelect={nodes => { if (!createdId && !movedId && nodes[0]) onTreeSelect(nodes[0].id) }}
-        onRename={({ id, name }) => onRename(id, name)}
-        onMove={({ dragIds, parentId, index }) => onMove(dragIds, parentId, index)}
-        aria-label="폴더와 문서"
-      >{Node}</Tree>
-      {search.trim() && !items.some(item => matchesSearch(item, search)) && <p role="status">검색 결과가 없습니다.</p>}
+    <Frame>
+      {/* Tree selection and keyboard navigation preserve the original creation position. */}
+      <div role="tree" aria-label="폴더와 문서" onKeyDown={navigate}>
+        {rows.map(({ node, depth }) => {
+          const folder = node.kind === 'folder'
+          const expanded = folder && (!!search.trim() || !!openFolders[node.folder.id])
+          return <Row
+            key={node.key} role="treeitem" aria-level={depth + 1}
+            tabIndex={node.key === tabKey ? 0 : -1} onFocus={() => setFocusedKey(node.key)}
+            aria-selected={node.key === selectedKey}
+            selected={node.key === selectedKey}
+            style={{ paddingLeft: 2 + depth * 20, ...(folder && node.folder.id === editingFolderId ? { height: 'auto', minHeight: 40 } : {}) }} title={nodeLabel(node)}
+            aria-expanded={folder ? expanded : undefined}
+            aria-current={!folder && node.note.id === selectedNoteId ? 'page' : undefined}
+            data-node-key={node.key}
+            data-creation-target={folder && node.folder.id === selectedFolderId || undefined}
+            onKeyDown={event => {
+              if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
+                event.preventDefault(); event.currentTarget.click()
+              }
+            }}
+            onClick={event => {
+              if (event.target instanceof HTMLInputElement) return
+              if (folder) { onFolderSelect(node.folder.id); onFolderOpen(node.folder.id, !expanded) }
+              else onSelect(node.note.id)
+            }}
+          >
+            <Chevron data-open={expanded}>{folder && <Icon name="chevron" size={13} />}</Chevron>
+            <Icon name={folder ? 'folder' : 'note'} size={16} />
+            {folder && node.folder.id === editingFolderId ? <FolderName key={node.folder.id} name={node.folder.name}
+              busy={namingBusy} error={namingError} onSave={name => onFolderName(node.folder.id, name)} onCancel={onCancelFolderName} />
+              : <span>{nodeLabel(node)}</span>}
+          </Row>
+        })}
+      </div>
+      {!tree.roots.length && <p role="status">폴더가 없습니다.</p>}
+      {!!tree.roots.length && !rows.length && <p role="status">검색 결과가 없습니다.</p>}
+      {!!tree.issues.length && <p role="status">일부 항목의 폴더 관계가 올바르지 않습니다.</p>}
     </Frame>
   )
+}
+
+function FolderName({ name, busy, error, onSave, onCancel }: {
+  name: string; busy: boolean; error?: string
+  onSave: (name: string) => Promise<boolean | null>; onCancel: () => void
+}) {
+  const [value, setValue] = useState(name)
+  const [validation, setValidation] = useState('')
+  const input = useRef<HTMLInputElement>(null)
+  const submitting = useRef(false)
+  const cancelled = useRef(false)
+  useEffect(() => { input.current?.focus(); input.current?.select(); input.current?.scrollIntoView({ block: 'nearest' }) }, [])
+  async function save() {
+    if (busy || submitting.current || cancelled.current) return
+    const next = value.trim()
+    if (!next || next.length > 200) { setValidation('폴더 이름은 공백이 아닌 1~200자로 입력해주세요.'); return }
+    if (next === name) { onCancel(); return }
+    setValidation('')
+    submitting.current = true
+    try { await onSave(next) } finally { submitting.current = false }
+  }
+  return <span style={{ flex: 1 }}>
+    <input ref={input} aria-label="새 폴더 이름" value={value} maxLength={200} readOnly={busy}
+      onChange={event => setValue(event.target.value)} onBlur={() => void save()}
+      onKeyDown={event => {
+        event.stopPropagation()
+        if (event.key === 'Enter' && !event.nativeEvent.isComposing) { event.preventDefault(); void save() }
+        if (event.key === 'Escape' && !busy) { event.preventDefault(); cancelled.current = true; onCancel() }
+      }} />
+    {(validation || error) && <span role="alert" style={{ display: 'block', whiteSpace: 'normal', fontSize: 11 }}>{validation || error}</span>}
+  </span>
 }

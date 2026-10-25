@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import type { ReactNode } from 'react'
 import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
 import { WorkspacePicker } from '@/features/workspaces/WorkspacePicker'
@@ -102,6 +103,7 @@ const CreatePicker = styled.details(({ theme }) => ({
   },
 }))
 
+
 const Footnote = styled.p(({ theme }) => ({
   marginTop: 'auto',
   padding: `${theme.spacing.xl} ${theme.spacing.md} 0`,
@@ -110,11 +112,12 @@ const Footnote = styled.p(({ theme }) => ({
   color: theme.colors.mutedText,
 }))
 
-export function Sidebar({ onClose, folders, onSelectNote, onCreate }: {
+export function Sidebar({ onClose, folders, onSelectNote, onCreate, creationFeedback }: {
   onClose: () => void
   folders: ReturnType<typeof useFolders>
   onSelectNote: (id: string) => void
   onCreate: (kind: 'folder' | 'document') => void
+  creationFeedback?: ReactNode
 }) {
   const createRef = useRef<HTMLDetailsElement>(null)
 
@@ -141,29 +144,31 @@ export function Sidebar({ onClose, folders, onSelectNote, onCreate }: {
       <nav aria-label="폴더 탐색">
         <FolderHeading>
           <Eyebrow>폴더</Eyebrow>
-          <CreatePicker ref={createRef} onBlur={event => {
-            if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false
-          }} onKeyDown={event => {
-            if (event.key === 'Escape') {
-              event.preventDefault()
-              event.currentTarget.open = false
-              event.currentTarget.querySelector('summary')?.focus()
-            }
-          }}>
+          <CreatePicker ref={createRef}
+            onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false }}
+            onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus() } }}>
             <summary aria-label="폴더 또는 문서 추가"><Icon name="plus" size={17} /></summary>
             <div aria-label="추가할 항목">
-              <button type="button" onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('folder') }}><Icon name="folder" size={17} />새 폴더</button>
-              <button type="button" onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('document') }}><Icon name="note" size={17} />새 문서</button>
+              <button type="button" disabled={folders.busy || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('folder') }}><Icon name="folder" size={17} />새 폴더</button>
+              <button type="button" disabled={folders.busy || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('document') }}><Icon name="note" size={17} />새 문서</button>
             </div>
           </CreatePicker>
         </FolderHeading>
-        <FolderTree
-          items={folders.items} selectedId={folders.selectedId} createdId={folders.createdId} movedId={folders.movedId}
-          search={folders.search} openFolders={folders.openFolders} onFolderOpen={folders.setFolderOpen} onSelectionHandled={folders.acknowledgeTreeSelection}
-          onSelect={onSelectNote} onTreeSelect={folders.selectTreeItem} onRename={(id, title) => folders.update(id, { title })} onMove={folders.move}
-        />
+        {creationFeedback}
+        {folders.workspace.isPending && <p role="status">폴더와 원고를 불러오는 중입니다.</p>}
+        {folders.workspace.isError && <div role="alert">
+          <p>{folders.workspace.data ? '목록 갱신에 실패했습니다' : '목록을 불러오지 못했습니다'}: {folders.workspace.error.message}</p>
+          <button type="button" onClick={() => void folders.workspace.refetch()}>다시 시도</button>
+        </div>}
+        {folders.workspace.data && <FolderTree
+          tree={folders.tree} selectedNoteId={folders.selectedNoteId}
+          editingFolderId={folders.editingFolderId} onFolderName={folders.renameCreatedFolder}
+          onCancelFolderName={folders.cancelFolderName} namingBusy={folders.busy} namingError={folders.renameFolderMutation.error?.message}
+          selectedFolderId={folders.selectedFolderId} onFolderSelect={folders.selectFolder} search={folders.search}
+          openFolders={folders.openFolders} onFolderOpen={folders.setFolderOpen} onSelect={onSelectNote}
+        />}
       </nav>
-      <Footnote>A little room for everything on your mind.<br />변경 내용은 현재 세션에서만 유지됩니다.</Footnote>
+      <Footnote>A little room for everything on your mind.<br />서버 원고를 읽기 전용으로 보고 있습니다.</Footnote>
     </Panel>
   )
 }

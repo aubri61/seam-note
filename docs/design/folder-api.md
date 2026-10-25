@@ -233,3 +233,7 @@ expectedVersion 누락/null/음수는 HTTP 400 INVALID_REQUEST이며 errors에 e
 동시 수정 테스트는 JDBC SELECT FOR UPDATE로 테스트 원고를 잠근 상태에서 동일 expectedVersion 0인 PUT/PATCH 두 요청을 실행하고, 두 UPDATE가 실제 DB 잠금에 대기하는 것을 확인한 뒤 잠금을 해제했다. 두 요청 모두 서비스의 버전 검사를 통과한 조건에서도 한 요청만 200/version 1, 다른 요청은 409이며 최종 원고가 성공 응답과 일치했다. 테스트 SQL은 version/본문을 직접 변경하지 않는다.
 
 프론트엔드·DB 마이그레이션·공유 DB는 이번 작업에서 변경하거나 적용하지 않았다. 운영 데이터·다중 서버 성능·프론트엔드 E2E는 미검증이다. [작업 순서와 파일별 변경 이력](../worklogs/2026-10-25-note-expected-version.md)에 실행 내역을 기록했다.
+
+## 후속 통합 조회
+
+GET /api/workspace/tree와 읽기 전용 UI는 [통합 조회 계약](workspace-readonly-ui.md)에 기록했다. 기존 CRUD와 expectedVersion 계약은 유지한다.

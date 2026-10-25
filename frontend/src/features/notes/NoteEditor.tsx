@@ -1,9 +1,8 @@
-import { useEffect } from 'react'
 import type { RefObject } from 'react'
 import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
 import { IconButton } from '@/components/primitives'
-import type { FolderItem } from '@/features/folders/folderModel'
+import type { Note } from '@/lib/api/types'
 
 const Panel = styled.section(({ theme }) => ({
   position: 'relative',
@@ -100,23 +99,30 @@ const NewDocumentButton = styled.button(({ theme }) => ({
   fontSize: '13px', fontWeight: 600,
   transition: `opacity ${theme.motion.duration[100]} ${theme.motion.easing.standard}`,
   '&:hover': { opacity: .85 },
+  '&:disabled': { opacity: .4, cursor: 'not-allowed' },
   [`@media (max-width: ${theme.breakpoints.mobile})`]: { right: theme.spacing.md, bottom: theme.spacing.md },
 }))
 
-export function NoteEditor({ note, titleRef, focusTitleId, onChange, onCreateNote }: {
-  note: FolderItem
+export function NoteEditor({ note, selectedNoteId, titleRef, loading, error, onRetry, busy, canCreate, onCreateNote, onDeleteNote }: {
+  note: Note | null
+  selectedNoteId: string | null
   titleRef: RefObject<HTMLInputElement | null>
-  focusTitleId: string | null
-  onChange: (patch: Partial<Pick<FolderItem, 'title' | 'content'>>) => void
+  loading: boolean
+  error: Error | null
+  onRetry: () => void
+  busy: boolean
+  canCreate: boolean
   onCreateNote: () => void
+  onDeleteNote: () => void
 }) {
-  useEffect(() => {
-    if (focusTitleId === note.id) titleRef.current?.focus()
-  }, [focusTitleId, note.id, titleRef])
+  const visible = note?.id === selectedNoteId ? note : null
   return (
-    <Panel aria-label="노트 편집기" data-note-id={note.id}>
+    <Panel aria-label="노트 편집기" data-note-id={visible?.id ?? undefined} aria-busy={loading}>
       <Document>
-        <Title ref={titleRef} aria-label="문서 제목" placeholder="제목을 입력해주세요" value={note.title} onChange={event => onChange({ title: event.target.value })} />
+        {loading && <p role="status">원고를 불러오는 중입니다.</p>}
+        {error && <div role="alert"><p>조회에 실패했습니다: {error.message}</p><button type="button" onClick={onRetry}>다시 시도</button></div>}
+        {!loading && !error && !visible && <p role="status">{selectedNoteId ? '원고를 선택해주세요.' : '표시할 원고가 없습니다.'}</p>}
+        <Title ref={titleRef} aria-label="문서 제목" placeholder={visible ? '제목 없는 문서' : ''} value={visible?.title ?? ''} readOnly />
         <Toolbar role="group" aria-label="Formatting preview (not connected)">
           <IconButton type="button" disabled aria-label="Bold (coming later)" title="Formatting is not connected">
             <strong style={{ fontSize: 18 }}>B</strong>
@@ -130,15 +136,16 @@ export function NoteEditor({ note, titleRef, focusTitleId, onChange, onCreateNot
           <IconButton type="button" disabled aria-label="Numbered list (coming later)" title="Formatting is not connected">
             <Icon name="ordered" size={19} />
           </IconButton>
+          <IconButton type="button" aria-label="원고 삭제" title="원고 삭제" disabled={busy || !selectedNoteId} onClick={onDeleteNote} style={{ marginLeft: 'auto' }}><Icon name="trash" size={18} /></IconButton>
         </Toolbar>
         <Writing>
-          <textarea aria-label="문서 내용" placeholder="Start writing, and let your ideas flow…" value={note.content} onChange={event => onChange({ content: event.target.value })} />
+          <textarea aria-label="문서 내용" placeholder="" value={visible?.content ?? ''} readOnly />
         </Writing>
         <Footer>
-          <span>변경 내용은 현재 세션에서만 유지됩니다. 새로고침하면 초기화됩니다.</span>
+          <span>본문 읽기 전용 · 생성·삭제는 서버에 반영되며 내용 편집은 아직 지원하지 않습니다.</span>
         </Footer>
       </Document>
-      <NewDocumentButton type="button" aria-label="새 문서" title="새 문서" onClick={onCreateNote}><Icon name="pencil" size={24} /></NewDocumentButton>
+      <NewDocumentButton type="button" disabled={busy || !canCreate} onClick={onCreateNote} aria-label="새 문서" title="빈 원고 생성"><Icon name="pencil" size={24} /></NewDocumentButton>
     </Panel>
   )
 }
