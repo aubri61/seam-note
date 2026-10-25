@@ -35,10 +35,11 @@ interface AppHeaderProps {
   sidebarId: string
   onToggleSidebar: () => void
   toggleRef: Ref<HTMLButtonElement>
+  path: string[]
   syncStatus?: SyncStatusValue
 }
 
-export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, toggleRef, syncStatus = 'saving-locally' }: AppHeaderProps) {
+export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, toggleRef, path, syncStatus = 'saving-locally' }: AppHeaderProps) {
   return (
     <Header>
       <div>
@@ -54,7 +55,7 @@ export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, t
         >
           <Icon name="sidebar" size={19} />
         </IconButton>
-        <p>Personal <Icon name="chevron" size={12} /> My notes</p>
+        <p>Personal{path.map((name, index) => <span key={index} style={{ display: 'contents' }}><Icon name="chevron" size={12} />{name}</span>)}</p>
       </div>
       <div>
         <SyncStatus status={syncStatus} />

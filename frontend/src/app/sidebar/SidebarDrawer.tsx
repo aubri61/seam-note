@@ -50,9 +50,10 @@ interface SidebarDrawerProps {
   onOpenChange: (open: boolean) => void
   toggleRef: RefObject<HTMLButtonElement | null>
   children: ReactNode
+  onAfterClose?: () => void
 }
 
-export function SidebarDrawer({ id, open, onOpenChange, toggleRef, children }: SidebarDrawerProps) {
+export function SidebarDrawer({ id, open, onOpenChange, toggleRef, children, onAfterClose }: SidebarDrawerProps) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -64,9 +65,10 @@ export function SidebarDrawer({ id, open, onOpenChange, toggleRef, children }: S
             // The opener lives in AppHeader rather than Dialog.Trigger.
             event.preventDefault()
             toggleRef.current?.focus()
+            onAfterClose?.()
           }}
         >
-          <Title>워크스페이스 사이드바</Title>
+          <Title>폴더 사이드바</Title>
           {children}
         </Content>
       </Dialog.Portal>

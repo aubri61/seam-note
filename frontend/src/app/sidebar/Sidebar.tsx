@@ -1,0 +1,169 @@
+import { useRef } from 'react'
+import styled from '@emotion/styled'
+import { Icon } from '@/components/Icon'
+import { WorkspacePicker } from '@/features/workspaces/WorkspacePicker'
+import { Eyebrow, IconButton } from '@/components/primitives'
+import { FolderTree } from '@/features/folders/FolderTree'
+import type { useFolders } from '@/features/folders/useFolders'
+
+const Panel = styled.aside(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: '100%',
+  height: '100%',
+  padding: `${theme.spacing.lg} ${theme.spacing.md} ${theme.spacing.md}`,
+  borderRight: `1px solid ${theme.colors.border}`,
+  background: theme.colors.sidebar,
+}))
+
+const Brand = styled.header(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: theme.spacing.sm,
+  padding: `0 ${theme.spacing.xxs} ${theme.spacing.lg}`,
+  img: {
+    flexShrink: 0,
+    width: '42px',
+    height: '42px',
+    objectFit: 'contain',
+  },
+  div: {
+    flex: 1,
+    minWidth: 0,
+    paddingTop: theme.spacing.xs,
+  },
+  h1: {
+    fontSize: '21px',
+    fontWeight: 650,
+    letterSpacing: '-.7px',
+  },
+  p: {
+    marginTop: theme.spacing.sm,
+    fontSize: '11px',
+    lineHeight: 1.7,
+    color: theme.colors.mutedText,
+  },
+  button: {
+    width: '30px',
+    height: '32px',
+    flexShrink: 0,
+  },
+}))
+
+const Search = styled.label(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.sm,
+  padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+  marginBottom: theme.spacing.lg,
+  border: '1px solid transparent',
+  borderRadius: theme.radii.pill,
+  transition: `border-color ${theme.motion.duration[100]} ${theme.motion.easing.standard}, background ${theme.motion.duration[100]} ${theme.motion.easing.standard}`,
+  '&:hover, &:focus-within': { borderColor: theme.colors.border, background: theme.colors.surface },
+  '&:focus-within': { outline: `2px solid ${theme.colors.mutedText}`, outlineOffset: theme.spacing.xxs },
+  color: theme.colors.mutedText,
+  input: {
+    width: '100%',
+    minWidth: 0,
+    padding: 0,
+    border: 0,
+    background: 'transparent',
+    fontSize: '13px',
+  },
+  'input:focus-visible': { outline: 'none' },
+  'input::placeholder': {
+    color: theme.colors.mutedText,
+  },
+}))
+
+const FolderHeading = styled.div(({ theme }) => ({
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: theme.spacing.md,
+}))
+
+const CreatePicker = styled.details(({ theme }) => ({
+  position: 'relative',
+  '> summary': {
+    display: 'grid', placeItems: 'center', width: '32px', height: '32px',
+    borderRadius: theme.radii.sm, listStyle: 'none', cursor: 'pointer',
+    transition: `background ${theme.motion.duration[100]} ${theme.motion.easing.standard}`,
+  },
+  '> summary:hover, &[open] > summary': { background: theme.colors.selected },
+  '> summary::-webkit-details-marker': { display: 'none' },
+  '> div': {
+    position: 'absolute', right: 0, top: `calc(100% + ${theme.spacing.xs})`, zIndex: 5,
+    width: '160px', padding: theme.spacing.sm, border: `1px solid ${theme.colors.border}`,
+    borderRadius: theme.radii.md, background: theme.colors.surface, boxShadow: theme.shadow,
+  },
+  button: {
+    display: 'flex', alignItems: 'center', gap: theme.spacing.md, width: '100%',
+    padding: `${theme.spacing.sm} ${theme.spacing.md}`, minHeight: '40px', border: 0,
+    borderRadius: theme.radii.sm, background: 'transparent', textAlign: 'left', fontSize: '13px',
+    '&:hover': { background: theme.colors.selected },
+  },
+}))
+
+const Footnote = styled.p(({ theme }) => ({
+  marginTop: 'auto',
+  padding: `${theme.spacing.xl} ${theme.spacing.md} 0`,
+  fontSize: '10px',
+  lineHeight: 1.8,
+  color: theme.colors.mutedText,
+}))
+
+export function Sidebar({ onClose, folders, onSelectNote, onCreate }: {
+  onClose: () => void
+  folders: ReturnType<typeof useFolders>
+  onSelectNote: (id: string) => void
+  onCreate: (kind: 'folder' | 'document') => void
+}) {
+  const createRef = useRef<HTMLDetailsElement>(null)
+
+  return (
+    <Panel aria-label="폴더 사이드바">
+      <Brand>
+        <img src="/seam-note-icon.png" alt="" width={42} height={42} />
+        <div>
+          <h1>seam note</h1>
+          <p>당신의 생각이 끊기지 않도록</p>
+        </div>
+        <IconButton type="button" aria-label="사이드바 닫기" title="사이드바 접기" onClick={onClose}>
+          <Icon name="collapse" size={17} />
+        </IconButton>
+      </Brand>
+
+      <WorkspacePicker />
+
+      <Search>
+        <Icon name="search" size={17} />
+        <input aria-label="노트 검색" placeholder="Search notes" value={folders.search} onChange={event => folders.setSearch(event.target.value)} type="search" />
+      </Search>
+
+      <nav aria-label="폴더 탐색">
+        <FolderHeading>
+          <Eyebrow>폴더</Eyebrow>
+          <CreatePicker ref={createRef} onBlur={event => {
+            if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false
+          }} onKeyDown={event => {
+            if (event.key === 'Escape') {
+              event.preventDefault()
+              event.currentTarget.open = false
+              event.currentTarget.querySelector('summary')?.focus()
+            }
+          }}>
+            <summary aria-label="폴더 또는 문서 추가"><Icon name="plus" size={17} /></summary>
+            <div aria-label="추가할 항목">
+              <button type="button" onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('folder') }}><Icon name="folder" size={17} />새 폴더</button>
+              <button type="button" onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('document') }}><Icon name="note" size={17} />새 문서</button>
+            </div>
+          </CreatePicker>
+        </FolderHeading>
+        <FolderTree
+          items={folders.items} selectedId={folders.selectedId} createdId={folders.createdId} movedId={folders.movedId}
+          search={folders.search} openFolders={folders.openFolders} onFolderOpen={folders.setFolderOpen} onSelectionHandled={folders.acknowledgeTreeSelection}
+          onSelect={onSelectNote} onTreeSelect={folders.selectTreeItem} onRename={(id, title) => folders.update(id, { title })} onMove={folders.move}
+        />
+      </nav>
+      <Footnote>A little room for everything on your mind.<br />변경 내용은 현재 세션에서만 유지됩니다.</Footnote>
+    </Panel>
+  )
+}

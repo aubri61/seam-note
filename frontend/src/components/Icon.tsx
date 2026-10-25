@@ -1,4 +1,5 @@
 const paths = {
+  pencil: 'M16 3l5 5M3 21l5-1L21 7a2 2 0 0 0-4-4L4 16l-1 5z',
   sidebar: 'M3 4h18v16H3zM9 4v16',
   collapse: 'M13 6l-6 6 6 6M20 6l-6 6 6 6',
   chevron: 'M9 6l6 6-6 6',
