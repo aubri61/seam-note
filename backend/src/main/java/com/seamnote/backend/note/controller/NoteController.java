@@ -1,67 +1,31 @@
 package com.seamnote.backend.note.controller;
 
-import com.seamnote.backend.note.dto.CreateNoteRequest;
-import com.seamnote.backend.note.dto.NoteResponse;
-import com.seamnote.backend.note.dto.UpdateNoteRequest;
-import com.seamnote.backend.note.entity.Note;
+import com.seamnote.backend.note.dto.*;
 import com.seamnote.backend.note.service.NoteService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.net.URI;
-import java.util.List;
-import java.util.UUID;
-
+import java.util.*;
 @RestController
 @RequestMapping("/api/notes")
 public class NoteController {
-
-    private final NoteService noteService;
-
-    public NoteController(NoteService noteService) {
-        this.noteService = noteService;
-    }
-
+    private final NoteService notes;
+    public NoteController(NoteService notes) { this.notes = notes; }
     @PostMapping
-    public ResponseEntity<NoteResponse> createNote(
-            @Valid @RequestBody CreateNoteRequest createNoteRequest
-    ) {
-        Note note = noteService.createNote(createNoteRequest);
-        NoteResponse noteResponse = new NoteResponse(note);
-        return ResponseEntity.created(URI.create("/api/notes/" + note.getId())).body(noteResponse);
+    public ResponseEntity<NoteResponse> createNote(@Valid @RequestBody CreateNoteRequest request) {
+        NoteResponse response = notes.createNote(request);
+        return ResponseEntity.created(URI.create("/api/notes/" + response.getId())).body(response);
     }
-
     @GetMapping("/{id}")
-    public ResponseEntity<NoteResponse> getNote(
-            @PathVariable("id") UUID id
-    ) {
-        Note note = noteService.getNote(id);
-        return ResponseEntity.ok(new NoteResponse(note));
-    }
-
+    public NoteResponse getNote(@PathVariable UUID id) { return notes.getNote(id); }
     @GetMapping
-    public ResponseEntity<List<NoteResponse>> getAllNotes() {
-        List<NoteResponse> notes = noteService.getAllNotes().stream().map(NoteResponse::new).toList();
-        return ResponseEntity.ok(notes);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<NoteResponse> updateNote(
-            @PathVariable("id") UUID id,
-            @Valid @RequestBody UpdateNoteRequest updateNoteRequest) {
-        Note note = noteService.updateNote(id, updateNoteRequest);
-
-        return ResponseEntity.ok(new NoteResponse(note));
-    }
-
-
+    public List<NoteResponse> getAllNotes() { return notes.getAllNotes(); }
+    // Both endpoints replace title and content together; missing/null is invalid.
+    @RequestMapping(value = "/{id}", method = {RequestMethod.PUT, RequestMethod.PATCH})
+    public NoteResponse updateNote(@PathVariable UUID id, @Valid @RequestBody UpdateNoteRequest request) { return notes.updateNote(id, request); }
+    @PatchMapping("/{id}/move")
+    public NoteResponse move(@PathVariable UUID id, @Valid @RequestBody MoveNoteRequest request) { return notes.move(id, request); }
     @DeleteMapping("/{id}")
-    public ResponseEntity<NoteResponse> deleteNote(
-            @PathVariable("id") UUID id
-    ) {
-        noteService.deleteNote(id);
-
-        return ResponseEntity.noContent().build();
-    }
+    public ResponseEntity<Void> deleteNote(@PathVariable UUID id) { notes.deleteNote(id); return ResponseEntity.noContent().build(); }
 }

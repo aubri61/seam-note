@@ -8,7 +8,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,16 +36,29 @@ public class GlobalExceptionHandler {
             errors.add(error);
         }
 
-        ErrorResponse response = new ErrorResponse(
-                "INVALID_REQUEST",
-                "입력값을 확인해주세요.",
-                errors
-        );
-
         return createResponse(ErrorCode.INVALID_REQUEST, errors);
-//        return ResponseEntity.badRequest().body(response);
     }
 
+
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> malformed(Exception exception) {
+        return createResponse(ErrorCode.MALFORMED_JSON, List.of());
+    }
+
+    @ExceptionHandler({org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class, IllegalArgumentException.class})
+    public ResponseEntity<ErrorResponse> invalid(Exception exception) {
+        return createResponse(ErrorCode.INVALID_REQUEST, List.of());
+    }
+
+    @ExceptionHandler({org.springframework.dao.OptimisticLockingFailureException.class, jakarta.persistence.OptimisticLockException.class})
+    public ResponseEntity<ErrorResponse> versionConflict(Exception exception) {
+        return createResponse(ErrorCode.VERSION_CONFLICT, List.of());
+    }
+
+    @ExceptionHandler({org.springframework.dao.DataIntegrityViolationException.class, org.hibernate.exception.ConstraintViolationException.class})
+    public ResponseEntity<ErrorResponse> dataConflict(Exception exception) {
+        return createResponse(ErrorCode.DATA_CONFLICT, List.of());
+    }
 
     // 위 처리 메서드들이 공통으로 사용하는 응답 생성 메서드
     private ResponseEntity<ErrorResponse> createResponse(
@@ -64,6 +76,5 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
-    ;
 
 }

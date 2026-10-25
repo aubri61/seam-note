@@ -1,34 +1,23 @@
 package com.seamnote.backend.note.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import java.util.UUID;
+import jakarta.validation.constraints.*;
 
 public class CreateNoteRequest {
 
-    @NotBlank(message = "제목을 입력해주세요.")
-    @Size(max=200, message="제목은 200자 이하여야 합니다.")
+    private UUID id;
+    @NotNull
+    private UUID folderId;
+    @NotNull @Size(max = 200)
     private String title;
-
-    @NotNull(message="본문은 null일 수 없습니다.")
+    @NotNull
     private String content;
-
-    public CreateNoteRequest() {
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+    public UUID getFolderId() { return folderId; }
+    public void setFolderId(UUID folderId) { this.folderId = folderId; }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
 }
