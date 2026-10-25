@@ -1,3 +1,5 @@
+import { Outlet } from 'react-router-dom'
+import type { ComponentProps } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { useTheme } from '@emotion/react'
 import styled from '@emotion/styled'
@@ -12,7 +14,7 @@ import type { WorkspaceAction } from '@/features/workspace/WorkspaceActionDialog
 import { ApiError } from '@/lib/api/client'
 import { useNoteDrafts } from '@/features/notes/useNoteDrafts'
 import { draftStatus } from '@/features/notes/noteDrafts'
-import { NoteEditor } from '@/features/notes/NoteEditor'
+import type { NoteEditor } from '@/features/notes/NoteEditor'
 
 const Shell = styled.div(({ theme }) => ({
   display: 'flex',
@@ -42,8 +44,8 @@ export function AppLayout() {
   const toggleRef = useRef<HTMLButtonElement>(null)
   const folders = useFolders()
   const drafts = useNoteDrafts(folders.selectedNoteId, folders.activeNote)
-  const editorLoading = folders.workspace.isPending || !!folders.selectedNoteId && folders.noteQuery.isFetching
-  const editorError = (!folders.workspace.data ? folders.workspace.error : null) ?? folders.noteQuery.error
+  const editorLoading = !folders.routeError && (folders.workspace.isPending || !!folders.selectedNoteId && folders.noteQuery.isFetching)
+  const editorError = folders.routeError ?? (!folders.workspace.data ? folders.workspace.error : null) ?? folders.detailError
   const status = draftStatus(drafts.draft, editorLoading, editorError)
   const [action, setAction] = useState<WorkspaceAction | null>(null)
   const [creationMessage, setCreationMessage] = useState('')
@@ -150,13 +152,16 @@ export function AppLayout() {
           path={folders.ancestors.map(item => item.name)}
         />
         {(!isMobile || !sidebarOpen) && creationFeedback}
-        <NoteEditor
-          draft={drafts.draft} onEdit={drafts.edit} selectedNoteId={folders.selectedNoteId} titleRef={titleRef}
-          loading={editorLoading}
-          error={editorError}
-          busy={folders.busy} canCreate={!!folders.workspace.data} onCreateNote={openCreateNote} onDeleteNote={openDeleteNote}
-          onRetry={() => void (folders.workspace.isError ? folders.workspace.refetch() : folders.noteQuery.refetch())}
-        />
+        <Outlet context={{
+          draft: folders.routeError ? null : drafts.draft, onEdit: drafts.edit,
+          selectedNoteId: folders.selectedNoteId, titleRef,
+          loading: editorLoading, error: editorError,
+          canRetry: !folders.routeError || !!folders.selectedNoteId,
+          busy: folders.busy, canCreate: !!folders.workspace.data,
+          canDelete: !!folders.selectedNoteId && folders.tree.notes.has(folders.selectedNoteId) && !folders.routeError,
+          onCreateNote: openCreateNote, onDeleteNote: openDeleteNote,
+          onRetry: () => { void (folders.routeError || folders.workspace.isError ? folders.workspace.refetch() : folders.noteQuery.refetch()) },
+        } satisfies ComponentProps<typeof NoteEditor>} />
       </EditorArea>
       {folders.busy && <div role="status" style={{ position: 'fixed', bottom: 16, left: 24 }}>요청을 처리하는 중입니다.</div>}
       {action && <WorkspaceActionDialog key={action.kind} action={action} folders={folders} onClose={() => setAction(null)} />}

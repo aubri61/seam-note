@@ -103,7 +103,7 @@ const NewDocumentButton = styled.button(({ theme }) => ({
   [`@media (max-width: ${theme.breakpoints.mobile})`]: { right: theme.spacing.md, bottom: theme.spacing.md },
 }))
 
-export function NoteEditor({ draft, onEdit, selectedNoteId, titleRef, loading, error, onRetry, busy, canCreate, onCreateNote, onDeleteNote }: {
+export function NoteEditor({ draft, onEdit, selectedNoteId, titleRef, loading, error, onRetry, canRetry, busy, canCreate, canDelete, onCreateNote, onDeleteNote }: {
   draft: NoteDraft | null
   onEdit: (noteId: string, patch: DraftPatch) => void
   selectedNoteId: string | null
@@ -111,8 +111,10 @@ export function NoteEditor({ draft, onEdit, selectedNoteId, titleRef, loading, e
   loading: boolean
   error: Error | null
   onRetry: () => void
+  canRetry: boolean
   busy: boolean
   canCreate: boolean
+  canDelete: boolean
   onCreateNote: () => void
   onDeleteNote: () => void
 }) {
@@ -121,7 +123,7 @@ export function NoteEditor({ draft, onEdit, selectedNoteId, titleRef, loading, e
     <Panel aria-label="노트 편집기" data-note-id={visible?.noteId ?? undefined} aria-busy={loading}>
       <Document>
         {loading && <p role="status">원고 로딩 중</p>}
-        {error && <div role="alert"><p>원고 조회 실패: {error.message}</p><button type="button" onClick={onRetry}>다시 시도</button></div>}
+        {error && <div role="alert"><p>원고 조회 실패: {error.message}</p>{canRetry && <button type="button" onClick={onRetry}>다시 시도</button>}</div>}
         {!loading && !error && !visible && <p role="status">{selectedNoteId ? '원고를 선택해주세요.' : '표시할 원고가 없습니다.'}</p>}
         <Title ref={titleRef} aria-label="문서 제목" placeholder={visible ? '제목 없음' : ''} value={visible?.title ?? ''} maxLength={200}
           readOnly={!visible} onChange={event => { if (visible) onEdit(visible.noteId, { title: event.target.value }) }} />
@@ -138,7 +140,7 @@ export function NoteEditor({ draft, onEdit, selectedNoteId, titleRef, loading, e
           <IconButton type="button" disabled aria-label="Numbered list (coming later)" title="Formatting is not connected">
             <Icon name="ordered" size={19} />
           </IconButton>
-          <IconButton type="button" aria-label="원고 삭제" title="원고 삭제" disabled={busy || !selectedNoteId} onClick={onDeleteNote} style={{ marginLeft: 'auto' }}><Icon name="trash" size={18} /></IconButton>
+          <IconButton type="button" aria-label="원고 삭제" title="원고 삭제" disabled={busy || !canDelete} onClick={onDeleteNote} style={{ marginLeft: 'auto' }}><Icon name="trash" size={18} /></IconButton>
         </Toolbar>
         <Writing>
           <textarea aria-label="문서 내용" placeholder="" value={visible?.content ?? ''} readOnly={!visible}

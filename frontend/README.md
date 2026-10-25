@@ -73,3 +73,10 @@ export default defineConfig([
 ])
 
 ```
+
+
+## 노트 URL 라우팅
+
+BrowserRouter를 사용한다. `/`는 Workspace의 첫 Note로 replace하며, `/notes/:noteId`는 해당 UUID의 원고를 연다. 없는 Note/잘못된 UUID는 다른 Note로 이동시키지 않는다. 미저장 Draft는 라우트 공통 부모의 React 메모리에만 있어 내부 Back/Forward에 유지되며 새로고침에는 복원되지 않는다.
+
+Vite 개발 서버의 기존 API proxy를 유지했다. 운영 배포는 `/notes/...` document 요청을 **URL 변경 없이 index.html로 fallback**해야 한다. `/api/*`와 없는 JS/CSS를 SPA HTML로 바꾸면 안 된다. 이 저장소에 운영 웹서버 설정은 없어 실제 배포 변경은 하지 않았다. [상세 라우팅·배포 계약](../docs/design/note-routing.md)을 참고한다.

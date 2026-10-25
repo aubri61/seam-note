@@ -9,6 +9,7 @@ const b = { ...a, id: '00000000-0000-4000-8000-000000000003', title: 'B', conten
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms))
 async function until(check, message) { for (let i = 0; i < 150; i++) { if (await check()) return; await pause(20) } throw new Error(message) }
 // A modal correctly aria-hides the background; inspect DOM state without querying hidden roles.
+const routePath = page => new URL(page.url()).pathname
 const editorId = page => page.locator('[aria-label="노트 편집기"]').getAttribute('data-note-id')
 function ordered(state) {
   const compare = (x, y) => x.sortOrder - y.sortOrder || x.id.localeCompare(y.id)
@@ -102,6 +103,7 @@ async function main() {
     await until(async () => state.notePosts.length === 1 && await editorId(page) === state.notePosts[0].id, 'note beside active note')
     const created = state.notePosts[0].id
     assert.equal(state.notePosts[0].folderId, root.id)
+    assert.equal(routePath(page), '/notes/' + created)
     assert.equal(await page.getByRole('dialog').count(), 0)
     assert.equal(await page.getByLabel('문서 내용').inputValue(), '')
     assert.equal(await page.getByLabel('문서 내용').getAttribute('readonly'), null)
@@ -159,6 +161,7 @@ async function main() {
     assert.equal(state.deletes.length, 0)
     assert.equal(await editorId(page), deleting)
 
+    await page.getByLabel('문서 내용').fill('삭제 실패에도 유지할 Draft')
     state.failDelete = true
     await page.getByRole('button', { name: '원고 삭제', exact: true }).click()
     dialog = page.getByRole('dialog', { name: '원고 영구 삭제' })
@@ -168,13 +171,27 @@ async function main() {
     await dialog.getByRole('alert').waitFor()
     await pause(350)
     assert.equal(state.deletes.length, 1)
+    assert.equal(routePath(page), '/notes/' + deleting)
+    assert.equal(await page.getByLabel('문서 내용').inputValue(), '삭제 실패에도 유지할 Draft')
     assert.equal(await editorId(page), deleting)
     assert.equal(await page.locator('[data-node-key="note:' + deleting + '"]').count(), 1)
     state.failDelete = false
     const ids = ordered(state), index = ids.indexOf(deleting), next = ids[index + 1] || ids[index - 1]
+    const historyBeforeDelete = await page.evaluate(() => history.length)
     await dialog.getByRole('button', { name: '영구 삭제', exact: true }).click()
     await dialog.waitFor({ state: 'hidden' })
     await until(async () => await editorId(page) === next, 'delete selection recovery')
+    assert.equal(routePath(page), '/notes/' + next)
+    assert.equal(await page.evaluate(() => history.length), historyBeforeDelete, 'DELETE must replace history')
+    const deletedUrl = await browser.newPage({ viewport: { width: 1360, height: 900 } })
+    deletedUrl.on('pageerror', e => errors.push(e.message))
+    const deletedState = await install(deletedUrl)
+    deletedState.folders = structuredClone(state.folders); deletedState.notes = structuredClone(state.notes)
+    await deletedUrl.goto(origin + '/notes/' + deleting)
+    await deletedUrl.getByRole('alert').filter({ hasText: '404 · 원고를 찾을 수 없습니다.' }).waitFor()
+    assert.equal(routePath(deletedUrl), '/notes/' + deleting)
+    assert.equal(await deletedUrl.getByLabel('문서 내용').inputValue(), '')
+    await deletedUrl.close()
     assert.equal(await page.locator('[data-node-key="note:' + deleting + '"]').count(), 0)
     assert.equal(await page.locator('[aria-current="page"]').getAttribute('data-node-key'), 'note:' + next)
 
@@ -216,7 +233,24 @@ async function main() {
     assert.equal(await last.getByLabel('문서 내용').inputValue(), '')
     assert.equal(lastState.notes.length, 0)
     assert.equal(await editorId(last), null)
+    assert.equal(routePath(last), '/')
     await last.close()
+
+    // Navigating Back while a delete is in flight must not redirect away from the new current Note.
+    const moving = await browser.newPage({ viewport: { width: 1360, height: 900 } })
+    moving.on('pageerror', e => errors.push(e.message))
+    const movingState = await install(moving)
+    await moving.goto(origin)
+    await until(async () => await editorId(moving) === a.id, 'pending-delete initial')
+    await moving.locator('[data-node-key="note:' + b.id + '"]').click()
+    await moving.getByRole('button', { name: '원고 삭제', exact: true }).click()
+    await moving.getByRole('button', { name: '영구 삭제', exact: true }).click()
+    await until(async () => movingState.deletes.length === 1, 'pending DELETE starts')
+    await moving.goBack()
+    await moving.getByRole('dialog').waitFor({ state: 'hidden' })
+    assert.equal(routePath(moving), '/notes/' + a.id)
+    assert.equal(await editorId(moving), a.id)
+    await moving.close()
 
     // A completely empty space can create its first root folder and then its first note.
     const fresh = await browser.newPage({ viewport: { width: 1360, height: 900 } })
@@ -259,6 +293,7 @@ async function main() {
     await mobile.getByLabel('폴더 또는 문서 추가').click()
     await mobile.getByRole('button', { name: '새 문서', exact: true }).first().click()
     await until(async () => mobileState.notePosts.length === 1 && await editorId(mobile) === mobileState.notePosts[0].id, 'mobile creation selection')
+    assert.equal(routePath(mobile), '/notes/' + mobileState.notePosts[0].id)
     await mobile.getByRole('button', { name: '사이드바 펼치기', exact: true }).waitFor()
     await mobile.close()
     assert.deepEqual(errors, [])

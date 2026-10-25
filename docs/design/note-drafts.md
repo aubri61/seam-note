@@ -1,5 +1,7 @@
 # React 원고 Draft
 
+> URL 라우팅 후에도 Draft는 공통 부모 AppLayout의 메모리 상태다. 선택 ID·history·직접 접속 계약은 [노트 URL 라우팅](note-routing.md)을 따른다.
+
 ## 범위와 상태 소유
 
 서버 원고와 독립적인 제목·본문 편집을 React 메모리 상태로 제공한다. 새 패키지나 전역 상태 라이브러리를 추가하지 않았다. 백엔드/DTO/Query 정책/API 함수/기존 생성·삭제 Mutation은 변경하지 않았다. Note 저장 PUT/PATCH, 자동 저장, IndexedDB/localStorage/sessionStorage, Outbox/오프라인 실행/자동 병합은 없다.

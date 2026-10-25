@@ -7,9 +7,11 @@ async function until(check, label) {
   for (let i = 0; i < 200; i++) { if (await check()) return; await pause(20) }
   throw new Error(label)
 }
+const ids = { A: '00000000-0000-4000-8000-000000000201', B: '00000000-0000-4000-8000-000000000202', C: '00000000-0000-4000-8000-000000000203' }
+const alias = id => Object.keys(ids).find(key => ids[key] === id)
 const stamp = '2026-10-25T00:00:00Z'
 const folder = { id: 'folder', parentId: null, name: '소설', sortOrder: 0, version: 0, createdAt: stamp, updatedAt: stamp }
-const note = (id, sortOrder, version) => ({ id, folderId: folder.id, title: id + ' 제목', content: id + ' 본문', sortOrder, version, createdAt: stamp, updatedAt: stamp })
+const note = (id, sortOrder, version) => ({ id: ids[id], folderId: folder.id, title: id + ' 제목', content: id + ' 본문', sortOrder, version, createdAt: stamp, updatedAt: stamp })
 async function warningRequested(page) {
   return page.evaluate(() => {
     const event = new Event('beforeunload', { cancelable: true })
@@ -43,7 +45,7 @@ async function main() {
       if (path === '/api/workspace/tree') return route.fulfill({ json: {
         folders: [folder], notes: Object.values(server).map(({ content, createdAt, ...summary }) => summary),
       } })
-      const id = path.split('/').pop()
+      const id = alias(path.split('/').pop())
       assert.ok(server[id], 'unknown API path ' + path)
       gets[id]++
       const response = structuredClone(server[id])
@@ -55,7 +57,7 @@ async function main() {
     await page.goto(origin)
     const editor = page.getByRole('region', { name: '노트 편집기' })
     const title = page.getByLabel('문서 제목'), body = page.getByLabel('문서 내용')
-    const select = id => page.locator('[data-node-key="note:' + id + '"]').click()
+    const select = id => page.locator('[data-node-key="note:' + ids[id] + '"]').click()
     const status = text => page.getByText(text, { exact: true }).first()
     await until(async () => await body.inputValue() === 'A 본문', 'initial Draft')
     await status('변경사항 없음').waitFor()
@@ -138,13 +140,13 @@ async function main() {
     await until(async () => await body.inputValue() === 'B 본문', 'B selected before C response')
     releaseC(); holdC = false
     await pause(200)
-    assert.equal(await editor.getAttribute('data-note-id'), 'B')
+    assert.equal(await editor.getAttribute('data-note-id'), ids.B)
     assert.equal(await body.inputValue(), 'B 본문')
     await select('A')
     await until(async () => await body.inputValue() === 'A 조회 실패 후에도 작성', 'A survives late response and transitions')
     assert.deepEqual(await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length })), { local: 0, session: 0 })
     await page.getByText(/편집 내용은 현재 브라우저 메모리에만 있으며/).waitFor()
-    assert.equal(await page.locator('[data-node-key="note:A"]').getAttribute('aria-selected'), 'true')
+    assert.equal(await page.locator('[data-node-key="note:' + ids.A + '"]').getAttribute('aria-selected'), 'true')
     await pause(200) // Let the existing selection background transition settle.
     await page.screenshot({ path: '/private/tmp/seam-note-drafts-desktop.png', fullPage: true })
 
@@ -170,14 +172,14 @@ async function main() {
       const path = new URL(route.request().url()).pathname
       return route.fulfill({ json: path === '/api/workspace/tree'
         ? { folders: [folder], notes: Object.values(server).map(({ content, createdAt, ...summary }) => summary) }
-        : server[path.split('/').pop()] })
+        : server[alias(path.split('/').pop())] })
     })
     await mobile.goto(origin)
     await until(async () => await mobile.getByLabel('문서 내용').inputValue() === 'A 원격 본문 4', 'mobile initial')
     await mobile.getByLabel('문서 내용').fill('모바일 A 초안')
     for (const id of ['B', 'A']) {
       await mobile.getByRole('button', { name: '사이드바 펼치기', exact: true }).click()
-      await mobile.locator('[data-node-key="note:' + id + '"]').click()
+      await mobile.locator('[data-node-key="note:' + ids[id] + '"]').click()
       await mobile.getByRole('button', { name: '사이드바 펼치기', exact: true }).waitFor()
     }
     assert.equal(await mobile.getByLabel('문서 내용').inputValue(), '모바일 A 초안')

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import styled from '@emotion/styled'
+import { Link } from 'react-router-dom'
+import { notePath } from '@/app/routing/noteRoutes'
 import { Icon } from '@/components/Icon'
 import { nodeLabel, visibleWorkspaceRows } from '@/features/workspace/workspaceTree'
 import type { WorkspaceTreeModel } from '@/features/workspace/workspaceTree'
@@ -11,12 +13,12 @@ const Frame = styled.div(({ theme }) => ({
   '[role="tree"]:focus-visible': { outlineOffset: 0 },
   '[role="treeitem"]:focus-visible': { outlineOffset: '-2px', borderRadius: theme.radii.sm },
 }))
-const Row = styled.div<{ selected: boolean }>(({ theme, selected }) => ({
+const Row = styled.div<{ selected: boolean; to?: string }>(({ theme, selected }) => ({
   display: 'flex', alignItems: 'center', gap: theme.spacing.sm,
   height: '40px', width: '100%', border: 0, textAlign: 'left', paddingRight: theme.spacing.sm, borderRadius: theme.radii.sm,
   background: selected ? theme.colors.selected : 'transparent',
   color: selected ? theme.colors.text : theme.colors.mutedText,
-  fontSize: '12px', cursor: 'pointer',
+  fontSize: '12px', cursor: 'pointer', textDecoration: 'none',
   transition: `background ${theme.motion.duration[100]} ${theme.motion.easing.standard}`,
   '&:hover': { background: selected ? theme.colors.selected : theme.colors.background },
   '> span': { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
@@ -53,7 +55,7 @@ export function FolderTree({ tree, selectedNoteId, selectedFolderId, onFolderSel
     : rows.some(row => row.node.key === selectedKey) ? selectedKey : rows[0]?.node.key
 
   function navigate(event: KeyboardEvent<HTMLDivElement>) {
-    const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[data-node-key]'))
+    const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('[data-node-key]'))
     const index = buttons.findIndex(button => button === event.target)
     if (index < 0) return
     const row = rows[index]
@@ -81,7 +83,7 @@ export function FolderTree({ tree, selectedNoteId, selectedFolderId, onFolderSel
           const folder = node.kind === 'folder'
           const expanded = folder && (!!search.trim() || !!openFolders[node.folder.id])
           return <Row
-            key={node.key} role="treeitem" aria-level={depth + 1}
+            key={node.key} as={folder ? 'div' : Link} to={folder ? undefined : notePath(node.note.id)} role="treeitem" aria-level={depth + 1}
             tabIndex={node.key === tabKey ? 0 : -1} onFocus={() => setFocusedKey(node.key)}
             aria-selected={node.key === selectedKey}
             selected={node.key === selectedKey}
@@ -91,12 +93,13 @@ export function FolderTree({ tree, selectedNoteId, selectedFolderId, onFolderSel
             data-node-key={node.key}
             data-creation-target={folder && node.folder.id === selectedFolderId || undefined}
             onKeyDown={event => {
-              if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
+              if (event.target === event.currentTarget && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && (event.key === 'Enter' || event.key === ' ')) {
                 event.preventDefault(); event.currentTarget.click()
               }
             }}
             onClick={event => {
               if (event.target instanceof HTMLInputElement) return
+              if (!folder && (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return
               if (folder) { onFolderSelect(node.folder.id); onFolderOpen(node.folder.id, !expanded) }
               else onSelect(node.note.id)
             }}

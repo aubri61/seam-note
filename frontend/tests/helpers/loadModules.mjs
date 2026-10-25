@@ -8,6 +8,7 @@ import ts from 'typescript'
 // Exercise real TypeScript modules using the project's existing test tools.
 const temporary = mkdtempSync(join(tmpdir(), 'seam-note-api-tests-'))
 for (const name of [
+  'app/routing/noteRoutes',
   'lib/api/types', 'lib/api/client', 'lib/query/queryKeys', 'lib/query/queryClient',
   'features/folders/folderApi', 'features/folders/folderQueries',
   'features/notes/noteApi', 'features/notes/noteQueries', 'features/notes/notePresentation',
