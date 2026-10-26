@@ -3,6 +3,7 @@ import type { ApiErrorResponse, ApiFieldError } from './types'
 
 export interface RequestOptions {
   signal?: AbortSignal
+  idempotencyKey?: string
 }
 
 export class ApiError extends Error {
@@ -35,9 +36,12 @@ function isApiErrorResponse(value: unknown): value is ApiErrorResponse {
       && typeof error.field === 'string' && typeof error.message === 'string')
 }
 
-async function request<T>(method: 'get' | 'post' | 'patch' | 'delete', path: string, data: unknown, { signal }: RequestOptions): Promise<{ data: T; status: number }> {
+async function request<T>(method: 'get' | 'post' | 'put' | 'patch' | 'delete', path: string, data: unknown, { signal, idempotencyKey }: RequestOptions): Promise<{ data: T; status: number; operationId?: string }> {
   try {
-    return await apiClient.request<T>({ method, url: path, data, signal })
+    const response = await apiClient.request<T>({ method, url: path, data, signal,
+      ...(idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey }, timeout: 15_000 } : {}) })
+    return { data: response.data, status: response.status,
+      operationId: typeof response.headers['idempotency-key'] === 'string' ? response.headers['idempotency-key'] : undefined }
   } catch (cause) {
     if (axios.isCancel(cause) || signal?.aborted) throw cause
     if (!axios.isAxiosError(cause)) throw cause
@@ -72,4 +76,10 @@ export async function deleteResource(path: string, options: RequestOptions = {})
 
 export async function patchJson<T>(path: string, data: unknown): Promise<T> {
   return jsonBody(await request<T>('patch', path, data, {}))
+}
+
+export async function putJsonWithOperation<T>(path: string, data: unknown, operationId: string) {
+  const response = await request<T>('put', path, data, { idempotencyKey: operationId })
+  if (response.status !== 200) throw new ApiError(response.status, { code: 'INVALID_RESPONSE', message: '수정 성공 응답 상태를 확인해주세요.', errors: [] }, undefined)
+  return { body: jsonBody(response), operationId: response.operationId }
 }

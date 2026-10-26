@@ -1,0 +1,156 @@
+{
+  "manifest": {
+    "date": "2026-10-25T11:58:49.393Z",
+    "phase": "history",
+    "head": "5fff38007bff4c1bcb8b65252dca999598ccea3e",
+    "branch": "feat/offline-local-storage",
+    "uncommitted": true,
+    "sourceHashes": {
+      "frontend/src/features/local-drafts/draftSession.ts": "a6014548b23c2014d5db8d87d91bb315b4c26e545123b5c2342fde74a2ff49bd",
+      "frontend/src/features/local-drafts/draftDatabase.ts": "5efb61b09afa600bc3d25a9423dd23f14ce24dc950d7c29ae3d1c04e1d892cbd",
+      "frontend/src/features/notes/noteDrafts.ts": "a5ab563419360cb6f6cb2d552410eef96d1b3ceba61f98fec4cf91a6933be229",
+      "frontend/src/features/notes/useNoteDrafts.ts": "a1be9cc11f3d813837d92fb8c9185d592a368f16054c8327868f00eea3bcd3f1",
+      "frontend/src/features/folders/FolderTree.tsx": "b7b9e33cdbd75b2a63e773435ebabc0f4d94e6c1482d31544d245567239bcc90"
+    },
+    "environment": {
+      "node": "v20.20.0",
+      "os": "Darwin 25.6.0",
+      "arch": "arm64",
+      "cpu": "Apple M1 Pro",
+      "memoryBytes": 34359738368,
+      "chrome": "155.0.8059.86",
+      "headless": true,
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "concurrency": 1
+    },
+    "percentile": "nearest-rank ceil(p*n)-1; per-scenario final-commit samples are 10, p95/p99 equal observed maximum, not production tail estimates"
+  },
+  "elapsedMs": 21147,
+  "data": {
+    "rows": [
+      {
+        "implementation": "9789b32",
+        "repeat": 0,
+        "matches": false,
+        "editorChanged": true
+      },
+      {
+        "implementation": "9789b32",
+        "repeat": 1,
+        "matches": false,
+        "editorChanged": true
+      },
+      {
+        "implementation": "9789b32",
+        "repeat": 2,
+        "matches": false,
+        "editorChanged": true
+      },
+      {
+        "implementation": "9789b32",
+        "repeat": 3,
+        "matches": false,
+        "editorChanged": true
+      },
+      {
+        "implementation": "9789b32",
+        "repeat": 4,
+        "matches": false,
+        "editorChanged": true
+      },
+      {
+        "implementation": "9789b32",
+        "repeat": 5,
+        "matches": false,
+        "editorChanged": true
+      },
+      {
+        "implementation": "9789b32",
+        "repeat": 6,
+        "matches": false,
+        "editorChanged": true
+      },
+      {
+        "implementation": "9789b32",
+        "repeat": 7,
+        "matches": false,
+        "editorChanged": true
+      },
+      {
+        "implementation": "9789b32",
+        "repeat": 8,
+        "matches": false,
+        "editorChanged": true
+      },
+      {
+        "implementation": "9789b32",
+        "repeat": 9,
+        "matches": false,
+        "editorChanged": true
+      },
+      {
+        "implementation": "current",
+        "repeat": 0,
+        "matches": true,
+        "editorChanged": true
+      },
+      {
+        "implementation": "current",
+        "repeat": 1,
+        "matches": true,
+        "editorChanged": true
+      },
+      {
+        "implementation": "current",
+        "repeat": 2,
+        "matches": true,
+        "editorChanged": true
+      },
+      {
+        "implementation": "current",
+        "repeat": 3,
+        "matches": true,
+        "editorChanged": true
+      },
+      {
+        "implementation": "current",
+        "repeat": 4,
+        "matches": true,
+        "editorChanged": true
+      },
+      {
+        "implementation": "current",
+        "repeat": 5,
+        "matches": true,
+        "editorChanged": true
+      },
+      {
+        "implementation": "current",
+        "repeat": 6,
+        "matches": true,
+        "editorChanged": true
+      },
+      {
+        "implementation": "current",
+        "repeat": 7,
+        "matches": true,
+        "editorChanged": true
+      },
+      {
+        "implementation": "current",
+        "repeat": 8,
+        "matches": true,
+        "editorChanged": true
+      },
+      {
+        "implementation": "current",
+        "repeat": 9,
+        "matches": true,
+        "editorChanged": true
+      }
+    ]
+  }
+}

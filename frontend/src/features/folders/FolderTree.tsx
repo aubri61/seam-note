@@ -33,6 +33,7 @@ const Chevron = styled.span(({ theme }) => ({
 
 interface FolderTreeProps {
   tree: WorkspaceTreeModel
+  draftTitles: Readonly<Partial<Record<string, string>>>
   selectedNoteId: string | null
   selectedFolderId: string | null
   editingFolderId: string | null
@@ -47,7 +48,7 @@ interface FolderTreeProps {
   onSelect: (id: string) => void
 }
 
-export function FolderTree({ tree, selectedNoteId, selectedFolderId, onFolderSelect, search, openFolders, onFolderOpen, onSelect, editingFolderId, onFolderName, onCancelFolderName, namingBusy, namingError }: FolderTreeProps) {
+export function FolderTree({ tree, draftTitles, selectedNoteId, selectedFolderId, onFolderSelect, search, openFolders, onFolderOpen, onSelect, editingFolderId, onFolderName, onCancelFolderName, namingBusy, namingError }: FolderTreeProps) {
   const rows = useMemo(() => visibleWorkspaceRows(tree, openFolders, search), [tree, openFolders, search])
   const [focusedKey, setFocusedKey] = useState<string | null>(null)
   const selectedKey = selectedFolderId ? `folder:${selectedFolderId}` : selectedNoteId ? `note:${selectedNoteId}` : null
@@ -81,13 +82,14 @@ export function FolderTree({ tree, selectedNoteId, selectedFolderId, onFolderSel
       <div role="tree" aria-label="폴더와 문서" onKeyDown={navigate}>
         {rows.map(({ node, depth }) => {
           const folder = node.kind === 'folder'
+          const label = folder ? nodeLabel(node) : (draftTitles[node.note.id] ?? node.note.title) || '제목 없음'
           const expanded = folder && (!!search.trim() || !!openFolders[node.folder.id])
           return <Row
             key={node.key} as={folder ? 'div' : Link} to={folder ? undefined : notePath(node.note.id)} role="treeitem" aria-level={depth + 1}
             tabIndex={node.key === tabKey ? 0 : -1} onFocus={() => setFocusedKey(node.key)}
             aria-selected={node.key === selectedKey}
             selected={node.key === selectedKey}
-            style={{ paddingLeft: 2 + depth * 20, ...(folder && node.folder.id === editingFolderId ? { height: 'auto', minHeight: 40 } : {}) }} title={nodeLabel(node)}
+            style={{ paddingLeft: 2 + depth * 20, ...(folder && node.folder.id === editingFolderId ? { height: 'auto', minHeight: 40 } : {}) }} title={label}
             aria-expanded={folder ? expanded : undefined}
             aria-current={!folder && node.note.id === selectedNoteId ? 'page' : undefined}
             data-node-key={node.key}
@@ -108,7 +110,7 @@ export function FolderTree({ tree, selectedNoteId, selectedFolderId, onFolderSel
             <Icon name={folder ? 'folder' : 'note'} size={16} />
             {folder && node.folder.id === editingFolderId ? <FolderName key={node.folder.id} name={node.folder.name}
               busy={namingBusy} error={namingError} onSave={name => onFolderName(node.folder.id, name)} onCancel={onCancelFolderName} />
-              : <span>{nodeLabel(node)}</span>}
+              : <span>{label}</span>}
           </Row>
         })}
       </div>

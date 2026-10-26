@@ -19,6 +19,7 @@ public enum ErrorCode {
     FOLDER_CYCLE_DETECTED(HttpStatus.CONFLICT, "자기 자신이나 하위 폴더로 이동할 수 없습니다."),
     DUPLICATE_ENTITY_ID(HttpStatus.CONFLICT, "이미 사용 중인 엔티티 ID입니다."),
     VERSION_CONFLICT(HttpStatus.CONFLICT, "다른 요청이 먼저 데이터를 변경했습니다."),
+    IDEMPOTENCY_KEY_REUSED(HttpStatus.CONFLICT, "같은 멱등성 키에 다른 요청을 사용할 수 없습니다."),
     DATA_CONFLICT(HttpStatus.CONFLICT, "데이터 관계 또는 정렬 제약과 충돌합니다."),
     NOTE_NOT_FOUND(
             HttpStatus.NOT_FOUND,

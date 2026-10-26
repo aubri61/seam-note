@@ -1,0 +1,417 @@
+{
+  "manifest": {
+    "date": "2026-10-25T11:58:06.213Z",
+    "phase": "reversal",
+    "head": "5fff38007bff4c1bcb8b65252dca999598ccea3e",
+    "branch": "feat/offline-local-storage",
+    "uncommitted": true,
+    "sourceHashes": {
+      "frontend/src/features/local-drafts/draftSession.ts": "a6014548b23c2014d5db8d87d91bb315b4c26e545123b5c2342fde74a2ff49bd",
+      "frontend/src/features/local-drafts/draftDatabase.ts": "5efb61b09afa600bc3d25a9423dd23f14ce24dc950d7c29ae3d1c04e1d892cbd",
+      "frontend/src/features/notes/noteDrafts.ts": "a5ab563419360cb6f6cb2d552410eef96d1b3ceba61f98fec4cf91a6933be229",
+      "frontend/src/features/notes/useNoteDrafts.ts": "a1be9cc11f3d813837d92fb8c9185d592a368f16054c8327868f00eea3bcd3f1",
+      "frontend/src/features/folders/FolderTree.tsx": "b7b9e33cdbd75b2a63e773435ebabc0f4d94e6c1482d31544d245567239bcc90"
+    },
+    "environment": {
+      "node": "v20.20.0",
+      "os": "Darwin 25.6.0",
+      "arch": "arm64",
+      "cpu": "Apple M1 Pro",
+      "memoryBytes": 34359738368,
+      "chrome": "155.0.8059.86",
+      "headless": true,
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "concurrency": 1
+    },
+    "percentile": "nearest-rank ceil(p*n)-1; per-scenario final-commit samples are 10, p95/p99 equal observed maximum, not production tail estimates"
+  },
+  "elapsedMs": 10624,
+  "data": {
+    "runs": 20,
+    "rows": [
+      {
+        "repeat": 0,
+        "id": "98e4d036-55c7-494f-88a4-9d44c36c63e4",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 1,
+        "id": "91c239d7-f150-4a43-88c1-2716463d4801",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 2,
+        "id": "6d405603-280a-4803-84ac-61fc86148a47",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 3,
+        "id": "a94b98b7-a711-413a-b020-d9838a899b2b",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 4,
+        "id": "fccf44c6-094e-4133-b8ee-18530ba24ac6",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 5,
+        "id": "83432ce3-72c5-483e-8d5d-f242e42e7986",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 6,
+        "id": "0501811b-5201-4dfd-9654-43106d171000",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 7,
+        "id": "ebe4e5bf-5400-448d-9265-3f98f4946083",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 8,
+        "id": "9ba151f0-f907-4418-a8b7-fa82ee0fa03a",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 9,
+        "id": "04e7f250-a429-41ea-b230-5b4a3607510c",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 10,
+        "id": "4533df12-35ec-4e0c-bd76-261b8ce4a11e",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 11,
+        "id": "19ff57ac-d360-419a-bb21-ed356dc5e261",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 12,
+        "id": "eb17bfa4-1b25-491a-a849-e3e2ee1f03bd",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 13,
+        "id": "8d4adc69-9c41-469c-bd29-6a125c12c9e8",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 14,
+        "id": "2437b790-a483-4cee-b6b1-d2b334525aaa",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 15,
+        "id": "f979b7ec-d6ee-4b5b-9c5f-6643f39addb3",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 16,
+        "id": "8e53f82c-950e-4581-84bb-f18fbf1832ba",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 17,
+        "id": "bdeaa90f-4750-44da-b863-187ce02a552a",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 18,
+        "id": "4c726f7b-937f-4332-a0f6-bddc15904ba5",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      },
+      {
+        "repeat": 19,
+        "id": "ba1a47aa-2101-4765-9dda-66c51579ca05",
+        "naivePreserved": false,
+        "safePreserved": true,
+        "naiveTrace": [
+          9,
+          8
+        ],
+        "safeTrace": [
+          8,
+          9
+        ],
+        "attempts": 2,
+        "maxActive": 1,
+        "naiveHash": "de612533474fcaf4d58dfc5a17ca88ec1757aac9eb23c4820782ce4d48ae13ef",
+        "safeHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a",
+        "expectedHash": "31063c303cd0dbe3ae4e3b0c39f75875d26935ae702488f567c8172084b6e79a"
+      }
+    ]
+  }
+}

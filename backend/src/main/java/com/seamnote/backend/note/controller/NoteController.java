@@ -2,6 +2,8 @@ package com.seamnote.backend.note.controller;
 
 import com.seamnote.backend.note.dto.*;
 import com.seamnote.backend.note.service.NoteService;
+import com.seamnote.backend.note.idempotency.IdempotentNoteUpdates;
+import org.springframework.http.MediaType;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +13,8 @@ import java.util.*;
 @RequestMapping("/api/notes")
 public class NoteController {
     private final NoteService notes;
-    public NoteController(NoteService notes) { this.notes = notes; }
+    private final IdempotentNoteUpdates updates;
+    public NoteController(NoteService notes, IdempotentNoteUpdates updates) { this.notes = notes; this.updates = updates; }
     @PostMapping
     public ResponseEntity<NoteResponse> createNote(@Valid @RequestBody CreateNoteRequest request) {
         NoteResponse response = notes.createNote(request);
@@ -23,7 +26,13 @@ public class NoteController {
     public List<NoteResponse> getAllNotes() { return notes.getAllNotes(); }
     // Both endpoints replace title and content together; missing/null is invalid.
     @RequestMapping(value = "/{id}", method = {RequestMethod.PUT, RequestMethod.PATCH})
-    public NoteResponse updateNote(@PathVariable UUID id, @Valid @RequestBody UpdateNoteRequest request) { return notes.updateNote(id, request); }
+    public ResponseEntity<String> updateNote(@PathVariable UUID id, @Valid @RequestBody UpdateNoteRequest request,
+            @RequestHeader(name = "Idempotency-Key", required = false) String key) {
+        String response = updates.update(id, request, key);
+        var result = ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON);
+        if (key != null) result.header("Idempotency-Key", UUID.fromString(key).toString());
+        return result.body(response);
+    }
     @PatchMapping("/{id}/move")
     public NoteResponse move(@PathVariable UUID id, @Valid @RequestBody MoveNoteRequest request) { return notes.move(id, request); }
     @DeleteMapping("/{id}")

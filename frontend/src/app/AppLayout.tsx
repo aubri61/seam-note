@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Link, Outlet } from 'react-router-dom'
 import type { ComponentProps } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { useTheme } from '@emotion/react'
@@ -13,7 +13,9 @@ import { WorkspaceActionDialog } from '@/features/workspace/WorkspaceActionDialo
 import type { WorkspaceAction } from '@/features/workspace/WorkspaceActionDialog'
 import { ApiError } from '@/lib/api/client'
 import { useNoteDrafts } from '@/features/notes/useNoteDrafts'
-import { draftStatus } from '@/features/notes/noteDrafts'
+import { notePath } from '@/app/routing/noteRoutes'
+import { useManualSync } from '@/features/manual-sync/useManualSync'
+import { localDraftStatus } from '@/features/local-drafts/localDraftStatus'
 import type { NoteEditor } from '@/features/notes/NoteEditor'
 
 const Shell = styled.div(({ theme }) => ({
@@ -46,7 +48,10 @@ export function AppLayout() {
   const drafts = useNoteDrafts(folders.selectedNoteId, folders.activeNote)
   const editorLoading = !folders.routeError && (folders.workspace.isPending || !!folders.selectedNoteId && folders.noteQuery.isFetching)
   const editorError = folders.routeError ?? (!folders.workspace.data ? folders.workspace.error : null) ?? folders.detailError
-  const status = draftStatus(drafts.draft, editorLoading, editorError)
+  const manualSync = useManualSync(folders.selectedNoteId, drafts.session, drafts.entry,
+    !!folders.selectedNoteId && folders.tree.notes.has(folders.selectedNoteId)
+      && folders.activeNote?.id === folders.selectedNoteId && !editorError && !editorLoading && !folders.busy)
+  const status = localDraftStatus(drafts.entry, drafts.recovering, editorLoading, editorError)
   const [action, setAction] = useState<WorkspaceAction | null>(null)
   const [creationMessage, setCreationMessage] = useState('')
   const titleRef = useRef<HTMLInputElement>(null)
@@ -124,7 +129,7 @@ export function AppLayout() {
           </>}
         </div>
 
-  const sidebar = <Sidebar onClose={closeSidebar} folders={folders} onSelectNote={selectNote}
+  const sidebar = <Sidebar onClose={closeSidebar} folders={folders} draftTitles={drafts.draftTitles} onSelectNote={selectNote}
     onCreate={create} creationFeedback={isMobile ? creationFeedback : undefined} />
 
   return (
@@ -149,13 +154,19 @@ export function AppLayout() {
           onToggleSidebar={() => setSidebarOpen(open => !open)}
           toggleRef={toggleRef}
           status={status}
+          manualSync={manualSync}
           path={folders.ancestors.map(item => item.name)}
         />
         {(!isMobile || !sidebarOpen) && creationFeedback}
+        {drafts.backgroundIssues.map(id => <div key={id} role="alert" style={{ padding: '8px 24px', fontSize: 13 }}>
+          <p>다른 원고의 로컬 저장을 완료하지 못했습니다. 입력은 메모리에 유지됩니다.</p>
+          <Link to={notePath(id)}>저장 실패 원고 확인</Link>
+        </div>)}
         <Outlet context={{
-          draft: folders.routeError ? null : drafts.draft, onEdit: drafts.edit,
+          draft: drafts.draft, onEdit: drafts.edit,
+          localEntry: drafts.entry, onRetryLocal: drafts.retryLocal,
           selectedNoteId: folders.selectedNoteId, titleRef,
-          loading: editorLoading, error: editorError,
+          loading: editorLoading || drafts.recovering, error: editorError,
           canRetry: !folders.routeError || !!folders.selectedNoteId,
           busy: folders.busy, canCreate: !!folders.workspace.data,
           canDelete: !!folders.selectedNoteId && folders.tree.notes.has(folders.selectedNoteId) && !folders.routeError,

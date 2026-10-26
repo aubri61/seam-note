@@ -13,7 +13,7 @@ export interface NoteDraft {
 }
 export type NoteDrafts = Readonly<Record<UUID, NoteDraft>>
 export type DraftPatch = Partial<Pick<NoteDraft, 'title' | 'content'>>
-export type DraftStatus = '변경사항 없음' | '저장되지 않은 변경사항' | '원고 로딩 중' | '원고 조회 실패'
+export type DraftStatus = '서버 결과 확인 필요' | '변경사항 없음' | '저장되지 않은 변경사항' | '원고 로딩 중' | '원고 조회 실패' | '로컬 원고 복구 중' | '편집 중 / 로컬 저장 대기' | '로컬 저장 중' | '로컬 저장됨 · 서버 미동기화' | '로컬 저장 실패'
 
 export function isDraftDirty(draft: NoteDraft): boolean {
   return draft.title !== draft.baseTitle || draft.content !== draft.baseContent

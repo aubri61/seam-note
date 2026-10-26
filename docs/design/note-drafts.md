@@ -1,5 +1,7 @@
 # React 원고 Draft
 
+> 후속 단계: 현재 Draft는 Dexie/IndexedDB에도 저장한다. 메모리 전용·이탈 정책에 대한 아래 설명은 해당 단계의 이력이며, 현재 복구/로컬 저장/멀티탭 계약은 [로컬 원고 저장](local-draft-storage.md)을 따른다.
+
 > URL 라우팅 후에도 Draft는 공통 부모 AppLayout의 메모리 상태다. 선택 ID·history·직접 접속 계약은 [노트 URL 라우팅](note-routing.md)을 따른다.
 
 ## 범위와 상태 소유
@@ -17,7 +19,7 @@
 | AppHeader / SyncStatus | 현재 원고의 편집·조회 상태 표시. 저장/동기화 성공을 주장하지 않음 |
 | Sidebar | 기존 트리·+ 메뉴 유지. 원고 편집이 메모리 상태임을 안내 |
 
-Draft를 NoteEditor 내부가 아닌 AppLayout의 Hook에 두므로 A→B→A 전환, 모바일 Drawer 개폐, 반응형 레이아웃 변경으로 편집 내용이 초기화되지 않는다. TanStack Query는 서버 캐시로 그대로 유지한다. 사이드바 제목/검색은 기존 서버 메타데이터 기준이며 미저장 제목을 서버 캐시나 트리에 덮어쓰지 않는다.
+Draft를 NoteEditor 내부가 아닌 AppLayout의 Hook에 두므로 A→B→A 전환, 모바일 Drawer 개폐, 반응형 레이아웃 변경으로 편집 내용이 초기화되지 않는다. TanStack Query는 서버 캐시로 그대로 유지한다. 후속 로컬 저장 단계에서는 사이드바 제목에 메모리 Draft 제목을 우선 표시한다. 검색은 기존 서버 메타데이터 기준이며 미저장 제목을 서버 캐시나 트리에 덮어쓰지 않는다. 상세 규칙은 [로컬 원고 저장](local-draft-storage.md#사이드바-제목-표시)을 따른다.
 
 ## 모델
 

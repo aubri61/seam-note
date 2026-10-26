@@ -1,5 +1,7 @@
 # 노트 URL 라우팅
 
+> 후속 단계: 현재 Draft는 Dexie/IndexedDB에도 저장한다. 메모리 전용·이탈 정책에 대한 아래 설명은 해당 단계의 이력이며, 현재 복구/로컬 저장/멀티탭 계약은 [로컬 원고 저장](local-draft-storage.md)을 따른다.
+
 ## 도입과 URL 계약
 
 기존 라우터가 없어 pnpm으로 react-router-dom **7.18.4**를 설치했다(동일 버전 react-router 포함). 설치 패키지의 peer는 React/React DOM >=18, Node engine은 >=20이며 현재 React 19/Node v20.20.0에서 build와 테스트를 통과했다. 기존 QueryClientProvider/Emotion ThemeProvider와 QueryClient 인스턴스는 유지하고 그 안에 BrowserRouter를 한 번 추가했다.
