@@ -58,7 +58,9 @@ async function main() {
     const editor = page.getByRole('region', { name: '노트 편집기' })
     const title = page.getByLabel('문서 제목'), body = page.getByLabel('문서 내용')
     const select = id => page.locator('[data-node-key="note:' + ids[id] + '"]').click()
-    const status = text => page.getByText(text, { exact: true }).first()
+    const status = text => text === '저장되지 않은 변경사항'
+      ? page.getByRole('status').filter({ hasText: /^(편집 중 \/ 로컬 저장 대기|로컬 저장 중|로컬 저장됨 · 서버 미동기화)$/ }).first()
+      : page.getByText(text, { exact: true }).first()
     await until(async () => await body.inputValue() === 'A 본문', 'initial Draft')
     await status('변경사항 없음').waitFor()
     assert.equal(await warningRequested(page), false)
@@ -76,18 +78,19 @@ async function main() {
     await title.fill('A 초안 제목'); await body.fill('A 초안 본문')
     await select('B')
     await until(async () => await body.inputValue() === 'B 본문', 'B isolated Draft')
-    assert.equal(await warningRequested(page), true, 'dirty inactive A still protects navigation')
+    await until(async () => !(await warningRequested(page)), 'inactive A is committed before removing warning')
     await status('변경사항 없음').waitFor()
     await body.fill('B 초안 본문')
     await select('A')
     await until(async () => await title.inputValue() === 'A 초안 제목', 'A draft restored')
     assert.equal(await body.inputValue(), 'A 초안 본문')
     await select('B')
-    assert.equal(await body.inputValue(), 'B 초안 본문')
+    await until(async () => await body.inputValue() === 'B 초안 본문', 'B draft committed after Link transition')
     await body.fill('B 본문')
     await status('변경사항 없음').waitFor()
-    assert.equal(await warningRequested(page), true)
+    assert.equal(await warningRequested(page), false)
     await select('A')
+    await until(async () => await title.inputValue() === 'A 초안 제목', 'A visible before reverting its fields')
     await title.fill('A 제목'); await body.fill('A 본문')
     await status('변경사항 없음').waitFor()
     await until(async () => !(await warningRequested(page)), 'all reverted removes unload listener')
@@ -98,6 +101,7 @@ async function main() {
     await refetch(page)
     await until(async () => gets.A > beforeClean, 'clean refetch request did not start')
     await until(async () => await body.inputValue() === 'A 서버 본문 3', 'clean refetch did not update Draft')
+    assert.equal(await page.locator('[data-node-key="note:' + ids.A + '"]').innerText(), 'A 서버 3')
     await status('변경사항 없음').waitFor()
     // Same-ID old response cannot roll back even a clean Draft.
     server.A = { ...server.A, version: 2, title: 'A 오래된 제목', content: 'A 오래된 본문' }
@@ -118,6 +122,7 @@ async function main() {
     await status('저장되지 않은 변경사항').waitFor()
     assert.equal(await body.inputValue(), 'A 응답 대기 중 작성')
     assert.equal(await title.inputValue(), 'A 유지할 제목')
+    assert.equal(await page.locator('[data-node-key="note:' + ids.A + '"]').innerText(), 'A 유지할 제목')
     // Failed refetch keeps the dirty editor enabled and input intact.
     failA = true
     await refetch(page)
@@ -145,11 +150,17 @@ async function main() {
     await select('A')
     await until(async () => await body.inputValue() === 'A 조회 실패 후에도 작성', 'A survives late response and transitions')
     assert.deepEqual(await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length })), { local: 0, session: 0 })
-    await page.getByText(/편집 내용은 현재 브라우저 메모리에만 있으며/).waitFor()
+    await page.getByText(/원고는 이 브라우저에 로컬 저장되며/).waitFor()
     assert.equal(await page.locator('[data-node-key="note:' + ids.A + '"]').getAttribute('aria-selected'), 'true')
     await pause(200) // Let the existing selection background transition settle.
     await page.screenshot({ path: '/private/tmp/seam-note-drafts-desktop.png', fullPage: true })
 
+    await page.evaluate(async () => {
+      const { draftRepository: repo } = await import('/src/features/local-drafts/draftDatabase.ts')
+      const original = repo.write.bind(repo)
+      repo.write = async (...args) => { await new Promise(resolve => setTimeout(resolve, 900)); return original(...args) }
+    })
+    await body.fill('새로고침 경고를 검증할 최신 입력')
     await body.click() // A trusted gesture is required by Chrome's beforeunload policy.
     assert.equal(await warningRequested(page), true)
     // Real Chrome warning, after user input. Browser policy may vary outside this test environment.
@@ -161,7 +172,7 @@ async function main() {
     await until(async () => warned, 'Chrome reload beforeunload warning')
     await navigation // Dismissing beforeunload may leave reload waiting until timeout.
     assert.equal(page.isClosed(), false)
-    assert.equal(await body.inputValue(), 'A 조회 실패 후에도 작성')
+    assert.equal(await body.inputValue(), '새로고침 경고를 검증할 최신 입력')
     await page.close() // Test cleanup bypasses beforeunload, like forced termination.
 
     // Mobile editing survives the responsive Drawer selection flow.
@@ -182,11 +193,11 @@ async function main() {
       await mobile.locator('[data-node-key="note:' + ids[id] + '"]').click()
       await mobile.getByRole('button', { name: '사이드바 펼치기', exact: true }).waitFor()
     }
-    assert.equal(await mobile.getByLabel('문서 내용').inputValue(), '모바일 A 초안')
+    await until(async () => await mobile.getByLabel('문서 내용').inputValue() === '모바일 A 초안', 'mobile A Draft transition committed')
     await mobile.screenshot({ path: '/private/tmp/seam-note-drafts-mobile.png', fullPage: true })
     await mobile.close()
     assert.deepEqual(errors, [])
-    console.log('PASS: independent React Drafts, editable/empty/200-char, A-B-A, clean/dirty/older/in-flight refetch, query error recovery, late ID protection, unload conditions + Chrome reload dialog, no persistence, mobile; mock GET only')
+    console.log('PASS: independent React Drafts, editable/empty/200-char, A-B-A, clean/dirty/older/in-flight refetch, query error recovery, late ID protection, unload conditions + Chrome reload dialog, local commit aware unload, mobile; mock GET only')
   } finally { await browser.close() }
 }
 main().catch(error => { console.error(error); process.exitCode = 1 })

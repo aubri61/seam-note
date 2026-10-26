@@ -1,0 +1,223 @@
+{
+  "caseRuns": 280,
+  "sourceIntegrity": [
+    {
+      "name": "recovery",
+      "unchanged": true
+    },
+    {
+      "name": "writes",
+      "unchanged": true
+    },
+    {
+      "name": "tabs",
+      "unchanged": true
+    },
+    {
+      "name": "reversal",
+      "unchanged": true
+    },
+    {
+      "name": "state",
+      "unchanged": true
+    },
+    {
+      "name": "history",
+      "unchanged": true
+    }
+  ],
+  "recovery": {
+    "n": 160,
+    "preserved": 160,
+    "overwritten": 0,
+    "naivePreserved": 77,
+    "naiveOverwritten": 83,
+    "localReadDurationMs": {
+      "n": 160,
+      "p50": 119.39999985694885,
+      "p95": 1002.6000001430511,
+      "p99": 1004.2000000476837
+    },
+    "localFinishedMs": {
+      "n": 160,
+      "min": 279.09999990463257,
+      "p50": 609.9000000953674,
+      "p95": 1394,
+      "p99": 1662.8999998569489,
+      "max": 1679.5
+    },
+    "serverFinishedMs": {
+      "n": 160,
+      "min": 316.09999990463257,
+      "p50": 745.2000000476837,
+      "p95": 1429.2000000476837,
+      "p99": 1672.2999999523163,
+      "max": 1696.5999999046326
+    }
+  },
+  "writes": {
+    "runs": 40,
+    "inputEvents": 2700,
+    "attempts": 60,
+    "commits": 60,
+    "cas": 0,
+    "failures": 0,
+    "preserved": 40,
+    "groups": [
+      {
+        "count": 35,
+        "interval": 5,
+        "wdelay": 0,
+        "runs": 10,
+        "inputEvents": 350,
+        "attempts": 10,
+        "commits": 10,
+        "cas": 0,
+        "failures": 0,
+        "preserved": 10,
+        "lastInputToCommitMs": {
+          "n": 10,
+          "min": 404.10000014305115,
+          "p50": 407.30000019073486,
+          "p95": 411.09999990463257,
+          "p99": 411.09999990463257,
+          "max": 411.09999990463257
+        },
+        "realInputIntervalsMs": {
+          "n": 340,
+          "min": 12.399999856948853,
+          "p50": 20.899999856948853,
+          "p95": 23.700000047683716,
+          "p99": 24.799999952316284,
+          "max": 29.59999990463257
+        }
+      },
+      {
+        "count": 35,
+        "interval": 80,
+        "wdelay": 600,
+        "runs": 10,
+        "inputEvents": 350,
+        "attempts": 20,
+        "commits": 20,
+        "cas": 0,
+        "failures": 0,
+        "preserved": 10,
+        "lastInputToCommitMs": {
+          "n": 10,
+          "min": 1008.7000000476837,
+          "p50": 1009.4000000953674,
+          "p95": 1012,
+          "p99": 1012,
+          "max": 1012
+        },
+        "realInputIntervalsMs": {
+          "n": 340,
+          "min": 86.90000009536743,
+          "p50": 88.29999995231628,
+          "p95": 89.80000019073486,
+          "p99": 91.5,
+          "max": 93.60000014305115
+        }
+      },
+      {
+        "count": 100,
+        "interval": 5,
+        "wdelay": 0,
+        "runs": 10,
+        "inputEvents": 1000,
+        "attempts": 10,
+        "commits": 10,
+        "cas": 0,
+        "failures": 0,
+        "preserved": 10,
+        "lastInputToCommitMs": {
+          "n": 10,
+          "min": 63.200000047683716,
+          "p50": 126.70000004768372,
+          "p95": 234.80000019073486,
+          "p99": 234.80000019073486,
+          "max": 234.80000019073486
+        },
+        "realInputIntervalsMs": {
+          "n": 990,
+          "min": 7.099999904632568,
+          "p50": 19,
+          "p95": 23.799999952316284,
+          "p99": 28.5,
+          "max": 38.299999952316284
+        }
+      },
+      {
+        "count": 100,
+        "interval": 25,
+        "wdelay": 800,
+        "runs": 10,
+        "inputEvents": 1000,
+        "attempts": 20,
+        "commits": 20,
+        "cas": 0,
+        "failures": 0,
+        "preserved": 10,
+        "lastInputToCommitMs": {
+          "n": 10,
+          "min": 1208,
+          "p50": 1208.6000001430511,
+          "p95": 1210,
+          "p99": 1210,
+          "max": 1210
+        },
+        "realInputIntervalsMs": {
+          "n": 990,
+          "min": 27,
+          "p50": 32.59999990463257,
+          "p95": 34.10000014305115,
+          "p99": 35.700000047683716,
+          "max": 42.10000014305115
+        }
+      }
+    ]
+  },
+  "tabs": {
+    "runs": 20,
+    "competingAttempts": 40,
+    "competingCommits": 20,
+    "competingCAS": 20,
+    "nonCASFailures": 0,
+    "additionalGuardAttempts": 40,
+    "additionalGuardCAS": 40,
+    "winnerLastEditToCommitMs": {
+      "n": 20,
+      "p50": 3.9000000953674316,
+      "p95": 5.599999904632568,
+      "p99": 6.5
+    },
+    "bothMemoryCopiesPreserved": 20
+  },
+  "reversal": {
+    "n": 20,
+    "currentPreserved": 20,
+    "hypotheticalNaivePreserved": 0
+  },
+  "state": {
+    "n": 20,
+    "cleanAdopted": 10,
+    "dirtyPreserved": 10
+  },
+  "history": {
+    "beforeRuns": 10,
+    "beforeMismatches": 10,
+    "afterRuns": 10,
+    "afterMatches": 10
+  },
+  "artifactHashes": {
+    "measure.cjs": "f6228c35842ce502db5cb00d5030de5f52106836ffccb3fd089b1400d5379b3e",
+    "analyze.cjs": "79d8642123ccc58267f957b2d1f01aaf01b82b15bbf65d088efa89e1deafe6a1",
+    "recovery.json": "120d208b2bdcc8e9c70cd4a3d9513b7727d950f277073e615142f85224041057",
+    "writes.json": "5b97649630cf908bd1a5e857109dd3829988cd891de4d6e519785bd61b4b8608",
+    "tabs.json": "ae09c04c20f942d50ac237990a85356162f98bd70e8503a3bc500015c1b8b990",
+    "reversal.json": "c0a9ca07466e7b5b71235314583cccdbe21e21087b6b86ee427dbad8823b55bf",
+    "state.json": "97f37ed38204a2bc868e777cd64eb261e29673198d5e707cdaf194e596eb8540",
+    "history.json": "b7f5dbd82afd37f56453f58557beea98fe65468576efae30d35b618ce261e5aa"
+  }
+}

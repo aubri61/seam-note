@@ -1,0 +1,777 @@
+{
+  "manifest": {
+    "date": "2026-10-25T11:57:24.181Z",
+    "phase": "tabs",
+    "head": "5fff38007bff4c1bcb8b65252dca999598ccea3e",
+    "branch": "feat/offline-local-storage",
+    "uncommitted": true,
+    "sourceHashes": {
+      "frontend/src/features/local-drafts/draftSession.ts": "a6014548b23c2014d5db8d87d91bb315b4c26e545123b5c2342fde74a2ff49bd",
+      "frontend/src/features/local-drafts/draftDatabase.ts": "5efb61b09afa600bc3d25a9423dd23f14ce24dc950d7c29ae3d1c04e1d892cbd",
+      "frontend/src/features/notes/noteDrafts.ts": "a5ab563419360cb6f6cb2d552410eef96d1b3ceba61f98fec4cf91a6933be229",
+      "frontend/src/features/notes/useNoteDrafts.ts": "a1be9cc11f3d813837d92fb8c9185d592a368f16054c8327868f00eea3bcd3f1",
+      "frontend/src/features/folders/FolderTree.tsx": "b7b9e33cdbd75b2a63e773435ebabc0f4d94e6c1482d31544d245567239bcc90"
+    },
+    "environment": {
+      "node": "v20.20.0",
+      "os": "Darwin 25.6.0",
+      "arch": "arm64",
+      "cpu": "Apple M1 Pro",
+      "memoryBytes": 34359738368,
+      "chrome": "155.0.8059.86",
+      "headless": true,
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "concurrency": 1
+    },
+    "percentile": "nearest-rank ceil(p*n)-1; per-scenario final-commit samples are 10, p95/p99 equal observed maximum, not production tail estimates"
+  },
+  "elapsedMs": 10527,
+  "data": {
+    "runs": 20,
+    "rows": [
+      {
+        "repeat": 0,
+        "id": "56a1da7d-f806-4d31-8fd6-4c6aaada0dac",
+        "perTab": [
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": 5.400000095367432,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          },
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 1,
+        "id": "1a30cfdd-46fd-4f15-abbf-2809fa68fed4",
+        "perTab": [
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": 3.700000047683716,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          },
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 2,
+        "id": "10f8c9f2-8eae-44c7-8855-6fb1a4a3e04e",
+        "perTab": [
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": 3.799999952316284,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          },
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 3,
+        "id": "aae324c9-094a-47ce-b5d9-f763b9bdfb4e",
+        "perTab": [
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": 3.9000000953674316,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          },
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 4,
+        "id": "a2e2b7ec-3a6e-40ad-83dc-e0fdd7dd042d",
+        "perTab": [
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          },
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": 3.299999952316284,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 5,
+        "id": "67c7ec0a-7476-41c0-bd81-d8d15a61641f",
+        "perTab": [
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": 4.099999904632568,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          },
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 6,
+        "id": "929c7994-8fbc-4445-b39b-63598519d8ee",
+        "perTab": [
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          },
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": 4.599999904632568,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 7,
+        "id": "2679f219-bdca-4ec1-a75b-8c7d27a52fcd",
+        "perTab": [
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": 5,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          },
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 8,
+        "id": "e6bb3884-0d15-4efd-9258-656f7158bc1a",
+        "perTab": [
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": 6.5,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          },
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 9,
+        "id": "301c9d9a-26ff-4a16-9e47-7196856b1417",
+        "perTab": [
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          },
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": 3.4000000953674316,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 10,
+        "id": "89875d55-78b5-40de-86c1-670472f5f48a",
+        "perTab": [
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          },
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": 3.299999952316284,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 11,
+        "id": "7c8d56ac-6fb8-4bf2-b8f7-523c0870eb08",
+        "perTab": [
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": 3.9000000953674316,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          },
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 12,
+        "id": "ab59f665-67d0-42f8-b9bb-dc1045ccf022",
+        "perTab": [
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": 3.299999952316284,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          },
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 13,
+        "id": "563ffea5-12e1-4e03-82d0-c7d831aeab8b",
+        "perTab": [
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": 3.799999952316284,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          },
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 14,
+        "id": "5d5c70fb-ca22-4377-8620-f08437908bc2",
+        "perTab": [
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          },
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": 4.5,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 15,
+        "id": "67f944ee-78fd-4dde-9d91-681be1cb295b",
+        "perTab": [
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": 3.9000000953674316,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          },
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 16,
+        "id": "c8017441-449f-43f2-8673-b0e73a2c81d7",
+        "perTab": [
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": 4,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          },
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 17,
+        "id": "c7d3a677-4983-46b6-948d-177f5addccea",
+        "perTab": [
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": 3.6000001430511475,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          },
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 18,
+        "id": "106981b3-bf63-40ab-b8eb-d6703f03ce90",
+        "perTab": [
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": 4.200000047683716,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          },
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      },
+      {
+        "repeat": 19,
+        "id": "55d26b45-40b5-4bf8-9b8b-4356ba136849",
+        "perTab": [
+          {
+            "phase": "conflict",
+            "revision": 8,
+            "savedRevision": 7,
+            "memoryHash": "c86f210e0efad769d6ade6f924a85200be38917fa99e33b360aa24535716359b",
+            "lastInputToCommitMs": null,
+            "attempts": 1,
+            "commits": 0,
+            "cas": 1,
+            "failures": 0
+          },
+          {
+            "phase": "saved",
+            "revision": 8,
+            "savedRevision": 8,
+            "memoryHash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+            "lastInputToCommitMs": 5.599999904632568,
+            "attempts": 1,
+            "commits": 1,
+            "cas": 0,
+            "failures": 0
+          }
+        ],
+        "dbState": {
+          "hash": "c4f984e0cf8a5d4a8f60c5d2d33848e4772045ba667a4e52851a7dd7eea6d6e2",
+          "revision": 8
+        },
+        "guards": {
+          "token": "LocalDraftConflict",
+          "revision": "LocalDraftConflict",
+          "unchanged": true
+        }
+      }
+    ]
+  }
+}

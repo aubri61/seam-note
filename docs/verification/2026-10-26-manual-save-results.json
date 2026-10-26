@@ -1,0 +1,344 @@
+{
+  "noteId": "8a617b1b-2130-4457-b99c-5af328d3fdd9",
+  "chrome": "155.0.8059.86",
+  "steps": [
+    {
+      "step": 1,
+      "event": "edit-title",
+      "titleHash": "71cb6f752f713a3f5e899e64708bc59b267ea3b599c934418c5e8cd0f77dcf06"
+    },
+    {
+      "step": 2,
+      "event": "React-controlled-input-and-sidebar",
+      "titleHash": "71cb6f752f713a3f5e899e64708bc59b267ea3b599c934418c5e8cd0f77dcf06"
+    },
+    {
+      "step": 3,
+      "event": "IndexedDB-drafts-commit",
+      "localRevision": 3,
+      "baseVersion": 0,
+      "contentHash": "6ee3ede94542c34c9623f112325a606d475ab92c80d4c029efe5b51fd6026fdb"
+    },
+    {
+      "step": 4,
+      "event": "Outbox-pending",
+      "operationId": "21c837e8-2624-4b77-ba45-b51756e61938",
+      "expectedVersion": 0,
+      "localRevision": 3
+    },
+    {
+      "step": 5,
+      "event": "explicit-button-click"
+    },
+    {
+      "step": 6,
+      "event": "Chrome-network-real-PUT",
+      "operationId": "21c837e8-2624-4b77-ba45-b51756e61938",
+      "status": 200,
+      "version": 1
+    },
+    {
+      "step": 7,
+      "event": "PostgreSQL-idempotency-ledger",
+      "operationId": "21c837e8-2624-4b77-ba45-b51756e61938",
+      "records": 1
+    },
+    {
+      "step": 8,
+      "event": "PostgreSQL-note-update",
+      "version": 1,
+      "contentMd5": "587e226b9d7231b583b9447dff2b8237"
+    },
+    {
+      "step": 9,
+      "event": "IndexedDB-atomic-ack",
+      "baseVersion": 1,
+      "outboxCount": 0
+    },
+    {
+      "step": 10,
+      "event": "new-Chrome-profile-real-server-GET",
+      "baseVersion": 1,
+      "contentHash": "6ee3ede94542c34c9623f112325a606d475ab92c80d4c029efe5b51fd6026fdb"
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "real-vertical-slice",
+      "passed": true,
+      "version": 1
+    },
+    {
+      "name": "editing-during-network-and-ack",
+      "passed": true,
+      "baseVersion": 2,
+      "pendingOperationId": "340dbdd7-d751-41b0-a92d-756ecb10d93c",
+      "contentHash": "f28a9de6156b4e7be6a997517f258bf48194969319e41cb9bb49a54a4b5053bd"
+    },
+    {
+      "name": "duplicate-click-and-two-tab-lock",
+      "passed": true,
+      "putCount": 1,
+      "version": 4
+    },
+    {
+      "name": "version-conflict-keeps-local",
+      "passed": true,
+      "serverVersion": 5,
+      "localBaseVersion": 4,
+      "operationId": "2e6f8053-eddf-486c-9b3e-6ead58c1af79"
+    },
+    {
+      "name": "lost-response-reload-same-key-replay",
+      "passed": true,
+      "operationId": "a336b011-5f49-43f7-93fd-b95af95d92db",
+      "attempts": 2,
+      "serverVersion": 6
+    },
+    {
+      "name": "server-failure-explicit-same-key-retry",
+      "passed": true,
+      "operationId": "11d85c7d-540f-4911-8dbe-0f1822434d78",
+      "serverVersion": 7
+    },
+    {
+      "name": "wrong-response-operation-id-no-ack",
+      "passed": true,
+      "serverVersion": 8
+    },
+    {
+      "name": "ack-transaction-rollback-and-replay",
+      "passed": true,
+      "operationId": "c65ebe27-1bc8-4669-9976-fb36f0a70cb1",
+      "serverVersion": 9
+    },
+    {
+      "name": "stale-head-ack-stops-then-owner-replays",
+      "passed": true,
+      "serverVersion": 11
+    },
+    {
+      "name": "clean-revert-refetch-lost-response-reload",
+      "passed": true,
+      "serverVersion": 13,
+      "contentHash": "d23dadc3438e3280e82865ba6dfa3bde6130b1a7564219a7dfd2e72c3f55b8d0"
+    }
+  ],
+  "network": [
+    {
+      "operationId": "21c837e8-2624-4b77-ba45-b51756e61938",
+      "expectedVersion": 0,
+      "titleHash": "71cb6f752f713a3f5e899e64708bc59b267ea3b599c934418c5e8cd0f77dcf06",
+      "contentHash": "6ee3ede94542c34c9623f112325a606d475ab92c80d4c029efe5b51fd6026fdb"
+    },
+    {
+      "operationId": "35482ac8-f739-4ae3-ac95-c2728fd8f4ea",
+      "expectedVersion": 1,
+      "titleHash": "d0a331c3dc85158481858620403d85a6a9ba9d56c668552286d8b4ce50dca6fb",
+      "contentHash": "5caf109b9624eb68e7f9eb0983a94020d29e30d744d1bcfa62a7b6502c2d7763"
+    },
+    {
+      "operationId": "340dbdd7-d751-41b0-a92d-756ecb10d93c",
+      "expectedVersion": 2,
+      "titleHash": "ae06a9e9feb4173708fa1d3eed26f7dfd9145196a99ce049d93f366fdd043f06",
+      "contentHash": "f28a9de6156b4e7be6a997517f258bf48194969319e41cb9bb49a54a4b5053bd"
+    },
+    {
+      "operationId": "b960b47f-dd9c-4391-90f4-df5db0d1bbf1",
+      "expectedVersion": 3,
+      "titleHash": "d797846ad2468fd1b307b35c5e529c50339cfdc8777f3d8877ad2decd0b930a6",
+      "contentHash": "49cf1f989c75ea50d7312f96778b365fdeae493f4eaaf90ad789ed7e4e3992fc"
+    },
+    {
+      "operationId": "2e6f8053-eddf-486c-9b3e-6ead58c1af79",
+      "expectedVersion": 4,
+      "titleHash": "51e424d91848aa25fe511d2dc626a2a4a3009e1322ccb3cb7450ed5a011dc6a9",
+      "contentHash": "7bbeb52cd880e918c3e00e85ed84025ec575e6d474cbd46e9875eb08c9e5ce6b"
+    },
+    {
+      "operationId": "a336b011-5f49-43f7-93fd-b95af95d92db",
+      "expectedVersion": 5,
+      "titleHash": "0a42d827b0eb65eb84d895ca35ff3488d78d084da86157f2d5fb91730a0db0ec",
+      "contentHash": "a3a700fa41ea088d453d1bb1daa7dc924fdcd8a43e07537b6617f684b5b96359"
+    },
+    {
+      "operationId": "a336b011-5f49-43f7-93fd-b95af95d92db",
+      "expectedVersion": 5,
+      "titleHash": "0a42d827b0eb65eb84d895ca35ff3488d78d084da86157f2d5fb91730a0db0ec",
+      "contentHash": "a3a700fa41ea088d453d1bb1daa7dc924fdcd8a43e07537b6617f684b5b96359"
+    },
+    {
+      "operationId": "11d85c7d-540f-4911-8dbe-0f1822434d78",
+      "expectedVersion": 6,
+      "titleHash": "86312e02f18e057f19d79c9aa6679d56bdc1249b7adaedb640a32a6f84dba9ba",
+      "contentHash": "9898d2e4d7cbc832a9d05f61a69b5b88f900a6c5c67055f0493e96a3d7e93e3f"
+    },
+    {
+      "operationId": "11d85c7d-540f-4911-8dbe-0f1822434d78",
+      "expectedVersion": 6,
+      "titleHash": "86312e02f18e057f19d79c9aa6679d56bdc1249b7adaedb640a32a6f84dba9ba",
+      "contentHash": "9898d2e4d7cbc832a9d05f61a69b5b88f900a6c5c67055f0493e96a3d7e93e3f"
+    },
+    {
+      "operationId": "8fb408bf-a576-47ef-93eb-619bb8d75fd4",
+      "expectedVersion": 7,
+      "titleHash": "d4498d45a173683bd873b9d6974ccc8ea6778dd7bbf04b36d6e73d88326bb93d",
+      "contentHash": "4cfabd81bb706c966a4a71a4157a4a17e6bd1b43567a81a3ee1779846cde571f"
+    },
+    {
+      "operationId": "8fb408bf-a576-47ef-93eb-619bb8d75fd4",
+      "expectedVersion": 7,
+      "titleHash": "d4498d45a173683bd873b9d6974ccc8ea6778dd7bbf04b36d6e73d88326bb93d",
+      "contentHash": "4cfabd81bb706c966a4a71a4157a4a17e6bd1b43567a81a3ee1779846cde571f"
+    },
+    {
+      "operationId": "c65ebe27-1bc8-4669-9976-fb36f0a70cb1",
+      "expectedVersion": 8,
+      "titleHash": "f691939a1a02a53c1df4a21e7ad0d0d768d25ccb513ec94eac1ab620bd129f2c",
+      "contentHash": "b01422825f3dc4eaa8a22322fe9bc88f7df89aadc02d1745275b107937401373"
+    },
+    {
+      "operationId": "c65ebe27-1bc8-4669-9976-fb36f0a70cb1",
+      "expectedVersion": 8,
+      "titleHash": "f691939a1a02a53c1df4a21e7ad0d0d768d25ccb513ec94eac1ab620bd129f2c",
+      "contentHash": "b01422825f3dc4eaa8a22322fe9bc88f7df89aadc02d1745275b107937401373"
+    },
+    {
+      "operationId": "32128983-ff0d-4b4b-a1b2-a5ba6dd3f085",
+      "expectedVersion": 9,
+      "titleHash": "67cdf4345ffeb5fb53b231c7a8abd927774753d308d599789aba80943d2eae11",
+      "contentHash": "7d56a8f9b9e89ef7bf6037ce709378f4dc497b8ee727c7ee6c2014f65b96aab6"
+    },
+    {
+      "operationId": "32128983-ff0d-4b4b-a1b2-a5ba6dd3f085",
+      "expectedVersion": 9,
+      "titleHash": "67cdf4345ffeb5fb53b231c7a8abd927774753d308d599789aba80943d2eae11",
+      "contentHash": "7d56a8f9b9e89ef7bf6037ce709378f4dc497b8ee727c7ee6c2014f65b96aab6"
+    },
+    {
+      "operationId": "46a20e24-6dc2-4814-955c-4b0110c5bf21",
+      "expectedVersion": 10,
+      "titleHash": "1cdd70af45476f09539f9669ce5e911273ed57382a11a9e884262d3569666ba9",
+      "contentHash": "d23dadc3438e3280e82865ba6dfa3bde6130b1a7564219a7dfd2e72c3f55b8d0"
+    },
+    {
+      "operationId": "b2988a5d-62f2-458b-935c-c3ec3414a377",
+      "expectedVersion": 11,
+      "titleHash": "97bd9344ab24dd132d39f2178422afa6bc8acbec9ca0d17a9e8bea54eae64ccf",
+      "contentHash": "443058a76cfea4fcc3856a7307a8e721d1947f499515ff3d6ebc7d33eb058fa1"
+    },
+    {
+      "operationId": "b2988a5d-62f2-458b-935c-c3ec3414a377",
+      "expectedVersion": 11,
+      "titleHash": "97bd9344ab24dd132d39f2178422afa6bc8acbec9ca0d17a9e8bea54eae64ccf",
+      "contentHash": "443058a76cfea4fcc3856a7307a8e721d1947f499515ff3d6ebc7d33eb058fa1"
+    },
+    {
+      "operationId": "5925fca3-ca3a-4c85-b8ba-752f2e04916d",
+      "expectedVersion": 12,
+      "titleHash": "1cdd70af45476f09539f9669ce5e911273ed57382a11a9e884262d3569666ba9",
+      "contentHash": "d23dadc3438e3280e82865ba6dfa3bde6130b1a7564219a7dfd2e72c3f55b8d0"
+    }
+  ],
+  "finalVersion": 13,
+  "finalOutboxCount": 0,
+  "postgres": {
+    "noteVersion": 13,
+    "noteId": "8a617b1b-2130-4457-b99c-5af328d3fdd9",
+    "ledger": [
+      {
+        "operationId": "21c837e8-2624-4b77-ba45-b51756e61938",
+        "version": 1
+      },
+      {
+        "operationId": "35482ac8-f739-4ae3-ac95-c2728fd8f4ea",
+        "version": 2
+      },
+      {
+        "operationId": "340dbdd7-d751-41b0-a92d-756ecb10d93c",
+        "version": 3
+      },
+      {
+        "operationId": "b960b47f-dd9c-4391-90f4-df5db0d1bbf1",
+        "version": 4
+      },
+      {
+        "operationId": "eabd66a0-aacd-471f-91ae-514f9794107d",
+        "version": 5
+      },
+      {
+        "operationId": "a336b011-5f49-43f7-93fd-b95af95d92db",
+        "version": 6
+      },
+      {
+        "operationId": "11d85c7d-540f-4911-8dbe-0f1822434d78",
+        "version": 7
+      },
+      {
+        "operationId": "8fb408bf-a576-47ef-93eb-619bb8d75fd4",
+        "version": 8
+      },
+      {
+        "operationId": "c65ebe27-1bc8-4669-9976-fb36f0a70cb1",
+        "version": 9
+      },
+      {
+        "operationId": "32128983-ff0d-4b4b-a1b2-a5ba6dd3f085",
+        "version": 10
+      },
+      {
+        "operationId": "46a20e24-6dc2-4814-955c-4b0110c5bf21",
+        "version": 11
+      },
+      {
+        "operationId": "b2988a5d-62f2-458b-935c-c3ec3414a377",
+        "version": 12
+      },
+      {
+        "operationId": "5925fca3-ca3a-4c85-b8ba-752f2e04916d",
+        "version": 13
+      }
+    ]
+  },
+  "environment": {
+    "postgres": "14.20 (Homebrew)",
+    "dbName": "seam_note_manual_lab",
+    "dbPort": 25442,
+    "apiPort": 18766,
+    "uiPort": 25175,
+    "fixtureNoteId": "8a617b1b-2130-4457-b99c-5af328d3fdd9"
+  },
+  "sourceHashes": {
+    "frontend/src/features/local-drafts/draftDatabase.ts": "0ffe6d3f6929f3b052c5ab6cd64a8eaafe8cd0ee54c9c11f77bf4bf03fa643d9",
+    "frontend/src/features/local-drafts/draftSession.ts": "3414051e1bb53c9684a41aab0f00cc225de7cf774c583c6f283156c1519a8dfa",
+    "frontend/src/features/manual-sync/manualSync.ts": "cdb216695338b6f8a3b125e0849250c3464d6541b43aefe6f6cc8327c6e62dee"
+  },
+  "uiVerification": {
+    "unitTests": 101,
+    "existingBrowserRegressions": [
+      "outboxStorage",
+      "localDraftStorage",
+      "noteDrafts",
+      "noteRouting",
+      "workspaceCreateDelete",
+      "workspaceReadonly",
+      "sidebarDraftTitles"
+    ],
+    "manualSaveUx": {
+      "development": true,
+      "productionPreview": true,
+      "api": "mock only",
+      "mobileViewport": [
+        390,
+        844
+      ]
+    },
+    "aggregateRunner": "First execution failed only in new UX mock scope; fixed UX passed standalone dev/production. Core 10 + existing 7 passed before that failure."
+  },
+  "uiSourceHashes": {
+    "frontend/src/features/manual-sync/syncContract.ts": "7f3c8dd68b7614f3177e776822594acabc5435a277a6285833154188d35060ca",
+    "frontend/src/features/manual-sync/useManualSync.ts": "6fce472f1b6ce9f1cebaaf5105dbd073cc2c6a44d9b9e2119013e759b1252526",
+    "frontend/src/app/AppHeader.tsx": "d0eea1167564c63e9a49addd98b2fd67ac008b48c2e29c2445386f0321876cb1",
+    "frontend/tests/browser/manualSaveUx.cjs": "0a0aa06595b715fbe4c66c64f60c86eaa7b7fc700696978b95f937be241bb89a"
+  }
+}

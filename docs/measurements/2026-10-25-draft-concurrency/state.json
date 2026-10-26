@@ -1,0 +1,257 @@
+{
+  "manifest": {
+    "date": "2026-10-25T11:59:27.373Z",
+    "phase": "state",
+    "head": "5fff38007bff4c1bcb8b65252dca999598ccea3e",
+    "branch": "feat/offline-local-storage",
+    "uncommitted": true,
+    "sourceHashes": {
+      "frontend/src/features/local-drafts/draftSession.ts": "a6014548b23c2014d5db8d87d91bb315b4c26e545123b5c2342fde74a2ff49bd",
+      "frontend/src/features/local-drafts/draftDatabase.ts": "5efb61b09afa600bc3d25a9423dd23f14ce24dc950d7c29ae3d1c04e1d892cbd",
+      "frontend/src/features/notes/noteDrafts.ts": "a5ab563419360cb6f6cb2d552410eef96d1b3ceba61f98fec4cf91a6933be229",
+      "frontend/src/features/notes/useNoteDrafts.ts": "a1be9cc11f3d813837d92fb8c9185d592a368f16054c8327868f00eea3bcd3f1",
+      "frontend/src/features/folders/FolderTree.tsx": "b7b9e33cdbd75b2a63e773435ebabc0f4d94e6c1482d31544d245567239bcc90"
+    },
+    "environment": {
+      "node": "v20.20.0",
+      "os": "Darwin 25.6.0",
+      "arch": "arm64",
+      "cpu": "Apple M1 Pro",
+      "memoryBytes": 34359738368,
+      "chrome": "155.0.8059.86",
+      "headless": true,
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "concurrency": 1
+    },
+    "percentile": "nearest-rank ceil(p*n)-1; per-scenario final-commit samples are 10, p95/p99 equal observed maximum, not production tail estimates"
+  },
+  "elapsedMs": 22641,
+  "data": {
+    "runs": 20,
+    "rows": [
+      {
+        "repeat": 0,
+        "dirty": false,
+        "id": "4a36c2d8-0b85-4684-8ed7-9f78213bf975",
+        "uiHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 3,
+        "latestServerVersion": 3,
+        "serverDirty": false
+      },
+      {
+        "repeat": 1,
+        "dirty": false,
+        "id": "f64ef960-17f6-40a9-989f-0265473a9f26",
+        "uiHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 3,
+        "latestServerVersion": 3,
+        "serverDirty": false
+      },
+      {
+        "repeat": 2,
+        "dirty": false,
+        "id": "5837b443-2da6-4b3c-8e4b-2bbb3d78d01e",
+        "uiHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 3,
+        "latestServerVersion": 3,
+        "serverDirty": false
+      },
+      {
+        "repeat": 3,
+        "dirty": false,
+        "id": "6152712b-429b-4731-b357-c0c8d0517e42",
+        "uiHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 3,
+        "latestServerVersion": 3,
+        "serverDirty": false
+      },
+      {
+        "repeat": 4,
+        "dirty": false,
+        "id": "beb42bef-60e0-4ed9-9272-24d9c6e42f4e",
+        "uiHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 3,
+        "latestServerVersion": 3,
+        "serverDirty": false
+      },
+      {
+        "repeat": 5,
+        "dirty": false,
+        "id": "53507e07-23ea-4ebb-a9b7-f3cadfa8b832",
+        "uiHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 3,
+        "latestServerVersion": 3,
+        "serverDirty": false
+      },
+      {
+        "repeat": 6,
+        "dirty": false,
+        "id": "0ef40816-5a64-4724-b363-7289c6e6a144",
+        "uiHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 3,
+        "latestServerVersion": 3,
+        "serverDirty": false
+      },
+      {
+        "repeat": 7,
+        "dirty": false,
+        "id": "ecdfc200-1f16-46f4-9e41-3a01d3949902",
+        "uiHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 3,
+        "latestServerVersion": 3,
+        "serverDirty": false
+      },
+      {
+        "repeat": 8,
+        "dirty": false,
+        "id": "8fb21436-39e9-4452-a9b0-ca61968f48b9",
+        "uiHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 3,
+        "latestServerVersion": 3,
+        "serverDirty": false
+      },
+      {
+        "repeat": 9,
+        "dirty": false,
+        "id": "cf73485e-e11d-4d2f-b284-3ad4ac310222",
+        "uiHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 3,
+        "latestServerVersion": 3,
+        "serverDirty": false
+      },
+      {
+        "repeat": 0,
+        "dirty": true,
+        "id": "f7d7353f-2a69-458c-93ac-1affa0b8cf2a",
+        "uiHash": "98b3377db2200d44f2e63f6c964d1f2f5ee596036ee80bf8d2953630596d6977",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 2,
+        "latestServerVersion": 3,
+        "serverDirty": true
+      },
+      {
+        "repeat": 1,
+        "dirty": true,
+        "id": "4b5c81a0-99bf-471c-96a7-dc10df9ca693",
+        "uiHash": "98b3377db2200d44f2e63f6c964d1f2f5ee596036ee80bf8d2953630596d6977",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 2,
+        "latestServerVersion": 3,
+        "serverDirty": true
+      },
+      {
+        "repeat": 2,
+        "dirty": true,
+        "id": "604bb1ae-9edf-4124-91a9-376990522f17",
+        "uiHash": "98b3377db2200d44f2e63f6c964d1f2f5ee596036ee80bf8d2953630596d6977",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 2,
+        "latestServerVersion": 3,
+        "serverDirty": true
+      },
+      {
+        "repeat": 3,
+        "dirty": true,
+        "id": "b1d9563f-2079-4be4-99a3-2274141e806c",
+        "uiHash": "98b3377db2200d44f2e63f6c964d1f2f5ee596036ee80bf8d2953630596d6977",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 2,
+        "latestServerVersion": 3,
+        "serverDirty": true
+      },
+      {
+        "repeat": 4,
+        "dirty": true,
+        "id": "105d37fa-6d61-48c5-b3b0-576a76e798f6",
+        "uiHash": "98b3377db2200d44f2e63f6c964d1f2f5ee596036ee80bf8d2953630596d6977",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 2,
+        "latestServerVersion": 3,
+        "serverDirty": true
+      },
+      {
+        "repeat": 5,
+        "dirty": true,
+        "id": "3aec6260-4605-46d6-b7ca-9f76b0f98ed0",
+        "uiHash": "98b3377db2200d44f2e63f6c964d1f2f5ee596036ee80bf8d2953630596d6977",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 2,
+        "latestServerVersion": 3,
+        "serverDirty": true
+      },
+      {
+        "repeat": 6,
+        "dirty": true,
+        "id": "495af118-405b-4828-b242-3f52aa199ecb",
+        "uiHash": "98b3377db2200d44f2e63f6c964d1f2f5ee596036ee80bf8d2953630596d6977",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 2,
+        "latestServerVersion": 3,
+        "serverDirty": true
+      },
+      {
+        "repeat": 7,
+        "dirty": true,
+        "id": "cf603779-339e-4b43-9899-5a7595096d2b",
+        "uiHash": "98b3377db2200d44f2e63f6c964d1f2f5ee596036ee80bf8d2953630596d6977",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 2,
+        "latestServerVersion": 3,
+        "serverDirty": true
+      },
+      {
+        "repeat": 8,
+        "dirty": true,
+        "id": "669e1721-453b-4cab-accb-b1e83963804c",
+        "uiHash": "98b3377db2200d44f2e63f6c964d1f2f5ee596036ee80bf8d2953630596d6977",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 2,
+        "latestServerVersion": 3,
+        "serverDirty": true
+      },
+      {
+        "repeat": 9,
+        "dirty": true,
+        "id": "8eb3465b-13f1-4568-8c91-becda5bfc31f",
+        "uiHash": "98b3377db2200d44f2e63f6c964d1f2f5ee596036ee80bf8d2953630596d6977",
+        "cacheHash": "48278d5995e5bd9539dad9bba271e1239967a534ed0480afed6a9ee069c6ecf8",
+        "cacheVersion": 3,
+        "baseVersion": 2,
+        "latestServerVersion": 3,
+        "serverDirty": true
+      }
+    ]
+  }
+}

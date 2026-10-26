@@ -2,6 +2,7 @@ import type { RefObject } from 'react'
 import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
 import { IconButton } from '@/components/primitives'
+import type { DraftEntry } from '@/features/local-drafts/draftSession'
 import type { DraftPatch, NoteDraft } from './noteDrafts'
 
 const Panel = styled.section(({ theme }) => ({
@@ -103,8 +104,10 @@ const NewDocumentButton = styled.button(({ theme }) => ({
   [`@media (max-width: ${theme.breakpoints.mobile})`]: { right: theme.spacing.md, bottom: theme.spacing.md },
 }))
 
-export function NoteEditor({ draft, onEdit, selectedNoteId, titleRef, loading, error, onRetry, canRetry, busy, canCreate, canDelete, onCreateNote, onDeleteNote }: {
+export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNoteId, titleRef, loading, error, onRetry, canRetry, busy, canCreate, canDelete, onCreateNote, onDeleteNote }: {
   draft: NoteDraft | null
+  localEntry?: DraftEntry
+  onRetryLocal: () => void
   onEdit: (noteId: string, patch: DraftPatch) => void
   selectedNoteId: string | null
   titleRef: RefObject<HTMLInputElement | null>
@@ -125,6 +128,10 @@ export function NoteEditor({ draft, onEdit, selectedNoteId, titleRef, loading, e
         {loading && <p role="status">원고 로딩 중</p>}
         {error && <div role="alert"><p>원고 조회 실패: {error.message}</p>{canRetry && <button type="button" onClick={onRetry}>다시 시도</button>}</div>}
         {!loading && !error && !visible && <p role="status">{selectedNoteId ? '원고를 선택해주세요.' : '표시할 원고가 없습니다.'}</p>}
+        {localEntry?.error && <div role="alert">
+          <p>{localEntry.error}</p>
+          <button type="button" onClick={onRetryLocal}>{localEntry.phase === 'conflict' ? '로컬 저장 상태 다시 확인' : '로컬 저장 다시 시도'}</button>
+        </div>}
         <Title ref={titleRef} aria-label="문서 제목" placeholder={visible ? '제목 없음' : ''} value={visible?.title ?? ''} maxLength={200}
           readOnly={!visible} onChange={event => { if (visible) onEdit(visible.noteId, { title: event.target.value }) }} />
         <Toolbar role="group" aria-label="Formatting preview (not connected)">
@@ -147,7 +154,7 @@ export function NoteEditor({ draft, onEdit, selectedNoteId, titleRef, loading, e
             onChange={event => { if (visible) onEdit(visible.noteId, { content: event.target.value }) }} />
         </Writing>
         <Footer>
-          <span>편집 내용은 현재 브라우저 메모리에만 있으며 새로고침·탭 종료 시 사라집니다. 이탈 경고는 브라우저에 따라 표시되지 않을 수 있습니다.</span>
+          <span>원고는 이 브라우저에 로컬 저장되며 자동으로 서버에 전송되지 않습니다. 저장 완료 전 종료하면 최신 입력이 유실될 수 있고, 브라우저 저장소 삭제·회수 시 로컬 원고도 사라질 수 있습니다.</span>
         </Footer>
       </Document>
       <NewDocumentButton type="button" disabled={busy || !canCreate} onClick={onCreateNote} aria-label="새 문서" title="빈 원고 생성"><Icon name="pencil" size={24} /></NewDocumentButton>

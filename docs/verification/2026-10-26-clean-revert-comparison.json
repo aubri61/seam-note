@@ -1,0 +1,20 @@
+{
+  "scope": "Intermediate implementation in this task, reproduced on disposable synthetic notes; not a historical production incident",
+  "scenario": "clean revert while PUT response is uncertain, actual GET then reload and replay",
+  "before": {
+    "expectedHash": "d23dadc3438e3280e82865ba6dfa3bde6130b1a7564219a7dfd2e72c3f55b8d0",
+    "actualHash": "443058a76cfea4fcc3856a7307a8e721d1947f499515ff3d6ebc7d33eb058fa1",
+    "localBaseVersion": 11,
+    "serverVersion": 12
+  },
+  "after": {
+    "expectedHash": "d23dadc3438e3280e82865ba6dfa3bde6130b1a7564219a7dfd2e72c3f55b8d0",
+    "actualHash": "d23dadc3438e3280e82865ba6dfa3bde6130b1a7564219a7dfd2e72c3f55b8d0",
+    "localBaseVersion": 11,
+    "serverVersion": 12
+  },
+  "beforePassed": false,
+  "afterPassed": true,
+  "beforeEvidence": "/private/tmp/seam-note-manual-sync-bumcb2gn/clean-revert-probe.json",
+  "afterEvidence": "/private/tmp/seam-note-manual-sync-l4sfzpk9/clean-revert-probe.json"
+}

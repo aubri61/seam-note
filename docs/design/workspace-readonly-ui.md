@@ -1,6 +1,6 @@
 # Axios·전체 메타데이터 조회·읽기 전용 집필 화면
 
-> 원고 편집 후속 단계: 현재 제목·본문은 React 메모리 Draft로 편집한다. 아래 읽기 전용 설명은 이 문서 작성 단계의 동작이다. 현재 상태·재조회·이탈 규칙은 [React 원고 Draft](note-drafts.md)를 따른다.
+> 원고 편집 후속 단계: 현재 제목·본문은 React Draft로 편집하고 IndexedDB에 로컬 저장한다. [로컬 저장 계약](local-draft-storage.md)을 참고한다. 아래 읽기 전용 설명은 이 문서 작성 단계의 동작이다. 현재 상태·재조회·이탈 규칙은 [React 원고 Draft](note-drafts.md)를 따른다.
 
 > 이 문서는 조회 UI 단계 기록이다. 후속 [생성·삭제 연결](create-delete-ui.md)에서 Folder/빈 Note 생성과 Note 삭제를 추가했다. 본문은 계속 읽기 전용이다.
 

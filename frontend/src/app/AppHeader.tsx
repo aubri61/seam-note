@@ -3,6 +3,7 @@ import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
 import { IconButton } from '@/components/primitives'
 import type { DraftStatus } from '@/features/notes/noteDrafts'
+import type { useManualSync } from '@/features/manual-sync/useManualSync'
 import { SyncStatus } from '@/features/sync/SyncStatus'
 
 const Header = styled.header(({ theme }) => ({
@@ -29,7 +30,15 @@ const Header = styled.header(({ theme }) => ({
   },
 }))
 
+const SaveButton = styled.button(({ theme }) => ({
+  border: `1px solid ${theme.colors.border}`, borderRadius: theme.radii.pill,
+  padding: `${theme.spacing.sm} ${theme.spacing.md}`, background: theme.colors.surface,
+  color: theme.colors.text, font: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap',
+  '&:disabled': { opacity: .5, cursor: 'not-allowed' },
+}))
+
 interface AppHeaderProps {
+  manualSync: ReturnType<typeof useManualSync>
   sidebarOpen: boolean
   isMobile: boolean
   sidebarId: string
@@ -39,7 +48,7 @@ interface AppHeaderProps {
   status: DraftStatus
 }
 
-export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, toggleRef, path, status }: AppHeaderProps) {
+export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, toggleRef, path, status, manualSync }: AppHeaderProps) {
   return (
     <Header>
       <div>
@@ -59,10 +68,16 @@ export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, t
       </div>
       <div>
         <SyncStatus status={status} />
+        <SaveButton type="button" disabled={manualSync.disabled} onClick={manualSync.onSync}
+          title={manualSync.summary} aria-describedby="server-save-feedback">서버에 저장</SaveButton>
         <IconButton type="button" disabled aria-label="More note options (coming later)" title="Note options are not connected">
           <Icon name="more" />
         </IconButton>
       </div>
+      <section id="server-save-feedback" aria-live="polite" style={{ flexBasis: '100%', textAlign: 'right', overflowWrap: 'anywhere' }}>
+        <span>{manualSync.summary}{manualSync.remaining !== undefined ? ` · 남은 Outbox 작업 ${manualSync.remaining}개` : ''}</span>
+        {manualSync.message && <p role={manualSync.error ? 'alert' : 'status'} style={{ justifyContent: 'flex-end', margin: '4px 0 0' }}>{manualSync.message}</p>}
+      </section>
     </Header>
   )
 }

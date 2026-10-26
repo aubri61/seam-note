@@ -14,9 +14,9 @@ const Badge = styled.span(({ theme }) => ({
   whiteSpace: 'nowrap',
 }))
 
-/** Editing status only: no server or local persistence is implemented. */
+/** Local persistence/uncertainty status. Manual server ack has a separate result panel. */
 export function SyncStatus({ status }: { status: DraftStatus }) {
-  return <Badge role="status" title="편집 내용은 현재 브라우저 메모리에만 있습니다" aria-live="polite">
+  return <Badge role="status" title="로컬 저장 상태이며 서버 동기화 완료를 뜻하지 않습니다" aria-live="polite">
     <Icon name="note" size={18} />{status}
   </Badge>
 }

@@ -1,28 +1,37 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import type { Note, UUID } from '@/lib/api/types'
-import { editDraft, hasDirtyDrafts, receiveServerNote } from './noteDrafts'
-import type { DraftPatch, NoteDrafts } from './noteDrafts'
+import type { DraftPatch } from './noteDrafts'
 import { protectUnsavedDrafts } from './draftNavigation'
+import { localDraftRepository } from '@/features/local-drafts/localDraftRepository'
+import { DraftSession, hasUnprotectedChanges } from '@/features/local-drafts/draftSession'
 
-/** Owned by AppLayout, so changing the selected editor never unmounts the drafts. */
+/** The session is owned by AppLayout; URL changes never replace it. */
 export function useNoteDrafts(selectedId: UUID | null, serverNote: Note | null) {
-  const [state, setState] = useState<{ drafts: NoteDrafts; lastServer: Note | null }>({ drafts: {}, lastServer: null })
-  // Adjust this component's state only when a new, ID-checked Query snapshot arrives.
-  // React rerenders before committing children, avoiding an empty/stale editor frame.
-  if (serverNote && serverNote.id === selectedId && serverNote !== state.lastServer) {
-    setState(current => ({ drafts: receiveServerNote(current.drafts, serverNote), lastServer: serverNote }))
-  }
-  const anyDirty = hasDirtyDrafts(state.drafts)
+  const [session] = useState(() => new DraftSession(localDraftRepository, crypto.randomUUID()))
+  const entries = useSyncExternalStore(session.subscribe, session.getSnapshot)
+  // Presentation only: never write edited titles into the server Query cache.
+  const draftTitles = useMemo(() => Object.fromEntries(
+    Object.entries(entries).flatMap(([id, value]) => value.draft ? [[id, value.draft.title]] : []),
+  ), [entries])
+  useEffect(() => session.connect(), [session])
   useEffect(() => {
-    if (anyDirty) return protectUnsavedDrafts(window)
-  }, [anyDirty])
-
-  function edit(noteId: UUID, patch: DraftPatch) {
-    // Functional updates always apply to the latest draft, including batched input.
-    setState(current => {
-      const drafts = editDraft(current.drafts, noteId, patch)
-      return drafts === current.drafts ? current : { ...current, drafts }
-    })
+    if (!selectedId) return
+    session.select(selectedId)
+    return () => { void session.flush(selectedId) }
+  }, [selectedId, session])
+  useEffect(() => {
+    if (serverNote && serverNote.id === selectedId) session.receive(serverNote)
+  }, [selectedId, serverNote, session])
+  const unprotected = hasUnprotectedChanges(entries)
+  useEffect(() => {
+    if (unprotected) return protectUnsavedDrafts(window)
+  }, [unprotected])
+  const entry = selectedId ? entries[selectedId] : undefined
+  return {
+    draft: entry?.draft ?? null, entry, draftTitles, session,
+    backgroundIssues: Object.entries(entries).filter(([id, value]) => id !== selectedId && !!value.error && !!value.draft).map(([id]) => id),
+    recovering: !!selectedId && (!entry || entry.phase === 'recovering'),
+    edit: (noteId: UUID, patch: DraftPatch) => session.edit(noteId, patch),
+    retryLocal: () => { if (selectedId) void session.retry(selectedId) },
   }
-  return { draft: selectedId ? state.drafts[selectedId] ?? null : null, edit }
 }

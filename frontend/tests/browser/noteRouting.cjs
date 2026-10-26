@@ -93,11 +93,11 @@ async function main() {
     await pause(200)
     assert.equal(url(home), path('B'))
     assert.equal(await body(home).inputValue(), 'B 미저장 원고')
-    assert.equal(await home.evaluate(() => {
+    await until(async () => !(await home.evaluate(() => {
       const event = new Event('beforeunload', { cancelable: true })
       window.dispatchEvent(event)
       return event.defaultPrevented
-    }), true)
+    })), 'locally committed inactive drafts no longer need an unload warning')
     await home.close()
 
     // Direct B entry starts only B detail even while metadata is still loading.

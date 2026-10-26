@@ -112,9 +112,10 @@ const Footnote = styled.p(({ theme }) => ({
   color: theme.colors.mutedText,
 }))
 
-export function Sidebar({ onClose, folders, onSelectNote, onCreate, creationFeedback }: {
+export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate, creationFeedback }: {
   onClose: () => void
   folders: ReturnType<typeof useFolders>
+  draftTitles: Readonly<Partial<Record<string, string>>>
   onSelectNote: (id: string) => void
   onCreate: (kind: 'folder' | 'document') => void
   creationFeedback?: ReactNode
@@ -161,14 +162,14 @@ export function Sidebar({ onClose, folders, onSelectNote, onCreate, creationFeed
           <button type="button" onClick={() => void folders.workspace.refetch()}>다시 시도</button>
         </div>}
         {folders.workspace.data && <FolderTree
-          tree={folders.tree} selectedNoteId={folders.selectedNoteId}
+          tree={folders.tree} draftTitles={draftTitles} selectedNoteId={folders.selectedNoteId}
           editingFolderId={folders.editingFolderId} onFolderName={folders.renameCreatedFolder}
           onCancelFolderName={folders.cancelFolderName} namingBusy={folders.busy} namingError={folders.renameFolderMutation.error?.message}
           selectedFolderId={folders.selectedFolderId} onFolderSelect={folders.selectFolder} search={folders.search}
           openFolders={folders.openFolders} onFolderOpen={folders.setFolderOpen} onSelect={onSelectNote}
         />}
       </nav>
-      <Footnote>A little room for everything on your mind.<br />편집 내용은 현재 브라우저 메모리에만 있습니다.</Footnote>
+      <Footnote>A little room for everything on your mind.<br />로컬 저장과 서버 동기화는 별개입니다.</Footnote>
     </Panel>
   )
 }
