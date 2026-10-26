@@ -1,12 +1,15 @@
 import { BrowserRouter } from 'react-router-dom'
 import { StrictMode } from 'react'
-import { QueryClientProvider } from '@tanstack/react-query'
+import { onlineManager, QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/lib/query/queryClient'
 import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from '@emotion/react'
 import { theme } from '@/styles/theme'
 import { GlobalStyles } from '@/styles/GlobalStyles'
 import App from '@/App.tsx'
+
+// Cold offline launches may happen before any native offline event reaches TanStack Query.
+onlineManager.setOnline(navigator.onLine !== false)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

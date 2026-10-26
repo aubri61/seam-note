@@ -1,5 +1,8 @@
 # Dexie 로컬 원고 영속 저장
 
+후속 PWA 단계에서 v1/v2를 그대로 보존하고 Workspace metadata 전용 v3를 추가했다. 최신 [오프라인 복원 계약](pwa-offline.md)을 참고한다. 아래는 최초 로컬 저장 단계의 기록이다.
+
+
 > 후속 단계: 현재는 v1을 보존한 Dexie v2 Outbox와 서버 멱등성 기반이 추가됐다. 아래 v1-only/Outbox 미래 경계 설명은 도입 단계의 이력이며, 현재 schema·원자성·백필 계약은 [Outbox와 멱등성](outbox-idempotency.md)을 따른다. 자동 서버 전송은 없다.
 
 ## 범위와 도입

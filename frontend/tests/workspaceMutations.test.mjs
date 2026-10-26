@@ -8,6 +8,9 @@ const { createFolder } = await load('features/folders/folderApi')
 const { createNote, deleteNote } = await load('features/notes/noteApi')
 const { createFolderMutationOptions, createNoteMutationOptions, deleteNoteMutationOptions } = await load('features/workspace/workspaceMutations')
 const { noteQueries } = await load('features/notes/noteQueries')
+// Query contract tests isolate persistence; real IndexedDB is covered by PWA/browser tests.
+const { workspaceStorage } = await load('features/offline/workspaceCache')
+workspaceStorage.save = async () => {}
 const { workspaceTreeQuery } = await load('features/workspace/workspaceQueries')
 const { workspaceKeys, folderKeys, noteKeys } = await load('lib/query/queryKeys')
 const { buildWorkspaceTree } = await load('features/workspace/workspaceTree')

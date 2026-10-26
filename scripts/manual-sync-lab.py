@@ -83,10 +83,10 @@ try:
         assert result['postgres']['noteVersion']==result['finalVersion']
         result['environment']={'postgres':subprocess.check_output(['psql','-h','127.0.0.1','-p',str(a.db_port),'-U','postgres','-d','seam_note_manual_lab','-Atc','show server_version'],text=True).strip(),'dbName':'seam_note_manual_lab','dbPort':a.db_port,'apiPort':a.api_port,'uiPort':a.ui_port,'fixtureNoteId':note['id']}
         result['sourceHashes']={str(f.relative_to(ROOT)):hashlib.sha256(f.read_bytes()).hexdigest() for f in [ROOT/'frontend/src/features/local-drafts/draftDatabase.ts',ROOT/'frontend/src/features/local-drafts/draftSession.ts',ROOT/'frontend/src/features/manual-sync/manualSync.ts']}
-        output=ROOT/'docs/verification/2026-10-26-manual-save-results.json';output.parent.mkdir(parents=True,exist_ok=True)
+        output=Path(base.get('SEAM_NOTE_VERIFICATION_OUTPUT',str(ROOT/'docs/verification/2026-10-26-manual-save-results.json')));output.parent.mkdir(parents=True,exist_ok=True)
         output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
         print('Verified real PUT + PostgreSQL + ack. Result:',output,flush=True)
-        # Optional unchanged UI regressions against mock APIs, with the lab gate not matching their fixture IDs.
+        # Existing UI regressions use mock APIs on the dedicated origin.
         for name in ['outboxStorage','localDraftStorage','noteDrafts','noteRouting','workspaceCreateDelete','workspaceReadonly','sidebarDraftTitles','manualSaveUx']:
             env={**test_env,'SEAM_NOTE_UI_URL':fixture['origin']}
             with open(work/(name+'.log'),'w') as log:

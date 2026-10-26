@@ -40,7 +40,7 @@ async function main() {
       const migrated = new DraftDatabase(legacyName), repo = new DexieDraftRepository(migrated)
       check(same(await repo.read(dirty.noteId),dirty),'v1 dirty record unchanged')
       check(same(await repo.read(clean.noteId),clean),'v1 clean record unchanged')
-      check(migrated.verno===2,'upgraded to v2')
+      check(migrated.verno===3,'upgraded through unchanged v2 to additive v3')
       let operations = await repo.listOperations(dirty.noteId)
       check(operations.length===1&&operations[0].expectedVersion===2&&operations[0].localRevision===7,'dirty backfill')
       check((await repo.listOperations(clean.noteId)).length===0,'clean is not queued')

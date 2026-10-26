@@ -1,4 +1,7 @@
 import Dexie from 'dexie'
+import { validateWorkspace } from '@/features/offline/workspaceCache'
+import type { WorkspaceRecord } from '@/features/offline/workspaceCache'
+import type { WorkspaceTreeResponse } from '@/lib/api/types'
 import type { Table } from 'dexie'
 import { isDraftDirty } from '@/features/notes/noteDrafts'
 import { createOperation, planOperation, validateOperation } from '@/features/outbox/outboxModel'
@@ -20,6 +23,7 @@ export function validateLocalDraft(value: LocalNoteDraft): LocalNoteDraft {
 }
 
 export class DraftDatabase extends Dexie {
+  workspace!: Table<WorkspaceRecord, string>
   drafts!: Table<LocalNoteDraft, string>
   outbox!: Table<NoteUpdateOperation, string>
   constructor(name = DRAFT_DB_NAME) {
@@ -34,6 +38,7 @@ export class DraftDatabase extends Dexie {
         if (isDraftDirty(draft)) await tx.table('outbox').add(createOperation(draft))
       }
     })
+    this.version(3).stores({ drafts: '&noteId', outbox: '&operationId, noteId, status', workspace: '&key' })
   }
 }
 export class DexieDraftRepository implements DraftRepository {
@@ -53,12 +58,43 @@ export class DexieDraftRepository implements DraftRepository {
         const draftSchema = drafts?.schema.primKey.keyPath === 'noteId' && drafts.schema.indexes.length === 0
         const outboxSchema = outbox?.schema.primKey.keyPath === 'operationId'
           && outbox.schema.indexes.map(index => index.name).sort().join(',') === 'noteId,status'
+        const workspace = existing.tables.find(table => table.name === 'workspace')
+        const workspaceSchema = workspace?.schema.primKey.keyPath === 'key' && workspace.schema.indexes.length === 0
         if (!draftSchema || !(existing.verno === 1 && existing.tables.length === 1
-          || existing.verno === 2 && existing.tables.length === 2 && outboxSchema)) throw new InvalidLocalDraft()
+          || existing.verno === 2 && existing.tables.length === 2 && outboxSchema
+          || existing.verno === 3 && existing.tables.length === 3 && outboxSchema && workspaceSchema)) throw new InvalidLocalDraft()
       } finally { existing.close() }
     })().catch(error => { this.checked = undefined; throw error })
     const pending = this.checked
     try { await pending } finally { if (this.checked === pending) this.checked = undefined }
+  }
+  async readWorkspace() {
+    await this.ensureSchema()
+    const record = await this.db.workspace.get('current')
+    if (record) {
+      validateWorkspace(record.data)
+      if (record.key !== 'current' || !Number.isSafeInteger(record.cachedAt) || record.cachedAt < 0
+        || !Number.isSafeInteger(record.requestedAt) || record.requestedAt < 0) throw new InvalidLocalDraft()
+    }
+    return record
+  }
+  async saveWorkspace(data: WorkspaceTreeResponse, requestedAt: number) {
+    await this.ensureSchema()
+    const metadata = validateWorkspace(data)
+    return this.db.transaction('rw', this.db.workspace, async () => {
+      const previous = await this.db.workspace.get('current')
+      if (previous && previous.requestedAt > requestedAt) return
+      await this.db.workspace.put({ key: 'current', data: metadata, requestedAt, cachedAt: Date.now() })
+    })
+  }
+  async readTitles() {
+    await this.ensureSchema()
+    const titles: Record<string, string> = {}
+    await this.db.drafts.each(record => {
+      validateLocalDraft(record)
+      titles[record.noteId] = record.title
+    })
+    return titles
   }
   async read(noteId: string) {
     await this.ensureSchema()

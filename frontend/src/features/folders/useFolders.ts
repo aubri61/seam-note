@@ -28,7 +28,7 @@ export function useFolders() {
   const selectedNoteId = route.noteId
   const selectedFolderId = selection.navigationKey === location.key && selection.folderId && tree.folders.has(selection.folderId) ? selection.folderId : null
   const creationParentId = creationParent(tree, selectedFolderId ? { kind: 'folder', id: selectedFolderId } : null, selectedNoteId)
-  const missingFromWorkspace = !!workspace.data && !!selectedNoteId && !tree.notes.has(selectedNoteId)
+  const missingFromWorkspace = !!workspace.data && !workspace.data.localSnapshot?.cachedAt && !!selectedNoteId && !tree.notes.has(selectedNoteId)
   const noteQuery = useNoteQuery(route.error || missingFromWorkspace ? null : selectedNoteId)
   const routeError = route.error ?? (missingFromWorkspace ? missingNoteError() : null)
   const detailError = noteQuery.error instanceof ApiError && noteQuery.error.status === 404 ? missingNoteError() : noteQuery.error
