@@ -1,0 +1,245 @@
+{
+  "noteId": "01496a17-2de2-402e-883f-8e61066516d0",
+  "chrome": "155.0.8059.86",
+  "steps": [
+    {
+      "step": 1,
+      "event": "edit-title",
+      "titleHash": "71cb6f752f713a3f5e899e64708bc59b267ea3b599c934418c5e8cd0f77dcf06"
+    },
+    {
+      "step": 2,
+      "event": "React-controlled-input-and-sidebar",
+      "titleHash": "71cb6f752f713a3f5e899e64708bc59b267ea3b599c934418c5e8cd0f77dcf06"
+    },
+    {
+      "step": 3,
+      "event": "IndexedDB-drafts-commit",
+      "localRevision": 3,
+      "baseVersion": 0,
+      "contentHash": "6ee3ede94542c34c9623f112325a606d475ab92c80d4c029efe5b51fd6026fdb"
+    },
+    {
+      "step": 4,
+      "event": "Outbox-pending",
+      "operationId": "7b171dbb-d6ad-4676-b0dc-6ad8b968caac",
+      "expectedVersion": 0,
+      "localRevision": 3
+    },
+    {
+      "step": 5,
+      "event": "explicit-button-click"
+    },
+    {
+      "step": 6,
+      "event": "Chrome-network-real-PUT",
+      "operationId": "7b171dbb-d6ad-4676-b0dc-6ad8b968caac",
+      "status": 200,
+      "version": 1
+    },
+    {
+      "step": 7,
+      "event": "PostgreSQL-idempotency-ledger",
+      "operationId": "7b171dbb-d6ad-4676-b0dc-6ad8b968caac",
+      "records": 1
+    },
+    {
+      "step": 8,
+      "event": "PostgreSQL-note-update",
+      "version": 1,
+      "contentMd5": "587e226b9d7231b583b9447dff2b8237"
+    },
+    {
+      "step": 9,
+      "event": "IndexedDB-atomic-ack",
+      "baseVersion": 1,
+      "outboxCount": 0
+    },
+    {
+      "step": 10,
+      "event": "new-Chrome-profile-real-server-GET",
+      "baseVersion": 1,
+      "contentHash": "6ee3ede94542c34c9623f112325a606d475ab92c80d4c029efe5b51fd6026fdb"
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "real-vertical-slice",
+      "passed": true,
+      "version": 1
+    },
+    {
+      "name": "editing-during-network-and-ack",
+      "passed": true,
+      "baseVersion": 2,
+      "pendingOperationId": "bf4c9636-0967-45e1-a2c9-7e1a2c50fa6b",
+      "contentHash": "f28a9de6156b4e7be6a997517f258bf48194969319e41cb9bb49a54a4b5053bd"
+    },
+    {
+      "name": "duplicate-click-and-two-tab-lock",
+      "passed": true,
+      "putCount": 1,
+      "version": 4
+    },
+    {
+      "name": "version-conflict-keeps-local",
+      "passed": true,
+      "serverVersion": 5,
+      "localBaseVersion": 4,
+      "operationId": "559e7dbe-f410-44c5-8ddf-2fef59d8d2fb"
+    },
+    {
+      "name": "lost-response-reload-same-key-replay",
+      "passed": true,
+      "operationId": "7395aae7-8481-4856-9fd0-934a265959cc",
+      "attempts": 2,
+      "serverVersion": 6
+    },
+    {
+      "name": "server-failure-explicit-same-key-retry",
+      "passed": true,
+      "operationId": "c27870fb-4f17-4e98-9a48-a0767d89d998",
+      "serverVersion": 7
+    },
+    {
+      "name": "wrong-response-operation-id-no-ack",
+      "passed": true,
+      "serverVersion": 8
+    },
+    {
+      "name": "ack-transaction-rollback-and-replay",
+      "passed": true,
+      "operationId": "78d28409-2ea9-4590-9f9c-017a5109554a",
+      "serverVersion": 9
+    },
+    {
+      "name": "stale-head-ack-stops-then-owner-replays",
+      "passed": true,
+      "serverVersion": 11
+    },
+    {
+      "name": "clean-revert-refetch-lost-response-reload",
+      "passed": true,
+      "serverVersion": 13,
+      "contentHash": "d23dadc3438e3280e82865ba6dfa3bde6130b1a7564219a7dfd2e72c3f55b8d0"
+    }
+  ],
+  "network": [
+    {
+      "operationId": "7b171dbb-d6ad-4676-b0dc-6ad8b968caac",
+      "expectedVersion": 0,
+      "titleHash": "71cb6f752f713a3f5e899e64708bc59b267ea3b599c934418c5e8cd0f77dcf06",
+      "contentHash": "6ee3ede94542c34c9623f112325a606d475ab92c80d4c029efe5b51fd6026fdb"
+    },
+    {
+      "operationId": "1c39bfbf-ac50-4872-bbd5-38a46408621b",
+      "expectedVersion": 1,
+      "titleHash": "d0a331c3dc85158481858620403d85a6a9ba9d56c668552286d8b4ce50dca6fb",
+      "contentHash": "5caf109b9624eb68e7f9eb0983a94020d29e30d744d1bcfa62a7b6502c2d7763"
+    },
+    {
+      "operationId": "bf4c9636-0967-45e1-a2c9-7e1a2c50fa6b",
+      "expectedVersion": 2,
+      "titleHash": "ae06a9e9feb4173708fa1d3eed26f7dfd9145196a99ce049d93f366fdd043f06",
+      "contentHash": "f28a9de6156b4e7be6a997517f258bf48194969319e41cb9bb49a54a4b5053bd"
+    },
+    {
+      "operationId": "15213c1d-e6ae-4f81-8499-61582c975016",
+      "expectedVersion": 3,
+      "titleHash": "d797846ad2468fd1b307b35c5e529c50339cfdc8777f3d8877ad2decd0b930a6",
+      "contentHash": "49cf1f989c75ea50d7312f96778b365fdeae493f4eaaf90ad789ed7e4e3992fc"
+    },
+    {
+      "operationId": "559e7dbe-f410-44c5-8ddf-2fef59d8d2fb",
+      "expectedVersion": 4,
+      "titleHash": "51e424d91848aa25fe511d2dc626a2a4a3009e1322ccb3cb7450ed5a011dc6a9",
+      "contentHash": "7bbeb52cd880e918c3e00e85ed84025ec575e6d474cbd46e9875eb08c9e5ce6b"
+    },
+    {
+      "operationId": "7395aae7-8481-4856-9fd0-934a265959cc",
+      "expectedVersion": 5,
+      "titleHash": "0a42d827b0eb65eb84d895ca35ff3488d78d084da86157f2d5fb91730a0db0ec",
+      "contentHash": "a3a700fa41ea088d453d1bb1daa7dc924fdcd8a43e07537b6617f684b5b96359"
+    },
+    {
+      "operationId": "7395aae7-8481-4856-9fd0-934a265959cc",
+      "expectedVersion": 5,
+      "titleHash": "0a42d827b0eb65eb84d895ca35ff3488d78d084da86157f2d5fb91730a0db0ec",
+      "contentHash": "a3a700fa41ea088d453d1bb1daa7dc924fdcd8a43e07537b6617f684b5b96359"
+    },
+    {
+      "operationId": "c27870fb-4f17-4e98-9a48-a0767d89d998",
+      "expectedVersion": 6,
+      "titleHash": "86312e02f18e057f19d79c9aa6679d56bdc1249b7adaedb640a32a6f84dba9ba",
+      "contentHash": "9898d2e4d7cbc832a9d05f61a69b5b88f900a6c5c67055f0493e96a3d7e93e3f"
+    },
+    {
+      "operationId": "c27870fb-4f17-4e98-9a48-a0767d89d998",
+      "expectedVersion": 6,
+      "titleHash": "86312e02f18e057f19d79c9aa6679d56bdc1249b7adaedb640a32a6f84dba9ba",
+      "contentHash": "9898d2e4d7cbc832a9d05f61a69b5b88f900a6c5c67055f0493e96a3d7e93e3f"
+    },
+    {
+      "operationId": "4b02640d-f940-41c0-8eb0-7dfcd450f8bc",
+      "expectedVersion": 7,
+      "titleHash": "d4498d45a173683bd873b9d6974ccc8ea6778dd7bbf04b36d6e73d88326bb93d",
+      "contentHash": "4cfabd81bb706c966a4a71a4157a4a17e6bd1b43567a81a3ee1779846cde571f"
+    },
+    {
+      "operationId": "4b02640d-f940-41c0-8eb0-7dfcd450f8bc",
+      "expectedVersion": 7,
+      "titleHash": "d4498d45a173683bd873b9d6974ccc8ea6778dd7bbf04b36d6e73d88326bb93d",
+      "contentHash": "4cfabd81bb706c966a4a71a4157a4a17e6bd1b43567a81a3ee1779846cde571f"
+    },
+    {
+      "operationId": "78d28409-2ea9-4590-9f9c-017a5109554a",
+      "expectedVersion": 8,
+      "titleHash": "f691939a1a02a53c1df4a21e7ad0d0d768d25ccb513ec94eac1ab620bd129f2c",
+      "contentHash": "b01422825f3dc4eaa8a22322fe9bc88f7df89aadc02d1745275b107937401373"
+    },
+    {
+      "operationId": "78d28409-2ea9-4590-9f9c-017a5109554a",
+      "expectedVersion": 8,
+      "titleHash": "f691939a1a02a53c1df4a21e7ad0d0d768d25ccb513ec94eac1ab620bd129f2c",
+      "contentHash": "b01422825f3dc4eaa8a22322fe9bc88f7df89aadc02d1745275b107937401373"
+    },
+    {
+      "operationId": "4f51b918-f997-4259-8ac5-76aa474e78bf",
+      "expectedVersion": 9,
+      "titleHash": "67cdf4345ffeb5fb53b231c7a8abd927774753d308d599789aba80943d2eae11",
+      "contentHash": "7d56a8f9b9e89ef7bf6037ce709378f4dc497b8ee727c7ee6c2014f65b96aab6"
+    },
+    {
+      "operationId": "4f51b918-f997-4259-8ac5-76aa474e78bf",
+      "expectedVersion": 9,
+      "titleHash": "67cdf4345ffeb5fb53b231c7a8abd927774753d308d599789aba80943d2eae11",
+      "contentHash": "7d56a8f9b9e89ef7bf6037ce709378f4dc497b8ee727c7ee6c2014f65b96aab6"
+    },
+    {
+      "operationId": "b195e2e5-eb45-4eeb-ba3a-63f8749c016c",
+      "expectedVersion": 10,
+      "titleHash": "1cdd70af45476f09539f9669ce5e911273ed57382a11a9e884262d3569666ba9",
+      "contentHash": "d23dadc3438e3280e82865ba6dfa3bde6130b1a7564219a7dfd2e72c3f55b8d0"
+    },
+    {
+      "operationId": "497c98a5-00ea-4f74-a2db-da7e39911e55",
+      "expectedVersion": 11,
+      "titleHash": "97bd9344ab24dd132d39f2178422afa6bc8acbec9ca0d17a9e8bea54eae64ccf",
+      "contentHash": "443058a76cfea4fcc3856a7307a8e721d1947f499515ff3d6ebc7d33eb058fa1"
+    },
+    {
+      "operationId": "497c98a5-00ea-4f74-a2db-da7e39911e55",
+      "expectedVersion": 11,
+      "titleHash": "97bd9344ab24dd132d39f2178422afa6bc8acbec9ca0d17a9e8bea54eae64ccf",
+      "contentHash": "443058a76cfea4fcc3856a7307a8e721d1947f499515ff3d6ebc7d33eb058fa1"
+    },
+    {
+      "operationId": "fe38e835-ec16-4ebf-ab64-80216e9f7db3",
+      "expectedVersion": 12,
+      "titleHash": "1cdd70af45476f09539f9669ce5e911273ed57382a11a9e884262d3569666ba9",
+      "contentHash": "d23dadc3438e3280e82865ba6dfa3bde6130b1a7564219a7dfd2e72c3f55b8d0"
+    }
+  ],
+  "finalVersion": 13,
+  "finalOutboxCount": 0
+}

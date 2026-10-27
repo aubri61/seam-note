@@ -1,5 +1,8 @@
 # Outbox v2와 Note 수정 멱등성
 
+후속 오프라인 생성 단계에서 additive v4와 FOLDER_CREATE/NOTE_CREATE·생성 Ledger·부모 우선 명시적 반영을 추가했다. 최신 생성/수동 저장 흐름은 [오프라인 생성 계약](offline-creation.md)을 따른다. 아래는 해당 선행 단계의 설계·실증 기록이다.
+
+
 ## 일반 원고 수동 저장 UX (2026-10-26)
 
 이후 실험UUID/DEV gate를 제거하고 개발·프로덕션 공통의 상단 수동 저장으로 확장했다. [최신 제품 계약](manual-server-save.md)을 따른다. Outbox/서버 멱등성 스키마와 전송 안전성은 유지한다.

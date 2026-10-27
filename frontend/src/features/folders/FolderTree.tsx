@@ -3,6 +3,8 @@ import type { KeyboardEvent } from 'react'
 import styled from '@emotion/styled'
 import { Link } from 'react-router-dom'
 import { notePath } from '@/app/routing/noteRoutes'
+import { FolderMenu } from './FolderMenu'
+import type { FolderAction } from './FolderMenu'
 import { Icon } from '@/components/Icon'
 import { nodeLabel, visibleWorkspaceRows } from '@/features/workspace/workspaceTree'
 import type { WorkspaceTreeModel } from '@/features/workspace/workspaceTree'
@@ -32,6 +34,9 @@ const Chevron = styled.span(({ theme }) => ({
 
 
 interface FolderTreeProps {
+  localIds?: string[]
+  actionsBusy: boolean
+  onFolderAction: (id: string, action: FolderAction) => void
   tree: WorkspaceTreeModel
   draftTitles: Readonly<Partial<Record<string, string>>>
   selectedNoteId: string | null
@@ -48,7 +53,7 @@ interface FolderTreeProps {
   onSelect: (id: string) => void
 }
 
-export function FolderTree({ tree, draftTitles, selectedNoteId, selectedFolderId, onFolderSelect, search, openFolders, onFolderOpen, onSelect, editingFolderId, onFolderName, onCancelFolderName, namingBusy, namingError }: FolderTreeProps) {
+export function FolderTree({ actionsBusy, onFolderAction, localIds = [], tree, draftTitles, selectedNoteId, selectedFolderId, onFolderSelect, search, openFolders, onFolderOpen, onSelect, editingFolderId, onFolderName, onCancelFolderName, namingBusy, namingError }: FolderTreeProps) {
   const rows = useMemo(() => visibleWorkspaceRows(tree, openFolders, search), [tree, openFolders, search])
   const [focusedKey, setFocusedKey] = useState<string | null>(null)
   const selectedKey = selectedFolderId ? `folder:${selectedFolderId}` : selectedNoteId ? `note:${selectedNoteId}` : null
@@ -95,12 +100,15 @@ export function FolderTree({ tree, draftTitles, selectedNoteId, selectedFolderId
             data-node-key={node.key}
             data-creation-target={folder && node.folder.id === selectedFolderId || undefined}
             onKeyDown={event => {
+              if (folder && event.target === event.currentTarget && event.shiftKey && event.key === 'F10') {
+                event.preventDefault(); event.currentTarget.querySelector<HTMLButtonElement>('[data-folder-menu]')?.click(); return
+              }
               if (event.target === event.currentTarget && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && (event.key === 'Enter' || event.key === ' ')) {
                 event.preventDefault(); event.currentTarget.click()
               }
             }}
             onClick={event => {
-              if (event.target instanceof HTMLInputElement) return
+              if (event.target instanceof HTMLElement && event.target.closest('input,button')) return
               if (!folder && (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return
               if (folder) { onFolderSelect(node.folder.id); onFolderOpen(node.folder.id, !expanded) }
               else onSelect(node.note.id)
@@ -111,6 +119,9 @@ export function FolderTree({ tree, draftTitles, selectedNoteId, selectedFolderId
             {folder && node.folder.id === editingFolderId ? <FolderName key={node.folder.id} name={node.folder.name}
               busy={namingBusy} error={namingError} onSave={name => onFolderName(node.folder.id, name)} onCancel={onCancelFolderName} />
               : <span>{label}</span>}
+            {localIds.includes(folder ? node.folder.id : node.note.id) && <small aria-label="서버 미반영" style={{fontSize:10,opacity:.7}}>로컬</small>}
+            {folder && node.folder.id !== editingFolderId && <FolderMenu name={label} tabIndex={node.key === tabKey ? 0 : -1}
+              disabled={actionsBusy} onAction={action => onFolderAction(node.folder.id, action)} />}
           </Row>
         })}
       </div>
@@ -135,13 +146,12 @@ function FolderName({ name, busy, error, onSave, onCancel }: {
     if (busy || submitting.current || cancelled.current) return
     const next = value.trim()
     if (!next || next.length > 200) { setValidation('폴더 이름은 공백이 아닌 1~200자로 입력해주세요.'); return }
-    if (next === name) { onCancel(); return }
     setValidation('')
     submitting.current = true
     try { await onSave(next) } finally { submitting.current = false }
   }
   return <span style={{ flex: 1 }}>
-    <input ref={input} aria-label="새 폴더 이름" value={value} maxLength={200} readOnly={busy}
+    <input ref={input} aria-label="새 폴더 이름" aria-invalid={!!(validation || error)} value={value} maxLength={200} readOnly={busy}
       onChange={event => setValue(event.target.value)} onBlur={() => void save()}
       onKeyDown={event => {
         event.stopPropagation()

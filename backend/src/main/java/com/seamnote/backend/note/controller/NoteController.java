@@ -12,13 +12,17 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/notes")
 public class NoteController {
+    private final com.seamnote.backend.creation.IdempotentCreations creates;
     private final NoteService notes;
     private final IdempotentNoteUpdates updates;
-    public NoteController(NoteService notes, IdempotentNoteUpdates updates) { this.notes = notes; this.updates = updates; }
+    public NoteController(NoteService notes, IdempotentNoteUpdates updates, com.seamnote.backend.creation.IdempotentCreations creates) { this.creates=creates; this.notes = notes; this.updates = updates; }
     @PostMapping
-    public ResponseEntity<NoteResponse> createNote(@Valid @RequestBody CreateNoteRequest request) {
-        NoteResponse response = notes.createNote(request);
-        return ResponseEntity.created(URI.create("/api/notes/" + response.getId())).body(response);
+    public ResponseEntity<String> createNote(@Valid @RequestBody CreateNoteRequest request,
+            @RequestHeader(name="Idempotency-Key", required=false) String key) {
+        String response=creates.note(request,key);
+        var result=ResponseEntity.created(creates.location("/api/notes/",response)).contentType(MediaType.APPLICATION_JSON);
+        if(key!=null)result.header("Idempotency-Key",UUID.fromString(key).toString());
+        return result.body(response);
     }
     @GetMapping("/{id}")
     public NoteResponse getNote(@PathVariable UUID id) { return notes.getNote(id); }

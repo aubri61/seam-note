@@ -43,3 +43,8 @@ test('invalid metadata cannot replace a valid snapshot; cancellation never falls
  const c=new AbortController();c.abort();await assert.rejects(()=>loadWorkspace({signal:c.signal},f.deps));assert.equal(f.calls.save,1)
  assert.throws(()=>validateWorkspace({folders:[],notes:[{id:'n'}]}))
 })
+
+test('local creation read failure cannot hide a successful server Workspace',async()=>{
+ const f=fixture();f.deps.storage.local=async()=>{throw Error('unknown schema')}
+ const r=await loadWorkspace({},f.deps);assert.deepEqual(r.notes,data.notes);assert.match(r.localSnapshot.warning,/생성 목록을 읽지 못했습니다/)
+})

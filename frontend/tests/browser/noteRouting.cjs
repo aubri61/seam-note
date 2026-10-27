@@ -73,16 +73,19 @@ async function main() {
     await until(async () => url(home) === path('A') && await body(home).inputValue() === 'A 미저장 원고', 'Back preserves A')
     await home.goForward()
     await until(async () => url(home) === path('B') && await body(home).inputValue() === 'B 미저장 원고', 'Forward preserves B')
+    // Without a saved preference, B's root ancestors are the automatic default.
+    await home.locator('[data-node-key="folder:nested"]').click()
     await row(home, 'A').click()
     await until(async () => await body(home).inputValue() === 'A 미저장 원고', 'reselect A')
     assert.equal(await home.evaluate(() => window.__routingDocument), documentId, 'no full document navigation')
-    // A previously collapsed ancestor must reopen on history navigation back to A.
+    // A user-collapsed ancestor stays collapsed on history navigation back to A.
     await home.locator('[data-node-key="folder:nested"]').click()
     await row(home, 'B').click()
     await until(async () => url(home) === path('B') && await body(home).inputValue() === 'B 미저장 원고', 'B committed before history Back')
     await home.goBack()
+    assert.equal(await home.locator('[data-node-key="folder:nested"]').getAttribute('aria-expanded'), 'false')
+    await home.locator('[data-node-key="folder:nested"]').click()
     await row(home, 'A').waitFor()
-    assert.equal(await home.locator('[data-node-key="folder:nested"]').getAttribute('aria-expanded'), 'true')
     assert.equal(await body(home).inputValue(), 'A 미저장 원고')
     // In-flight C response cannot select C after navigating back to B.
     state.holdNote = 'C'
@@ -176,7 +179,7 @@ async function main() {
     await mobile.screenshot({ path: '/private/tmp/seam-note-routing-mobile.png', fullPage: true })
     await mobile.close()
     assert.deepEqual(errors, [])
-    console.log('PASS: replace root, Link/no reload, direct/parallel/reload, Back/Forward + dirty Draft, ancestor reveal, slow response, UUID/404/workspace exclusion, empty root, mobile, beforeunload; mock GET only')
+    console.log('PASS: replace root, Link/no reload, direct/parallel/reload, Back/Forward + dirty Draft, saved ancestor collapse preserved, slow response, UUID/404/workspace exclusion, empty root, mobile, beforeunload; mock GET only')
   } finally { await browser.close() }
 }
 main().catch(error => { console.error(error); process.exitCode = 1 })

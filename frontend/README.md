@@ -84,7 +84,7 @@ Vite 개발 서버의 기존 API proxy를 유지했다. 운영 배포는 `/notes
 
 ## 로컬 원고 저장
 
-Dexie 4.4.7의 seam-note-local DB/schema v3를 사용한다(v1/v2 선언 보존). 입력 후 약 400ms, 지속 입력 중 최대 약 2초마다 로컬 저장을 시도하며 노트 전환 시 flush를 요청한다. 로컬 commit과 서버 dirty는 별개다. 멀티탭 저장 기준이 다르면 현재 입력과 기존 DB를 보존하고 저장을 중단한다.
+Dexie 4.4.7의 seam-note-local DB/schema v4를 사용한다(v1/v2/v3 선언 보존). 입력 후 약 400ms, 지속 입력 중 최대 약 2초마다 로컬 저장을 시도하며 노트 전환 시 flush를 요청한다. 로컬 commit과 서버 dirty는 별개다. 멀티탭 저장 기준이 다르면 현재 입력과 기존 DB를 보존하고 저장을 중단한다.
 
 로컬 저장은 서버 동기화/백업이 아니며 브라우저 저장소 삭제·회수로 사라질 수 있다. 저장 실패/충돌 중 입력은 메모리에 남으므로 안내에 따라 텍스트를 보관해야 한다. Draft와 Outbox를 함께 기록하며, 서버 PUT은 현재 열린 정상 원고에서 사용자가 명시적으로 저장 버튼을 누를 때만 수행한다. 자동 전송·PWA는 없다. [스키마·복구·경쟁·확장 계약](../docs/design/local-draft-storage.md)을 참고한다.
 
@@ -109,3 +109,12 @@ production 빌드는 앱 셸을 precache하고 Dexie v3에 마지막 성공 Work
 저장소 루트에서 `pnpm --dir frontend build`, `pnpm --dir frontend exec vite preview --host localhost --port 4173 --strictPort`로 실습한다. 온라인 첫 방문에서 앱 캐시와 각 원고의 로컬 저장을 준비해야 한다. Chrome 설치 메뉴를 사용할 수 있으며 development5173에는 SW를 등록하지 않는다. **5173과4173은 다른 origin이므로 미동기화 로컬 원고가 자동 이동하지 않는다.** 기존 개발 서버를 종료/교체하지 않았다.
 
 업데이트는 모든 앱 창을 닫은 다음 실행할 때 적용한다. 열린 에디터를 강제 reload하지 않는다. [구조·지원 범위·재현·한계](../docs/design/pwa-offline.md)를 참고한다.
+
+
+## 오프라인 폴더·노트 생성
+
+기존 + 메뉴는 온라인에서도 먼저 로컬에 생성한다. 새 폴더는 사이드바에서 바로 이름을 입력해 Enter/포커스 이동으로 확정하고(Escape 취소), `새 최상위 폴더` 메뉴로 최상위 생성도 지원한다. 새 노트는 해당 폴더 아래 생성 후 즉시 편집한다. 로컬 표시가 있는 항목은 아직 서버에 없다. 인터넷 없이 닫고 다시 열어도 같은 origin/profile의 commit된 entity/Draft/생성 의도를 복원한다.
+
+온라인 복귀 후 원고의 `서버에 저장`은 필요한 부모부터 POST하고, 생성 ACK 뒤 필요하면 기존 expectedVersion PUT을 수행한다. 폴더만 선택했을 때는 사이드바 `폴더 서버에 저장`을 사용한다. 자동 전송은 없다. local note 삭제/오프라인 이동·이름변경은 제공하지 않는다.
+
+새 서버 POST 멱등성 계약에는 Flyway V4가 필요하다. backend를 새 코드로 실행해야 하며 구 서버의 응답 검증을 우회하지 않는다. [생성 데이터 흐름·실패 복구·재현](../docs/design/offline-creation.md), [실제 작업/검증](../docs/worklogs/2026-10-26-offline-creation.md)을 참고한다.

@@ -14,11 +14,13 @@ import java.util.*;
 @RequestMapping("/api/folders")
 public class FolderController {
 
+    private final com.seamnote.backend.creation.IdempotentCreations creates;
     private final FolderService folders;
 
     private final NoteService notes;
 
-    public FolderController(FolderService folders, NoteService notes) {
+    public FolderController(FolderService folders, NoteService notes, com.seamnote.backend.creation.IdempotentCreations creates) {
+        this.creates=creates;
         this.folders = folders;
         this.notes = notes;
     }
@@ -45,9 +47,13 @@ public class FolderController {
     }
 
     @PostMapping
-    public ResponseEntity<FolderResponse> create(@Valid @RequestBody CreateFolderRequest request) {
-        FolderResponse response = folders.create(request);
-        return ResponseEntity.created(URI.create("/api/folders/" + response.getId())).body(response);
+    public ResponseEntity<String> create(@Valid @RequestBody CreateFolderRequest request,
+            @RequestHeader(name="Idempotency-Key", required=false) String key) {
+        String response=creates.folder(request,key);
+        var result=ResponseEntity.created(creates.location("/api/folders/",response)).contentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        if(key!=null)result.header("Idempotency-Key",UUID.fromString(key).toString());
+        // Legacy clients may omit id; the response retains its actual generated id.
+        return result.body(response);
     }
 
     @PatchMapping("/{id}")

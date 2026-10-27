@@ -1,5 +1,6 @@
 import { mutationOptions, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
+import { deleteEmptyFolder } from '@/features/folders/folderDeletion'
 import { createFolder, renameFolder } from '@/features/folders/folderApi'
 import { createNote, deleteNote } from '@/features/notes/noteApi'
 import { folderKeys, noteKeys, workspaceKeys } from '@/lib/query/queryKeys'
@@ -92,4 +93,26 @@ export function renameFolderMutationOptions(client: QueryClient) {
 }
 export function useRenameFolderMutation() {
   return useMutation(renameFolderMutationOptions(useQueryClient()))
+}
+
+export function deleteFolderMutationOptions(client: QueryClient, onDeleted?: (id: UUID) => void) {
+  return mutationOptions({
+    mutationKey: ['folders', 'delete'], retry: false, networkMode: 'always',
+    mutationFn: async (id: UUID) => {
+      await Promise.all([client.cancelQueries({queryKey: workspaceKeys.tree(), exact: true}), client.cancelQueries({queryKey: folderKeys.all})])
+      await deleteEmptyFolder(id)
+    },
+    onSuccess: (_, id) => {
+      client.setQueryData<WorkspaceTreeResponse>(workspaceKeys.tree(), current => current ? {
+        ...current, folders: current.folders.filter(folder => folder.id !== id),
+      } : undefined)
+      client.removeQueries({ queryKey: folderKeys.detail(id), exact: true })
+      client.removeQueries({ queryKey: folderKeys.children(id), exact: true })
+      onDeleted?.(id)
+      void Promise.all([client.invalidateQueries({queryKey: workspaceKeys.tree(), exact: true}), client.invalidateQueries({queryKey: folderKeys.all})])
+    },
+  })
+}
+export function useDeleteFolderMutation(onDeleted: (id: UUID) => void) {
+  return useMutation(deleteFolderMutationOptions(useQueryClient(), onDeleted))
 }

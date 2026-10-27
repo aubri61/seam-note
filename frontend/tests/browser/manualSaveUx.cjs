@@ -46,7 +46,7 @@ async function main(){
   await page.locator(`[data-node-key="note:${ids[1]}"]`).click()
   await until(async()=>await title(page).inputValue()==='원고 1','B loaded')
   await page.setViewportSize({width:390,height:844})
-  const box=await button(page).boundingBox();assert.ok(box.x>=0&&box.x+box.width<=390,'mobile save button fits viewport')
+  await until(async()=>{const box=await button(page).boundingBox();return box&&box.x>=0&&box.x+box.width<=390},'mobile save button fits viewport after responsive layout settles')
   if(process.env.SEAM_NOTE_SCREENSHOT_DIR)await page.screenshot({path:process.env.SEAM_NOTE_SCREENSHOT_DIR+'/manual-save-mobile.png'})
   await title(page).fill('B 변경');mode='lost';await button(page).click()
   await page.getByText(/서버 결과를 확정하지 못했습니다/).waitFor()

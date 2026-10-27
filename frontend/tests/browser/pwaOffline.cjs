@@ -66,9 +66,9 @@ async function main(){
  },{seed,op,idC:ids[2]})
  await page.goto(origin+'/notes/'+ids[0]);await until(async()=>await title(page).inputValue()===seed.title,'dirty v2 draft restored')
  await until(async()=>(await records(page)).workspace.length===1,'workspace committed')
- const migrated=await records(page);assert.equal(migrated.version,30);assert.deepEqual(migrated.drafts.find(d=>d.noteId===ids[0]),seed);assert.deepEqual(migrated.outbox.find(o=>o.operationId===op.operationId),op)
+ const migrated=await records(page);assert.equal(migrated.version,40);assert.deepEqual(migrated.drafts.find(d=>d.noteId===ids[0]),seed);assert.deepEqual(migrated.outbox.find(o=>o.operationId===op.operationId),op)
  assert.equal(await page.locator(`[data-node-key="note:${ids[2]}"]`).innerText(),'C 복구 제목')
- done('v2-to-v3-preserves-drafts-outbox-and-sidebar-titles')
+ done('v2-through-v3-to-v4-preserves-drafts-outbox-and-sidebar-titles')
  await page.evaluate(()=>navigator.serviceWorker.ready);await until(()=>page.getByText(/오프라인 앱 파일 준비됨/).count(),'app precached')
  const cdp=await context.newCDPSession(page);await cdp.send('Page.enable');const installability=await cdp.send('Page.getInstallabilityErrors');assert.deepEqual(installability.installabilityErrors,[])
  const manifest=await cdp.send('Page.getAppManifest');assert.ok(manifest.data.includes('standalone'))
@@ -115,8 +115,8 @@ async function main(){
  assert.ok(cacheEntries.length>0);assert.ok(cacheEntries.every(p=>!p.startsWith('/api/')))
  done('waiting-worker-activates-after-close-keeps-draft-outbox',{cacheEntries:cacheEntries.length,apiCacheEntries:0})
  const output={origin,sourceHashes,chrome:context.browser()?.version()||'persistent Chrome',results,puts,final:{contentHash:sha(last),workspaceNotes:(await records(page)).workspace[0].data.notes.length,outboxCount:(await records(page)).outbox.length},scope:'Synthetic HTTP API; no development DB or existing profile used. Installability verified, no OS install dialog automated.'}
- fs.mkdirSync(path.join(root,'docs/verification'),{recursive:true});fs.writeFileSync(path.join(root,'docs/verification/2026-10-26-pwa-results.json'),JSON.stringify(output,null,2)+'\n')
- await page.screenshot({path:path.join(root,'docs/verification/2026-10-26-pwa-offline.png')})
+ fs.mkdirSync(path.join(root,'docs/verification'),{recursive:true});fs.writeFileSync(process.env.SEAM_NOTE_PWA_REPORT||path.join(root,'docs/verification/2026-10-26-pwa-results.json'),JSON.stringify(output,null,2)+'\n')
+ await page.screenshot({path:process.env.SEAM_NOTE_PWA_SCREENSHOT||path.join(root,'docs/verification/2026-10-26-pwa-offline.png')})
  console.log('PASS: '+results.length+' production PWA scenarios; profile/build artifacts retained at '+work)
  }finally{if(context)await context.close();if(server)await new Promise(resolve=>server.close(resolve))}
 }

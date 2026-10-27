@@ -1,5 +1,8 @@
 # Dexie 로컬 원고 영속 저장
 
+후속 오프라인 생성 단계에서 additive v4와 FOLDER_CREATE/NOTE_CREATE·생성 Ledger·부모 우선 명시적 반영을 추가했다. 최신 생성/수동 저장 흐름은 [오프라인 생성 계약](offline-creation.md)을 따른다. 아래는 해당 선행 단계의 설계·실증 기록이다.
+
+
 후속 PWA 단계에서 v1/v2를 그대로 보존하고 Workspace metadata 전용 v3를 추가했다. 최신 [오프라인 복원 계약](pwa-offline.md)을 참고한다. 아래는 최초 로컬 저장 단계의 기록이다.
 
 

@@ -1,9 +1,11 @@
+import { FolderCreationSave } from '@/features/manual-sync/FolderCreationSave'
 import { useRef } from 'react'
 import type { ReactNode } from 'react'
 import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
 import { WorkspacePicker } from '@/features/workspaces/WorkspacePicker'
 import { Eyebrow, IconButton } from '@/components/primitives'
+import type { FolderAction } from '@/features/folders/FolderMenu'
 import { FolderTree } from '@/features/folders/FolderTree'
 import type { useFolders } from '@/features/folders/useFolders'
 
@@ -112,12 +114,13 @@ const Footnote = styled.p(({ theme }) => ({
   color: theme.colors.mutedText,
 }))
 
-export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate, creationFeedback }: {
+export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate, onFolderAction, creationFeedback }: {
   onClose: () => void
   folders: ReturnType<typeof useFolders>
   draftTitles: Readonly<Partial<Record<string, string>>>
   onSelectNote: (id: string) => void
-  onCreate: (kind: 'folder' | 'document') => void
+  onCreate: (kind: 'folder' | 'root-folder' | 'document') => void
+  onFolderAction: (id: string, action: FolderAction) => void
   creationFeedback?: ReactNode
 }) {
   const createRef = useRef<HTMLDetailsElement>(null)
@@ -150,11 +153,13 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
             onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus() } }}>
             <summary aria-label="폴더 또는 문서 추가"><Icon name="plus" size={17} /></summary>
             <div aria-label="추가할 항목">
-              <button type="button" disabled={folders.busy || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('folder') }}><Icon name="folder" size={17} />새 폴더</button>
-              <button type="button" disabled={folders.busy || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('document') }}><Icon name="note" size={17} />새 문서</button>
+              <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('folder') }}><Icon name="folder" size={17} />새 폴더</button>
+              <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('root-folder') }}><Icon name="folder" size={17} />새 최상위 폴더</button>
+              <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('document') }}><Icon name="note" size={17} />새 문서</button>
             </div>
           </CreatePicker>
         </FolderHeading>
+        <FolderCreationSave id={folders.selectedFolderId} pending={!!folders.selectedFolderId && folders.localIds.includes(folders.selectedFolderId)} />
         {creationFeedback}
         {folders.workspace.isPending && <p role="status">폴더와 원고를 불러오는 중입니다.</p>}
         {folders.workspace.isError && <div role="alert">
@@ -162,9 +167,10 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
           <button type="button" onClick={() => void folders.workspace.refetch()}>다시 시도</button>
         </div>}
         {folders.workspace.data && <FolderTree
-          tree={folders.tree} draftTitles={draftTitles} selectedNoteId={folders.selectedNoteId}
+          actionsBusy={folders.busy || !!folders.pendingFolder} onFolderAction={onFolderAction}
+          tree={folders.tree} localIds={folders.localIds} draftTitles={draftTitles} selectedNoteId={folders.selectedNoteId}
           editingFolderId={folders.editingFolderId} onFolderName={folders.renameCreatedFolder}
-          onCancelFolderName={folders.cancelFolderName} namingBusy={folders.busy} namingError={folders.renameFolderMutation.error?.message}
+          onCancelFolderName={folders.cancelFolderName} namingBusy={folders.busy} namingError={(folders.pendingFolder ? folders.createFolderMutation.error : folders.renameFolderMutation.error)?.message}
           selectedFolderId={folders.selectedFolderId} onFolderSelect={folders.selectFolder} search={folders.search}
           openFolders={folders.openFolders} onFolderOpen={folders.setFolderOpen} onSelect={onSelectNote}
         />}

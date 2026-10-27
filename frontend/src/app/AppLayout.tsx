@@ -6,6 +6,7 @@ import styled from '@emotion/styled'
 import { AppHeader } from '@/app/AppHeader'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { Sidebar } from '@/app/sidebar/Sidebar'
+import type { FolderAction } from '@/features/folders/FolderMenu'
 import { useFolders } from '@/features/folders/useFolders'
 import { DesktopSidebar } from '@/app/sidebar/DesktopSidebar'
 import { SidebarDrawer } from '@/app/sidebar/SidebarDrawer'
@@ -56,8 +57,8 @@ export function AppLayout() {
   const serverAvailable = online && !folders.workspace.data?.localSnapshot?.cachedAt
   const manualSync = useManualSync(folders.selectedNoteId, drafts.session, drafts.entry,
     online && !!folders.selectedNoteId && folders.tree.notes.has(folders.selectedNoteId)
-      && folders.activeNote?.id === folders.selectedNoteId && !editorError && !editorLoading && !folders.busy)
-  const status = localDraftStatus(drafts.entry, drafts.recovering, editorLoading, editorError)
+      && (folders.localNote || folders.activeNote?.id === folders.selectedNoteId) && !editorError && !editorLoading && !folders.busy)
+  const status = folders.localNote && drafts.entry?.phase === 'saved' ? '로컬 저장됨 · 서버 미동기화' : localDraftStatus(drafts.entry, drafts.recovering, editorLoading, editorError)
   const [action, setAction] = useState<WorkspaceAction | null>(null)
   const [creationMessage, setCreationMessage] = useState('')
   const titleRef = useRef<HTMLInputElement>(null)
@@ -96,21 +97,33 @@ export function AppLayout() {
   function showCreatedNote() {
     if (isMobile) { pendingEditorFocus.current = true; setSidebarOpen(false) }
   }
-  function create(kind: 'folder' | 'document') {
-    if (!serverAvailable || folders.busy || !folders.workspace.data) return
+  function create(kind: 'folder' | 'root-folder' | 'document') {
+    if (folders.busy || folders.pendingFolder) return
     setCreationMessage('')
-    if (kind === 'folder') {
-      void folders.createFolder({ id: crypto.randomUUID(), parentId: folders.creationParentId, name: '새 폴더' })
+    if (kind === 'folder' || kind === 'root-folder') {
+      folders.beginFolderCreation(kind === 'root-folder')
     } else if (folders.creationParentId) {
       void folders.createEmptyNote(folders.creationParentId).then(success => { if (success) showCreatedNote() })
     } else {
       setCreationMessage('먼저 폴더를 만들거나 원고를 넣을 폴더를 선택해주세요.')
     }
   }
+  function folderAction(id: string, kind: FolderAction) {
+    if (folders.busy || folders.pendingFolder) return
+    const folder = folders.tree.folders.get(id)?.folder
+    if (!folder) return
+    setCreationMessage('')
+    if (kind === 'add-folder') folders.beginFolderCreation(false, id)
+    else if (kind === 'add-note') {
+      void folders.createEmptyNote(id).then(success => { if (success) showCreatedNote() })
+    } else {
+      folders.resetMutationErrors()
+      setAction({ kind: 'delete-folder', folder })
+    }
+  }
   function openCreateNote() { create('document') }
   const creationError = folders.createFolderMutation.error ?? folders.createNoteMutation.error
   async function retryCreation() {
-    if (!serverAvailable) return
     if (folders.createFolderMutation.isError && folders.createFolderMutation.variables) {
       await folders.createFolder(folders.createFolderMutation.variables)
     } else if (folders.createNoteMutation.isError && folders.createNoteMutation.variables) {
@@ -132,12 +145,12 @@ export function AppLayout() {
             {creationError instanceof ApiError && creationError.status === 0 && <p>서버에 반영됐지만 응답만 유실됐을 수 있습니다. 목록을 먼저 확인해주세요.</p>}
             {creationError instanceof ApiError && creationError.code === 'DUPLICATE_ENTITY_ID' && <p>이전 요청이 반영됐을 수 있습니다. 목록에서 확인해주세요.</p>}
             <button type="button" disabled={folders.busy} onClick={() => void folders.workspace.refetch()}>목록 새로고침</button>
-            <button type="button" disabled={folders.busy || !serverAvailable} onClick={() => void retryCreation()}>같은 요청 다시 시도</button>
+            <button type="button" disabled={folders.busy} onClick={() => void retryCreation()}>같은 요청 다시 시도</button>
           </>}
         </div>
 
-  const sidebar = <Sidebar onClose={closeSidebar} folders={{ ...folders, busy: folders.busy || !serverAvailable, renameCreatedFolder: serverAvailable ? folders.renameCreatedFolder : async () => null }} draftTitles={drafts.draftTitles} onSelectNote={selectNote}
-    onCreate={create} creationFeedback={isMobile ? creationFeedback : undefined} />
+  const sidebar = <Sidebar onClose={closeSidebar} folders={{ ...folders, renameCreatedFolder: folders.pendingFolder || serverAvailable ? folders.renameCreatedFolder : async () => null }} draftTitles={drafts.draftTitles} onSelectNote={selectNote}
+    onCreate={create} onFolderAction={folderAction} creationFeedback={isMobile ? creationFeedback : undefined} />
 
   return (
     <Shell>
@@ -166,10 +179,10 @@ export function AppLayout() {
         />
         <PwaStatus />
         {(!online || folders.workspace.data?.localSnapshot) && <aside role="status" style={{ padding: '8px 24px', fontSize: 12 }}>
-          {!online ? '오프라인 편집 · 변경사항은 이 브라우저에 로컬 저장됩니다.' : '서버 목록을 확인하지 못해 로컬 목록을 사용합니다.'}
+          {!online ? '오프라인 편집 · 변경사항은 이 브라우저에 로컬 저장됩니다.' : '로컬 목록을 표시합니다. 생성한 항목은 서버에 저장을 눌러 반영해주세요.'}
           <p>{folders.workspace.data?.localSnapshot?.warning ?? '이 브라우저에 본문이 로컬 저장된 원고만 열 수 있습니다.'}</p>
-          <p>서버 저장·생성·삭제는 온라인에서만 가능합니다. 브라우저 저장소 삭제·회수 시 로컬 데이터가 사라질 수 있습니다.</p>
-          {online && <button type="button" onClick={() => { void folders.workspace.refetch(); void folders.noteQuery.refetch() }}>서버 목록 다시 확인</button>}
+          <p>서버 반영·삭제는 온라인에서만 가능합니다. 생성과 원고 편집은 오프라인에서도 가능합니다. 브라우저 저장소 삭제·회수 시 로컬 데이터가 사라질 수 있습니다.</p>
+          {online && <button type="button" onClick={() => { void folders.workspace.refetch(); if(!folders.localNote)void folders.noteQuery.refetch() }}>서버 목록 다시 확인</button>}
         </aside>}
         {!drafts.recovering && !drafts.draft && offlineDetail && <p role="alert" style={{ padding: '8px 24px' }}>이 원고의 본문은 이 브라우저에 저장되어 있지 않아 오프라인에서 열 수 없습니다. 온라인에서 먼저 열어주세요.</p>}
         {(!isMobile || !sidebarOpen) && creationFeedback}
@@ -183,8 +196,8 @@ export function AppLayout() {
           selectedNoteId: folders.selectedNoteId, titleRef,
           loading: editorLoading || drafts.recovering, error: editorError,
           canRetry: !folders.routeError || !!folders.selectedNoteId,
-          busy: folders.busy, canCreate: serverAvailable && !!folders.workspace.data,
-          canDelete: serverAvailable && !!folders.selectedNoteId && folders.tree.notes.has(folders.selectedNoteId) && !folders.routeError,
+          busy: folders.busy, canCreate: true,
+          canDelete: serverAvailable && !folders.localNote && !!folders.selectedNoteId && folders.tree.notes.has(folders.selectedNoteId) && !folders.routeError,
           onCreateNote: openCreateNote, onDeleteNote: openDeleteNote,
           onRetry: () => { void (folders.routeError || folders.workspace.isError ? folders.workspace.refetch() : folders.noteQuery.refetch()) },
         } satisfies ComponentProps<typeof NoteEditor>} />
