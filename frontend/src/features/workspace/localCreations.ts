@@ -10,7 +10,7 @@ export function useLocalFolderCreation(onCreated:(folder:Folder)=>void){
     mutationFn:(r:CreateFolderRequest)=>creationStorage.createFolder(r),
     onSuccess:async folder=>{
       await client.cancelQueries({queryKey:workspaceKeys.tree()})
-      client.setQueryData(workspaceKeys.tree(),await loadWorkspace({}, {online:()=>false,get:async()=>{throw Error('local only')},storage:workspaceStorage}))
+      client.setQueryData(workspaceKeys.tree(),await loadWorkspace({}, {localRefresh:true,online:()=>false,get:async()=>{throw Error('local only')},storage:workspaceStorage}))
       onCreated(folder)
     }})
 }
@@ -20,7 +20,7 @@ export function useLocalNoteCreation(onCreated:(note:Note)=>void){
     mutationFn:(r:CreateNoteRequest)=>creationStorage.createNote(r),
     onSuccess:async note=>{
       await client.cancelQueries({queryKey:workspaceKeys.tree()})
-      client.setQueryData(workspaceKeys.tree(),await loadWorkspace({}, {online:()=>false,get:async()=>{throw Error('local only')},storage:workspaceStorage}))
+      client.setQueryData(workspaceKeys.tree(),await loadWorkspace({}, {localRefresh:true,online:()=>false,get:async()=>{throw Error('local only')},storage:workspaceStorage}))
       onCreated(note)
     }})
 }

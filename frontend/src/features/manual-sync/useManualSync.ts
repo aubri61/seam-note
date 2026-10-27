@@ -1,3 +1,4 @@
+import { withSyncLock } from './syncLock'
 import { useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import type { Note } from '@/lib/api/types'
@@ -43,12 +44,13 @@ export function useManualSync(noteId: string | null, session: DraftSession, entr
     running.current = true; setState({ noteId: id, busy: true, message: '최신 로컬 저장을 확인하고 있습니다.', error: false, revision: -1, missing: false })
     let creationUnconfirmed=false
     try {
+      await withSyncLock(async () => {
       const local=await creationStorage.local(id)
       creationUnconfirmed=!!local&&!local.confirmed
-      const created = await syncLocalNote(id, session, () => context.current.noteId === id && context.current.available)
+      const created = await syncLocalNote(id, session, () => context.current.noteId === id && context.current.available, {lockHeld:true})
       creationUnconfirmed=false
       const updated = await syncOneNote(id, session, {
-        storage: outboxRepository, send: sendNoteSnapshot, locks: navigator.locks,
+        lockHeld: true, storage: outboxRepository, send: sendNoteSnapshot, locks: navigator.locks,
         canSend: () => context.current.noteId === id && context.current.available,
       })
       const result = updated.kind === 'unchanged' && created ? {kind:'synced' as const,note:created,hasNewerChanges:false} : updated
@@ -58,10 +60,11 @@ export function useManualSync(noteId: string | null, session: DraftSession, entr
       }
       setState({ noteId: id, busy: false, error: false, missing: false, revision: session.getSnapshot()[id]?.revision ?? -1,
         message: result.kind === 'unchanged' ? '서버에 전송할 변경사항이 없습니다.' : `전송한 원고의 서버 저장과 로컬 확인이 완료됐습니다.${result.hasNewerChanges ? ' 새 입력은 아직 서버에 저장되지 않았습니다.' : ''}` })
+      })
     } catch (error) {
       let cause: unknown = error, notFound = false
       for (let depth = 0; cause instanceof Error && depth < 5; depth++, cause = cause.cause) {
-        if (cause instanceof ApiError && cause.status === 404) notFound = true
+        if (cause instanceof ApiError && cause.status === 404 && cause.code === 'NOTE_NOT_FOUND') notFound = true
       }
       if(creationUnconfirmed)notFound=false
       if (notFound) {

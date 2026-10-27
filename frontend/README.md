@@ -95,9 +95,9 @@ Dexie v2는 v1 Draft를 보존하고 기존 dirty 원고를 pending 작업으로
 
 ## 수동 서버 저장
 
-기존 `pnpm dev`의 localhost5173에서 원고를 열고 상단 로컬 저장 상태 옆 `서버에 저장`을 누른다. 개발·프로덕션 공통이며 실험 env/UUID/별도DB 설정은 필요 없다. `/api` 및 기존 Vite proxy를 그대로 쓴다.
+기존 `pnpm dev`의 localhost5173에서 상단 `모든 변경사항 동기화`를 누른다. 개별 원고 저장 버튼은 제거했다. 개발·프로덕션 공통이며 실험 env/UUID/별도DB 설정은 필요 없다. `/api` 및 기존 Vite proxy를 그대로 쓴다.
 
-미동기화 변경이 없으면 비활성화한다. 저장 중에는 최신 로컬 commit을 확인하며, 성공/실패와 남은 Outbox를 표시한다. 응답 유실은 같은 키로 명시적 재시도하고, conflict/복구 실패/확인된404는 전송을 차단해 원고를 보존한다. 자동 전송은 없다. [제품 저장 계약](../docs/design/manual-server-save.md)을 참고한다.
+미동기화 변경이 없으면 비활성화한다. 저장 중에는 최신 로컬 commit을 확인하며, 성공/실패와 남은 Outbox를 표시한다. 응답 유실은 같은 키로 명시적 재시도하고, conflict/복구 실패/확인된404 원고는 전송을 차단해 보존하며 독립 작업은 계속한다. 자동 전송은 없다. [제품 저장 계약](../docs/design/manual-server-save.md)을 참고한다.
 
 학습·회귀 실험에는 선택적으로 저장소 루트의 `python3 scripts/manual-sync-lab.py --serve`를 사용할 수 있다. 이는 신규 fixture를 만드는 별도 도구이며 일반 저장 기능의 요구사항이 아니다. [전체 저장 흐름·DevTools 실습](../docs/learning/2026-10-26-note-storage-flow.md)은 최초 통합 당시의 실증 기록이다.
 
@@ -115,6 +115,17 @@ production 빌드는 앱 셸을 precache하고 Dexie v3에 마지막 성공 Work
 
 기존 + 메뉴는 온라인에서도 먼저 로컬에 생성한다. 새 폴더는 사이드바에서 바로 이름을 입력해 Enter/포커스 이동으로 확정하고(Escape 취소), `새 최상위 폴더` 메뉴로 최상위 생성도 지원한다. 새 노트는 해당 폴더 아래 생성 후 즉시 편집한다. 로컬 표시가 있는 항목은 아직 서버에 없다. 인터넷 없이 닫고 다시 열어도 같은 origin/profile의 commit된 entity/Draft/생성 의도를 복원한다.
 
-온라인 복귀 후 원고의 `서버에 저장`은 필요한 부모부터 POST하고, 생성 ACK 뒤 필요하면 기존 expectedVersion PUT을 수행한다. 폴더만 선택했을 때는 사이드바 `폴더 서버에 저장`을 사용한다. 자동 전송은 없다. local note 삭제/오프라인 이동·이름변경은 제공하지 않는다.
+온라인 복귀 후 `모든 변경사항 동기화`는 필요한 부모부터 POST하고, 생성 ACK 뒤 필요하면 기존 expectedVersion PUT을 수행한다. 폴더만 선택했을 때는 사이드바 `폴더 서버에 저장`을 사용한다. 자동 전송은 없다. local note 삭제/오프라인 이동·이름변경은 제공하지 않는다.
 
 새 서버 POST 멱등성 계약에는 Flyway V4가 필요하다. backend를 새 코드로 실행해야 하며 구 서버의 응답 검증을 우회하지 않는다. [생성 데이터 흐름·실패 복구·재현](../docs/design/offline-creation.md), [실제 작업/검증](../docs/worklogs/2026-10-26-offline-creation.md)을 참고한다.
+
+
+## Workspace 전체 수동 동기화
+
+공통 헤더의 `모든 변경사항 동기화`는 이 탭 메모리 원고를 먼저 로컬 commit한 뒤 두 Outbox의 대상 snapshot을 고정한다. 폴더 부모 우선 생성과 노트 생성/수정을 기존 멱등성·expectedVersion·ACK 경로로 처리한다. 개별 원고 저장 버튼과 해당 결과 패널은 제거했다. 충돌·서버에서 찾지 못한 원고·로컬 저장 실패는 보존하고 독립 작업을 계속한다. 실행 중 추가 입력은 남을 수 있어 최종 실제 작업 수를 확인하고 다음에 다시 클릭한다. 온라인 복귀만으로 전송하지 않는다.
+
+설계·학습 및 재현 방법은 [Workspace 수동 동기화](../docs/design/workspace-manual-sync.md), 실제 결과는 [작업 이력](../docs/worklogs/2026-10-27-workspace-manual-sync.md)을 따른다. 격리 전체 검증: `python3 scripts/manual-sync-lab.py --workspace`.
+
+폴더 `… → 이름 변경`은 사이드바 인라인 입력으로 확정한다. 미전송 로컬 폴더는 생성 대기의 이름까지 원자 변경하고, 서버 폴더는 온라인 PATCH로 변경한다. 생성 결과가 불확실한 폴더는 먼저 서버 반영 상태를 확인한다. 새 문서를 만들면 데스크톱에서는 제목 입력에 키보드 focus를 옮기며, 모바일에서는 Drawer를 닫지 않는다. 입력란의 기본·focus 테두리는 제거했다.
+
+로컬 생성 직후의 내부 Workspace 재구성은 `local-refresh`로 구분해 온라인에서 불필요한 캐시 안내/재조회 버튼을 표시하지 않는다. 실제 초기 로딩·조회 오류·저장소 오류·오프라인 안내는 유지한다.

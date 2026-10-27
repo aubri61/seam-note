@@ -23,6 +23,11 @@ export function GlobalStyles() {
       font: 'inherit',
       color: 'inherit',
     },
+    'input, textarea': {
+      border: 0,
+      outline: 'none',
+      boxShadow: 'none',
+    },
     button: {
       cursor: 'pointer',
     },
@@ -36,8 +41,8 @@ export function GlobalStyles() {
       outline: `2px solid ${theme.colors.mutedText}`,
       outlineOffset: theme.spacing.xs,
     },
-    'input:focus-visible, textarea:focus-visible': {
-      outlineOffset: theme.spacing.xxs,
+    'input:focus, input:focus-visible, textarea:focus, textarea:focus-visible': {
+      border: 0, outline: 'none', boxShadow: 'none',
     },
     '::selection': {
       background: theme.colors.accent,

@@ -132,6 +132,11 @@ export function useFolders() {
       setSearch('')
       if (parentId) revealFolder(parentId)
     },
+    beginFolderRename: (id: string) => {
+      if (busy || writing.current || pendingFolder || !tree.folders.has(id)) return
+      resetMutationErrors()
+      setEditingFolderId(id)
+    },
     renameFolderMutation,
     renameCreatedFolder: async (id: string, name: string) => {
       if (pendingFolder?.id === id) {
@@ -145,7 +150,10 @@ export function useFolders() {
     selectFolder: (id: string) => setSelection({ navigationKey: location.key, folderId: id }),
     busy, createFolderMutation, createNoteMutation, deleteNoteMutation, deleteFolderMutation, resetMutationErrors,
     createFolder: (request: CreateFolderRequest) => perform(() => createFolderMutation.mutateAsync(request)),
-    createEmptyNote: (folderId: string, id?: string) => perform(() => createNoteMutation.mutateAsync({ id: id ?? crypto.randomUUID(), folderId, title: '', content: '' })),
+    createEmptyNote: async (folderId: string, id: string = crypto.randomUUID()) => {
+      const success = await perform(() => createNoteMutation.mutateAsync({ id, folderId, title: '', content: '' }))
+      return success ? id : success
+    },
     deleteFolder: (id: string) => perform(() => deleteFolderMutation.mutateAsync(id)),
     deleteNote: (id: string) => perform(() => deleteNoteMutation.mutateAsync(id)),
     activeNote: routeError || !workspace.data ? null : selectedNoteDetail(selectedNoteId, noteQuery.data),

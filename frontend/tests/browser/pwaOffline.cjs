@@ -7,7 +7,7 @@ const ids=['00000000-0000-4000-8000-000000000901','00000000-0000-4000-8000-00000
 const stamp='2026-10-26T00:00:00Z',folder={id:'00000000-0000-4000-8000-000000000900',parentId:null,name:'오프라인 실험',sortOrder:0,version:0,createdAt:stamp,updatedAt:stamp}
 const notes=new Map(ids.map((id,i)=>[id,{id,folderId:folder.id,title:'서버 '+i,content:'합성 서버 본문 '+i,sortOrder:i,version:0,createdAt:stamp,updatedAt:stamp}]))
 const sha=s=>createHash('sha256').update(s).digest('hex'),pause=ms=>new Promise(r=>setTimeout(r,ms)),results=[]
-const title=p=>p.getByLabel('문서 제목'),body=p=>p.getByLabel('문서 내용'),button=p=>p.getByRole('button',{name:'서버에 저장',exact:true})
+const title=p=>p.getByLabel('문서 제목'),body=p=>p.getByLabel('문서 내용'),button=p=>p.getByRole('button',{name:'모든 변경사항 동기화',exact:true})
 async function until(fn,label){for(let i=0;i<600;i++){if(await fn())return;await pause(30)}throw Error('Timeout: '+label)}
 function done(name,data={}){results.push({name,passed:true,...data});console.log('PASS: '+name)}
 let buildDir,context,server,onlineGetsFail=false,puts=[],ledger=new Map(),origin
@@ -43,7 +43,7 @@ async function main(){
    }
    assert.equal(req.method,'PUT','Fixture accepts only explicit note PUT')
    let raw='';for await(const c of req)raw+=c
-   const input=JSON.parse(raw),id=p.split('/').at(-1),key=req.headers['idempotency-key'];assert.equal(id,ids[0]);assert.ok(key)
+   const input=JSON.parse(raw),id=p.split('/').at(-1),key=req.headers['idempotency-key'];assert.ok([ids[0],ids[2]].includes(id),'only the two seeded pending notes may PUT');assert.ok(key)
    puts.push({operationId:key,expectedVersion:input.expectedVersion,contentHash:sha(input.content)})
    if(ledger.has(key))return json(200,ledger.get(key),{'Idempotency-Key':key})
    const n=notes.get(id);if(input.expectedVersion!==n.version)return json(409,{code:'VERSION_CONFLICT',message:'conflict',errors:[]})
@@ -92,8 +92,8 @@ async function main(){
  done('second-offline-cold-launch-keeps-input')
  await context.setOffline(false);await until(()=>button(page).isEnabled(),'online queries recover and manual save enabled');await pause(300);assert.equal(puts.length,0)
  assert.ok((await records(page)).outbox.some(o=>o.noteId===ids[0]));await button(page).click()
- await until(async()=>{const r=await records(page);return !r.outbox.some(o=>o.noteId===ids[0])&&r.drafts.find(d=>d.noteId===ids[0]).baseVersion===1},'manual ack')
- assert.equal(puts.length,1);assert.equal(notes.get(ids[0]).content,edited);assert.equal(ledger.size,1)
+ await until(async()=>{const r=await records(page);return !r.outbox.some(o=>[ids[0],ids[2]].includes(o.noteId))&&r.drafts.find(d=>d.noteId===ids[0]).baseVersion===1},'manual ack')
+ assert.equal(puts.length,2);assert.equal(notes.get(ids[0]).content,edited);assert.equal(notes.get(ids[2]).content,'v2 로컬 C 본문');assert.equal(ledger.size,2)
  done('online-return-keeps-outbox-no-auto-put-then-manual-ack',{serverVersion:1,putCount:puts.length})
  onlineGetsFail=true;await page.reload();await until(async()=>await body(page).inputValue()===edited,'503 fallback');assert.equal((await records(page)).workspace[0].data.notes.length,3)
  assert.ok((await records(page)).drafts.find(d=>d.noteId===ids[0]).content===edited);onlineGetsFail=false
@@ -110,13 +110,13 @@ async function main(){
  done('new-worker-waits-no-editor-reload',{contentHash:sha(last)})
  await context.close();context=null;page=await launch(true);await page.goto(origin+'/notes/'+ids[0]);await until(async()=>await body(page).inputValue()===last,'updated offline launch')
  assert.equal(await page.locator('meta[name="fixture-build"]').getAttribute('content'),'B');assert.equal((await records(page)).drafts.find(d=>d.noteId===ids[0]).storageToken,token)
- assert.equal(puts.length,1)
+ assert.equal(puts.length,2)
  const cacheEntries=await page.evaluate(async()=>{const names=await caches.keys(),urls=[];for(const name of names)for(const req of await(await caches.open(name)).keys())urls.push(new URL(req.url).pathname);return urls})
  assert.ok(cacheEntries.length>0);assert.ok(cacheEntries.every(p=>!p.startsWith('/api/')))
  done('waiting-worker-activates-after-close-keeps-draft-outbox',{cacheEntries:cacheEntries.length,apiCacheEntries:0})
  const output={origin,sourceHashes,chrome:context.browser()?.version()||'persistent Chrome',results,puts,final:{contentHash:sha(last),workspaceNotes:(await records(page)).workspace[0].data.notes.length,outboxCount:(await records(page)).outbox.length},scope:'Synthetic HTTP API; no development DB or existing profile used. Installability verified, no OS install dialog automated.'}
- fs.mkdirSync(path.join(root,'docs/verification'),{recursive:true});fs.writeFileSync(process.env.SEAM_NOTE_PWA_REPORT||path.join(root,'docs/verification/2026-10-26-pwa-results.json'),JSON.stringify(output,null,2)+'\n')
- await page.screenshot({path:process.env.SEAM_NOTE_PWA_SCREENSHOT||path.join(root,'docs/verification/2026-10-26-pwa-offline.png')})
+ fs.mkdirSync(path.join(root,'docs/verification'),{recursive:true});fs.writeFileSync(process.env.SEAM_NOTE_PWA_REPORT||process.env.SEAM_NOTE_PWA_VERIFICATION_OUTPUT||path.join(root,'docs/verification/2026-10-26-pwa-results.json'),JSON.stringify(output,null,2)+'\n')
+ await page.screenshot({path:process.env.SEAM_NOTE_PWA_SCREENSHOT||(process.env.SEAM_NOTE_PWA_SCREENSHOT_DIR?path.join(process.env.SEAM_NOTE_PWA_SCREENSHOT_DIR,'pwa-offline.png'):path.join(root,'docs/verification/2026-10-26-pwa-offline.png'))})
  console.log('PASS: '+results.length+' production PWA scenarios; profile/build artifacts retained at '+work)
  }finally{if(context)await context.close();if(server)await new Promise(resolve=>server.close(resolve))}
 }

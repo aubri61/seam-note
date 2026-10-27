@@ -301,3 +301,73 @@ test('recovery derives protection from a frozen Outbox even when the draft is cl
   assert.equal(get().draft.content,'서버 본문');assert.equal(get().draft.baseVersion,2)
   assert.equal(get().serverProtected,true)
 })
+
+// Multi-tab reconciliation: checkpoint means the last committed local text, not the server baseline.
+const external = (repo, changes = {}) => {
+  const old = repo.records.get('A')
+  const record = { ...old, localRevision: old.localRevision + 1, storageToken: old.storageToken + '-external', ...changes }
+  repo.records.set('A', record); return record
+}
+test('ACK-only changes adopt the verified base and leave the body unchanged', async t => {
+  const { repo, session, get } = setup(t, stored()); await ready(session)
+  const record = external(repo, { baseVersion: 3, baseContent: '로컬 원고', latestServerVersion: 3 })
+  await session.checkHead('A')
+  assert.equal(get().phase, 'saved'); assert.equal(get().draft.content, '로컬 원고'); assert.equal(get().draft.baseVersion, 3)
+  assert.deepEqual(session.savedHead('A'), { token: record.storageToken, revision: record.localRevision })
+})
+test('uncommitted edit rebases over metadata only with a transactional compatibility proof', async t => {
+  const { repo, session, get } = setup(t, stored()); await ready(session)
+  session.edit('A', { content: 'new memory' })
+  external(repo, { baseVersion: 3, baseContent: '로컬 원고', latestServerVersion: 3, canRebaseLocalEdits: true })
+  await session.checkHead('A')
+  assert.equal(get().phase, 'waiting'); assert.equal(get().draft.content, 'new memory'); assert.equal(get().draft.baseVersion, 3)
+  assert.ok(get().revision > get().savedRevision); assert.equal(hasUnprotectedChanges(session.getSnapshot()), true)
+  await session.flushLatest('A'); assert.equal(repo.records.get('A').content, 'new memory'); assert.equal(get().phase, 'saved')
+})
+test('uncertain operation blocks carrying new edits onto a different token', async t => {
+  const { repo, session, get } = setup(t, stored()); await ready(session); session.edit('A', { content: 'memory' })
+  external(repo, { baseVersion: 3, serverOperationPending: true, canRebaseLocalEdits: false })
+  await session.checkHead('A'); assert.equal(get().phase, 'conflict'); assert.equal(get().draft.content, 'memory'); assert.equal(repo.attempts.length, 0)
+})
+test('equal text can follow the record without deleting an uncertain operation protection', async t => {
+  const { repo, session, get } = setup(t, stored()); await ready(session)
+  external(repo, { serverOperationPending: true, canRebaseLocalEdits: false })
+  await session.checkHead('A'); assert.equal(get().phase, 'saved'); assert.equal(get().serverProtected, true)
+})
+test('observer follows latest local text after previously editing and committing its own text', async t => {
+  const { repo, session, get } = setup(t, stored()); await ready(session); session.edit('A', { content: 'own committed' }); await session.flushLatest('A')
+  external(repo, { content: 'other tab committed' }); await session.checkHead('A')
+  assert.equal(get().draft.content, 'other tab committed'); assert.equal(get().phase, 'saved')
+})
+test('divergent text remains a conflict across repeated retry without writes', async t => {
+  const { repo, session, get } = setup(t, stored()); await ready(session); session.edit('A', { content: 'my memory' }); external(repo, { content: 'other text', canRebaseLocalEdits: true })
+  await session.checkHead('A'); await session.retry('A'); await session.retry('A')
+  assert.equal(get().phase, 'conflict'); assert.equal(get().draft.content, 'my memory'); assert.equal(repo.records.get('A').content, 'other text'); assert.equal(repo.attempts.length, 0)
+  assert.equal(localDraftStatus(get(), false, false, null), '다른 탭과 로컬 충돌')
+})
+test('missing committed record is never interpreted as permission to recreate', async t => {
+  const { repo, session, get } = setup(t, stored()); await ready(session); repo.records.delete('A'); await session.checkHead('A'); await session.retry('A')
+  assert.equal(get().phase, 'conflict'); assert.equal(get().draft.content, '로컬 원고'); assert.equal(repo.attempts.length, 0)
+})
+test('older base cannot be adopted even with equal text', async t => {
+  const { repo, session, get } = setup(t, stored()); await ready(session); external(repo, { baseVersion: 1 }); await session.checkHead('A')
+  assert.equal(get().phase, 'conflict'); assert.equal(get().draft.baseVersion, 2)
+})
+test('missed ACK notification re-reads after CAS then retries using the normal CAS', async t => {
+  const { repo, session, get } = setup(t, stored()); await ready(session)
+  const record = external(repo, { baseVersion: 3, latestServerVersion: 3, canRebaseLocalEdits: true }); session.edit('A', { content: 'memory after ACK' })
+  await session.flushLatest('A'); assert.equal(get().phase, 'saved'); assert.equal(repo.records.get('A').baseVersion, 3)
+  assert.equal(repo.attempts.length, 2); assert.notEqual(repo.attempts[0].expectedToken, record.storageToken); assert.equal(repo.attempts[1].expectedToken, record.storageToken)
+})
+test('second concurrent change is still caught by CAS after a verified metadata rebase', async t => {
+  const { repo, session, get } = setup(t, stored()); await ready(session); session.edit('A', { content: 'my memory' })
+  external(repo, { baseVersion: 3, canRebaseLocalEdits: true }); await session.checkHead('A')
+  external(repo, { content: 'other changed again' }); await session.flushLatest('A').catch(() => {})
+  assert.equal(get().phase, 'conflict'); assert.equal(get().draft.content, 'my memory'); assert.equal(repo.records.get('A').content, 'other changed again')
+})
+test('input during head read is compared at resolution and is not replaced by an old captured memory', async t => {
+  const { repo, session, get } = setup(t, stored()); await ready(session)
+  repo.readGate = deferred(); const checking = session.checkHead('A'); session.edit('A', { content: 'during read' })
+  external(repo, { content: 'other text' }); repo.readGate.resolve(); await checking
+  assert.equal(get().phase, 'conflict'); assert.equal(get().draft.content, 'during read')
+})

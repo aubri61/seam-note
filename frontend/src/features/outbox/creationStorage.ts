@@ -12,8 +12,8 @@ export const creationStorage={
   local:async(id:string)=>(await repository()).localEntity(id),
   view:async()=>(await repository()).localWorkspace(),
   chain:async(id:string)=>(await repository()).creationChain(id),
-  claim:async(id:string)=>(await repository()).claimCreation(id),
-  conflict:async(id:string)=>(await repository()).conflictCreation(id),
+  claim:async(id:string, allowedOperationIds?: readonly string[])=>(await repository()).claimCreation(id, allowedOperationIds),
+  conflict:async(id:string, failureCode?: string)=>(await repository()).conflictCreation(id, failureCode),
   ackFolder:async(op:CreationOperation,response:Folder)=>(await repository()).ackFolderCreation(op,response),
   ackNote:async(op:CreationOperation,response:Note,token:string,revision:number,writerId:string)=>(await repository()).ackNoteCreation(op,response,token,revision,writerId),
 }

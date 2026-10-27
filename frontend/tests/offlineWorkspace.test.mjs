@@ -48,3 +48,15 @@ test('local creation read failure cannot hide a successful server Workspace',asy
  const f=fixture();f.deps.storage.local=async()=>{throw Error('unknown schema')}
  const r=await loadWorkspace({},f.deps);assert.deepEqual(r.notes,data.notes);assert.match(r.localSnapshot.warning,/생성 목록을 읽지 못했습니다/)
 })
+
+test('forced local refresh is distinct from a failed server lookup without changing cached metadata',async()=>{
+ const f=fixture();await loadWorkspace({},f.deps)
+ f.deps.online=()=>false;f.deps.localRefresh=true
+ const local=await loadWorkspace({},f.deps);assert.equal(local.localSnapshot.reason,'local-refresh');assert.deepEqual(local.notes,data.notes);assert.equal(f.calls.get,1)
+ f.deps.localRefresh=false;f.deps.online=()=>true;f.deps.get=async()=>{throw new ApiError(503,{code:'UNAVAILABLE',message:'failure',errors:[]})}
+ const failed=await loadWorkspace({},f.deps);assert.equal(failed.localSnapshot.reason,undefined);assert.deepEqual(failed.notes,data.notes)
+})
+test('local-refresh marker never suppresses a local entity read failure warning',async()=>{
+ const f=fixture();await loadWorkspace({},f.deps);f.deps.online=()=>false;f.deps.localRefresh=true;f.deps.storage.local=async()=>{throw Error('read failed')}
+ const result=await loadWorkspace({},f.deps);assert.equal(result.localSnapshot.reason,undefined);assert.match(result.localSnapshot.warning,/읽지 못했습니다/)
+})

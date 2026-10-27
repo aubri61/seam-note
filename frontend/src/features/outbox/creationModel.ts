@@ -9,7 +9,7 @@ export interface LocalEntity {
   folder?: Folder
   note?: NoteSummary
 }
-interface Base { readonly operationId: string; readonly entityId: string; status: OutboxStatus; readonly createdAt: number; attemptedAt: number | null }
+interface Base { failureCode?: string; readonly operationId: string; readonly entityId: string; status: OutboxStatus; readonly createdAt: number; attemptedAt: number | null }
 export type CreationOperation = Base & ({ readonly type: 'FOLDER_CREATE'; readonly payload: Readonly<CreateFolderRequest & { id: string; parentId: string | null }> }
   | { readonly type: 'NOTE_CREATE'; readonly payload: Readonly<CreateNoteRequest & { id: string }>; readonly localRevision: number })
 export function validateCreation(op: CreationOperation): CreationOperation {

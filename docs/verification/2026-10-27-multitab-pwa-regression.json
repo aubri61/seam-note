@@ -1,0 +1,76 @@
+{
+  "origin": "http://127.0.0.1:60332",
+  "sourceHashes": {
+    "frontend/vite.config.ts": "774d3245b38f08a7724e8b6ae36d97d67749c5273a9290c76f259673965aba49",
+    "frontend/src/main.tsx": "bd2c1c24674270e5ea127763fbbaf0dd77d91aba7970ce3ede584d2ba541e762",
+    "frontend/src/app/AppLayout.tsx": "8f99e5608a75f5b0e89791aad2582f146de684ab500994221ae803657505f4e2",
+    "frontend/src/features/folders/useFolders.ts": "55ff89346899b392630795fd3fe9990d2f7f3bd3c77542d0c0ec3f1f30883449",
+    "frontend/src/features/local-drafts/draftDatabase.ts": "8b7e3ba4dff68aeb2cef9f92b8a6120a3560a43217bf198593714a703db7fee1",
+    "frontend/src/features/offline/workspaceCache.ts": "41cf37485fffe3dd754d7fb03997c34ea7eb0277c1fb93238d81a3029dfc9f49",
+    "frontend/src/features/pwa/PwaStatus.tsx": "4a23dc923f607a6d5295754a0f47be2ca4cbbc3e90b0db60ad7d080ec5b1ad3c"
+  },
+  "chrome": "156.0.8078.48",
+  "results": [
+    {
+      "name": "v2-through-v3-to-v4-preserves-drafts-outbox-and-sidebar-titles",
+      "passed": true
+    },
+    {
+      "name": "manifest-installability-and-production-precache",
+      "passed": true,
+      "installabilityErrors": []
+    },
+    {
+      "name": "offline-new-browser-process-direct-note-and-tree",
+      "passed": true,
+      "apiNavigationFallback": false
+    },
+    {
+      "name": "stale-local-list-does-not-hide-an-existing-url-draft",
+      "passed": true
+    },
+    {
+      "name": "offline-edit-refresh-and-unvisited-note-unavailable",
+      "passed": true,
+      "contentHash": "39bb163e4a71a951e6fca66d0f4f954d1aee697e1724e1752a1e8b5edd41b15f"
+    },
+    {
+      "name": "second-offline-cold-launch-keeps-input",
+      "passed": true
+    },
+    {
+      "name": "online-return-keeps-outbox-no-auto-put-then-manual-ack",
+      "passed": true,
+      "serverVersion": 1,
+      "putCount": 1
+    },
+    {
+      "name": "server-503-preserves-workspace-and-manuscript",
+      "passed": true
+    },
+    {
+      "name": "new-worker-waits-no-editor-reload",
+      "passed": true,
+      "contentHash": "100a9288328b21b86202feddc5809caa61a388dc2d7a7432b6d736a3d4afd690"
+    },
+    {
+      "name": "waiting-worker-activates-after-close-keeps-draft-outbox",
+      "passed": true,
+      "cacheEntries": 13,
+      "apiCacheEntries": 0
+    }
+  ],
+  "puts": [
+    {
+      "operationId": "866efb75-70f8-4053-aacd-cc7c14d0cbc6",
+      "expectedVersion": 0,
+      "contentHash": "39bb163e4a71a951e6fca66d0f4f954d1aee697e1724e1752a1e8b5edd41b15f"
+    }
+  ],
+  "final": {
+    "contentHash": "100a9288328b21b86202feddc5809caa61a388dc2d7a7432b6d736a3d4afd690",
+    "workspaceNotes": 3,
+    "outboxCount": 2
+  },
+  "scope": "Synthetic HTTP API; no development DB or existing profile used. Installability verified, no OS install dialog automated."
+}

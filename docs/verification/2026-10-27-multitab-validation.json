@@ -1,0 +1,46 @@
+{
+  "mode": "isolated candidate; NOT applied to live project source",
+  "nodeTests": {
+    "passed": 141,
+    "failed": 0
+  },
+  "build": "passed with >500kB chunk warning",
+  "lint": "passed",
+  "baselineReproductions": 5,
+  "candidateMultiTabScenarios": 9,
+  "realWorkspaceRegressionScenarios": 18,
+  "productionPwaScenarios": 10,
+  "uiSuites": [
+    "localDraftStorage (added copy/download assertions)",
+    "manualSaveUx"
+  ],
+  "transientFailures": [
+    "initial workspace run: ACK expected3 observed2, stopped after2 passed",
+    "second run: local commit timeout in case9, stopped after8 passed"
+  ],
+  "finalWorkspaceHarnessWait": "URL plus actual editor data-note-id and editable title; assert identity before input",
+  "logs": {
+    "tests-final.log": "52d784ea741bd442571136539f5d97863b39901171b794ac8bf4b6c92ddd9215",
+    "build-final.log": "aea00692b3e42f55c1ba49f62061a3fa9f8b3f96a5897eb7c7a7e2751a799dcb",
+    "lint-final.log": "9d162f8506469c2b708c20eaff6e7e0e7a143246544168dba7db5953bac55197",
+    "browser-local.log": "628c8083297c7cfb869c2285b1e6bf9ac63d9a6a0918a53cc4f93d1630ca8098",
+    "manual-ux.log": "21d2f47d2dbae52858b118ceb8dd548cc39e9f69ec63e4b6e88ea77fd1abd4c7",
+    "multitab-final.log": "3d187d175e2b6263863b2c49027ced647e8e34efb3f8374c1ff2855a950cfd1b",
+    "workspace-live.log": "4febc996822c19e6adb8dba510c53dcfa729e5827a559b1817b92983f7b06408",
+    "workspace-live-recheck.log": "777d34f2c53d7e6a4cc0e2496c993d2b6f17e44e570e9ad94a0b94f064f60850",
+    "workspace-live-final.log": "1d21be80098cd277e272f8da18c01aadf7a9990df310410c4950171f40526e97",
+    "pwa.log": "523270da555e27d5bbb494c86629fed440170cc5cf2d4d0daec3cc4d8c2ec8a8"
+  },
+  "environment": {
+    "origin": "http://127.0.0.1:25176",
+    "apiPort": 18766,
+    "postgresPort": 25442,
+    "database": "seam_note_manual_lab"
+  },
+  "limitations": [
+    "Live product source NOT patched pending backup confirmation",
+    "Safari not tested",
+    "18-case production run preceded final local-CAS error classification branch; final141 tests plus9-case actual multi-tab/independent-note sync exercise final candidate",
+    "Initial transient workspace harness failures not conclusively attributed to product or test"
+  ]
+}

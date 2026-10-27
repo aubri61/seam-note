@@ -5,6 +5,8 @@ export const DRAFT_CHANNEL = 'seam-note-local-drafts-v1'
 export interface LocalNoteDraft extends NoteDraft {
   /** Read projection from Outbox, never a persisted drafts schema field. */
   serverOperationPending?: boolean
+  /** Transactional read projection only; never persisted. Unknown means unsafe to rebase edits. */
+  canRebaseLocalEdits?: boolean
   localRevision: number
   localSavedAt: number
   storageToken: string

@@ -10,7 +10,7 @@ export interface WorkspaceRecord {
   cachedAt: number
   requestedAt: number
 }
-export type WorkspaceView = WorkspaceTreeResponse & { localSnapshot?: { cachedAt: number; warning: string }; localIds?: string[] }
+export type WorkspaceView = WorkspaceTreeResponse & { localSnapshot?: { cachedAt: number; warning: string; reason?: 'local-refresh' }; localIds?: string[] }
 export function validateWorkspace(data: WorkspaceTreeResponse) {
   if (!data || !Array.isArray(data.folders) || !Array.isArray(data.notes)
     || !data.folders.every(f => typeof f.id === 'string' && typeof f.name === 'string' && (f.parentId === null || typeof f.parentId === 'string') && Number.isSafeInteger(f.sortOrder) && Number.isSafeInteger(f.version))
@@ -28,6 +28,8 @@ export const workspaceStorage = {
   save: async (data: WorkspaceTreeResponse, requestedAt: number) => (await repository()).saveWorkspace(data, requestedAt),
 }
 interface Dependencies {
+  /** Forced local merge after a local mutation, not a failed network lookup. */
+  localRefresh?: boolean
   online: () => boolean
   get: typeof getWorkspaceTree
   storage: Pick<typeof workspaceStorage, 'read' | 'save'> & { local?: () => Promise<{entities:LocalEntity[];pendingIds:string[]}> }
@@ -64,9 +66,9 @@ export async function loadWorkspace(options: RequestOptions = {}, dependencies: 
   }
   const cached = await dependencies.storage.read()
   if (options.signal?.aborted) throw options.signal.reason
-  if (cached) return mergeLocal({ ...validateWorkspace(cached.data), localSnapshot: { cachedAt: cached.cachedAt,
+  if (cached) return mergeLocal({ ...validateWorkspace(cached.data), localSnapshot: { cachedAt: cached.cachedAt, ...(dependencies.localRefresh ? {reason: 'local-refresh' as const} : {}),
     warning: '마지막으로 저장한 폴더·원고 목록입니다. 이 브라우저에 본문이 저장된 원고만 오프라인에서 열 수 있습니다.' } },dependencies.storage)
-  const created=await mergeLocal({folders:[],notes:[],localSnapshot:{cachedAt:Date.now(),warning:'이 브라우저에서 만든 로컬 목록입니다. 서버에는 아직 반영되지 않았습니다.'}},dependencies.storage)
+  const created=await mergeLocal({folders:[],notes:[],localSnapshot:{cachedAt:Date.now(),...(dependencies.localRefresh?{reason:'local-refresh' as const}:{}),warning:'이 브라우저에서 만든 로컬 목록입니다. 서버에는 아직 반영되지 않았습니다.'}},dependencies.storage)
   if(created.localIds?.length)return created
   if (failure) throw failure
   throw new Error('오프라인 목록이 없습니다. 온라인에서 Workspace를 먼저 열어주세요.')

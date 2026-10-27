@@ -24,7 +24,8 @@ const Row = styled.div<{ selected: boolean; to?: string }>(({ theme, selected })
   transition: `background ${theme.motion.duration[100]} ${theme.motion.easing.standard}`,
   '&:hover': { background: selected ? theme.colors.selected : theme.colors.background },
   '> span': { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  input: { minWidth: 0, width: '100%', border: `1px solid ${theme.colors.border}`, borderRadius: theme.radii.sm, background: theme.colors.surface, padding: theme.spacing.xs },
+  'input:focus, input:focus-visible': { border: 0, outline: 'none', boxShadow: 'none' },
+  input: { minWidth: 0, width: '100%', border: 0, outline: 'none', boxShadow: 'none', borderRadius: theme.radii.sm, background: 'transparent', padding: theme.spacing.xs },
 }))
 const Chevron = styled.span(({ theme }) => ({
   display: 'flex', flex: '0 0 13px',
@@ -41,6 +42,7 @@ interface FolderTreeProps {
   draftTitles: Readonly<Partial<Record<string, string>>>
   selectedNoteId: string | null
   selectedFolderId: string | null
+  creatingFolderId: string | null
   editingFolderId: string | null
   onFolderName: (id: string, name: string) => Promise<boolean | null>
   onCancelFolderName: () => void
@@ -53,7 +55,7 @@ interface FolderTreeProps {
   onSelect: (id: string) => void
 }
 
-export function FolderTree({ actionsBusy, onFolderAction, localIds = [], tree, draftTitles, selectedNoteId, selectedFolderId, onFolderSelect, search, openFolders, onFolderOpen, onSelect, editingFolderId, onFolderName, onCancelFolderName, namingBusy, namingError }: FolderTreeProps) {
+export function FolderTree({ creatingFolderId, actionsBusy, onFolderAction, localIds = [], tree, draftTitles, selectedNoteId, selectedFolderId, onFolderSelect, search, openFolders, onFolderOpen, onSelect, editingFolderId, onFolderName, onCancelFolderName, namingBusy, namingError }: FolderTreeProps) {
   const rows = useMemo(() => visibleWorkspaceRows(tree, openFolders, search), [tree, openFolders, search])
   const [focusedKey, setFocusedKey] = useState<string | null>(null)
   const selectedKey = selectedFolderId ? `folder:${selectedFolderId}` : selectedNoteId ? `note:${selectedNoteId}` : null
@@ -116,7 +118,7 @@ export function FolderTree({ actionsBusy, onFolderAction, localIds = [], tree, d
           >
             <Chevron data-open={expanded}>{folder && <Icon name="chevron" size={13} />}</Chevron>
             <Icon name={folder ? 'folder' : 'note'} size={16} />
-            {folder && node.folder.id === editingFolderId ? <FolderName key={node.folder.id} name={node.folder.name}
+            {folder && node.folder.id === editingFolderId ? <FolderName key={node.folder.id} name={node.folder.name} creating={node.folder.id === creatingFolderId}
               busy={namingBusy} error={namingError} onSave={name => onFolderName(node.folder.id, name)} onCancel={onCancelFolderName} />
               : <span>{label}</span>}
             {localIds.includes(folder ? node.folder.id : node.note.id) && <small aria-label="서버 미반영" style={{fontSize:10,opacity:.7}}>로컬</small>}
@@ -132,8 +134,8 @@ export function FolderTree({ actionsBusy, onFolderAction, localIds = [], tree, d
   )
 }
 
-function FolderName({ name, busy, error, onSave, onCancel }: {
-  name: string; busy: boolean; error?: string
+function FolderName({ name, creating, busy, error, onSave, onCancel }: {
+  name: string; creating: boolean; busy: boolean; error?: string
   onSave: (name: string) => Promise<boolean | null>; onCancel: () => void
 }) {
   const [value, setValue] = useState(name)
@@ -151,7 +153,7 @@ function FolderName({ name, busy, error, onSave, onCancel }: {
     try { await onSave(next) } finally { submitting.current = false }
   }
   return <span style={{ flex: 1 }}>
-    <input ref={input} aria-label="새 폴더 이름" aria-invalid={!!(validation || error)} value={value} maxLength={200} readOnly={busy}
+    <input ref={input} aria-label={creating ? '새 폴더 이름' : '폴더 이름'} aria-invalid={!!(validation || error)} value={value} maxLength={200} readOnly={busy}
       onChange={event => setValue(event.target.value)} onBlur={() => void save()}
       onKeyDown={event => {
         event.stopPropagation()

@@ -1,0 +1,51 @@
+{
+  "status": "Applied to project source on 2026-10-27 after explicit user instruction; candidate SHA-256 verified",
+  "candidateRoot": "/private/tmp/seam-note-multitab-fix",
+  "files": {
+    "frontend/src/features/local-drafts/draftSession.ts": {
+      "baseSha256": "994f5cf6be209b9fc8f9912b0a8fdf4b57f379bb87912262749f77e7e3543cde",
+      "candidateSha256": "fe7a8fb0df718aa268c5c66d308628abe9d9456029ec12024664ffd7763f1203"
+    },
+    "frontend/src/features/local-drafts/draftDatabase.ts": {
+      "baseSha256": "2b9e91956f8ace5a6e7694a156aa351e28eb8f60bd372f234c4089246227e4bc",
+      "candidateSha256": "8b7e3ba4dff68aeb2cef9f92b8a6120a3560a43217bf198593714a703db7fee1"
+    },
+    "frontend/src/features/local-drafts/localDraftTypes.ts": {
+      "baseSha256": "641c6e4ebc06704b33c52597db4813590389da7384ab10caffd92291d644bd27",
+      "candidateSha256": "d14d77d7c4a2e1c764b5fe82fadf51d4a6b16b7001dec8f2894b27648a762dd9"
+    },
+    "frontend/src/features/local-drafts/localDraftStatus.ts": {
+      "baseSha256": "a28de690d6e165a3fed59582a2f882674817b23a6fb91c82e2725cdd9d7b342c",
+      "candidateSha256": "25fe67c85f6a986400ff5918227160091f7ea579b701ba3e976e89608fa75fb2"
+    },
+    "frontend/src/features/notes/noteDrafts.ts": {
+      "baseSha256": "a9b55b5190f52410a2851b5f0a0e0a9ea1f6f2a6a8012e0f60956550732bcc89",
+      "candidateSha256": "a18dec054dd637ea3c4e71e5b74710dc0df4caaab4b7a9193037784cb43170b1"
+    },
+    "frontend/src/features/notes/NoteEditor.tsx": {
+      "baseSha256": "3f9397baf5c8b6008dad663660ef5c332c0c2ae7d23f4687eb1e088db7b16e85",
+      "candidateSha256": "10face2da4b7ca465110c0519ee829b1ab92f6866ce434a9bd7ec1460dc1169d"
+    },
+    "frontend/src/features/manual-sync/SyncCoordinator.ts": {
+      "baseSha256": "0ac8a119ebfc56e46015320a78b7666b37feea4361b8be65d0830ca18cc78846",
+      "candidateSha256": "8852b68e480dd5d5368e73a641909012ee101058189cc665ccbf21a9f148f692"
+    },
+    "frontend/tests/localDraftStorage.test.mjs": {
+      "baseSha256": "918cbb6bac6881daa319209cf2f1e194d1381069fac1448a1b4047d8ebea98da",
+      "candidateSha256": "d183dcdd5936d680660aa7a1e547bd1ce2dea9e67af633ef684e27bcfcd4c481"
+    },
+    "frontend/tests/syncCoordinator.test.mjs": {
+      "baseSha256": "523e4566d1d0d5ee3f88237ee5e0f7d5c50201329345a2551965e74057691215",
+      "candidateSha256": "e881dfd2b3393d2329e8c34f7e03b93a3dbca2a150644b379c9a821864d4dd8d"
+    },
+    "frontend/tests/browser/localDraftStorage.cjs": {
+      "baseSha256": "628c826470e9cd1c6f806707929758022bba9b89e5bc0e94ca2f94dbf0ccb3d8",
+      "candidateSha256": "15caa3e7514033ca9eaf215e9077d0896eb32ccc1f82134a6c92d2eea046e989"
+    },
+    "frontend/tests/browser/workspaceSyncLive.cjs": {
+      "baseSha256": "9297906112ea9f76c08d7a004d4bc3a59e01d27d4fd76be187f281cf8e7b38e4",
+      "candidateSha256": "72e5bedf4a6239de95013904c31414a691c44b13f8122b6944d8a13ae8956049"
+    }
+  },
+  "initialStatus": "isolated candidate; NOT applied to live project source"
+}

@@ -4,6 +4,7 @@ import { isDraftDirty } from '@/features/notes/noteDrafts'
 
 export type OutboxStatus = 'pending' | 'inFlight' | 'conflict'
 export interface NoteUpdateOperation {
+  failureCode?: string
   readonly operationId: string
   readonly noteId: string
   readonly type: 'NOTE_UPDATE'

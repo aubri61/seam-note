@@ -23,3 +23,9 @@ IndexedDB schema/Flyway/서버 API는 변경하지 않는다. 새 오프라인 �
 ## 접근성
 
 트리 row 클릭과 메뉴 클릭을 분리한다. 메뉴 버튼 또는 Shift+F10으로 열고, Up/Down/Home/End/Enter/Escape를 사용한다. 외부 클릭/Tab/스크롤/resize로 닫는다. 검색/폴더 펼침/선택은 메뉴를 여는 것만으로 바꾸지 않는다. 모바일 Radix Drawer에서는 메뉴 portal을 Drawer 내부에 두어 모달의 focus/pointer 보호를 유지한다.
+
+## 이름 변경과 생성 후 포커스 (2026-10-27)
+
+`… → 이름 변경`은 기존 인라인 입력을 열고 Enter/blur로 확정, Escape로 취소한다. 미전송 pending 로컬 폴더는 metadata와 FOLDER_CREATE snapshot을 새 operationId로 원자 교체한다. 이미 시도한 snapshot은 변경하지 않는다. 서버 폴더는 기존 온라인 PATCH이며 성공 후 로컬 Workspace/confirmed receipt도 갱신한다. 새 오프라인 rename 작업 종류나 schema는 없다.
+
+입력란의 기본·focus 테두리는 제거했다. 새 문서는 데스크톱에서 실제 생성 UUID/URL/Draft 복구가 확인된 후 제목으로 일회성 키보드 focus를 옮긴다. 모바일 생성은 Drawer를 닫거나 뒤쪽 제목으로 강제로 focus하지 않는다. 기존 노트 클릭 동작은 별도다. 상세 파일과 검증은 [작업 이력](../worklogs/2026-10-27-folder-rename-focus.md)을 따른다.

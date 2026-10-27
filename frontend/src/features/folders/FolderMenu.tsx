@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
 
-export type FolderAction = 'add-folder' | 'add-note' | 'delete'
+export type FolderAction = 'add-folder' | 'add-note' | 'rename' | 'delete'
 const Trigger = styled.button(({ theme }) => ({
   marginLeft: 'auto', flexShrink: 0, width: 28, height: 28, display: 'grid', placeItems: 'center',
   border: 0, borderRadius: theme.radii.sm, color: theme.colors.mutedText, background: 'transparent', cursor: 'pointer',
@@ -43,7 +43,7 @@ export function FolderMenu({ name, tabIndex, disabled, onAction }: {
         event.stopPropagation()
         if (position) { close(); return }
         const bounds = event.currentTarget.getBoundingClientRect()
-        setPosition({container: event.currentTarget.closest('[role="dialog"]') ?? document.body, top: Math.max(8, Math.min(bounds.bottom + 4, window.innerHeight - 126)), left: Math.max(8, Math.min(bounds.right - 172, window.innerWidth - 180))})
+        setPosition({container: event.currentTarget.closest('[role="dialog"]') ?? document.body, top: Math.max(8, Math.min(bounds.bottom + 4, window.innerHeight - 166)), left: Math.max(8, Math.min(bounds.right - 172, window.innerWidth - 180))})
       }}><Icon name="more" size={17} /></Trigger>
     {position && createPortal(<Popup ref={menu} role="menu" aria-label={`${name} 폴더 작업`} style={{top:position.top,left:position.left}}
       onClick={event => event.stopPropagation()} onKeyDown={event => {
@@ -58,7 +58,7 @@ export function FolderMenu({ name, tabIndex, disabled, onAction }: {
           items[next]?.focus()
         }
       }}>
-      {([['add-folder','folder','폴더 추가'], ['add-note','note','문서 추가'], ['delete','trash','폴더 삭제']] as const).map(([action, icon, label]) =>
+      {([['add-folder','folder','폴더 추가'], ['add-note','note','문서 추가'], ['rename','pencil','이름 변경'], ['delete','trash','폴더 삭제']] as const).map(([action, icon, label]) =>
         <button key={action} role="menuitem" type="button" onClick={() => { close(); onAction(action) }}><Icon name={icon} size={15} />{label}</button>)}
     </Popup>, position.container)}
   </>

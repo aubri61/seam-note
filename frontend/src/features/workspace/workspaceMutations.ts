@@ -1,5 +1,7 @@
 import { mutationOptions, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
+import { renameFolderEntry } from '@/features/folders/folderRenaming'
+import { loadWorkspace, workspaceStorage } from '@/features/offline/workspaceCache'
 import { deleteEmptyFolder } from '@/features/folders/folderDeletion'
 import { createFolder, renameFolder } from '@/features/folders/folderApi'
 import { createNote, deleteNote } from '@/features/notes/noteApi'
@@ -75,24 +77,32 @@ export function useDeleteNoteMutation(onDeleted: (id: UUID, before: WorkspaceTre
   return useMutation(deleteNoteMutationOptions(useQueryClient(), onDeleted))
 }
 
+async function cacheFolderRename(client: QueryClient, folder: Folder) {
+  await client.cancelQueries({ queryKey: workspaceKeys.tree(), exact: true })
+  client.setQueryData<WorkspaceTreeResponse>(workspaceKeys.tree(), current => current ? {
+    ...current, folders: current.folders.map(item => item.id === folder.id ? folder : item),
+  } : undefined)
+  client.setQueryData(folderKeys.detail(folder.id), folder)
+  void Promise.all([
+    client.invalidateQueries({ queryKey: workspaceKeys.tree(), exact: true }),
+    client.invalidateQueries({ queryKey: folder.parentId ? folderKeys.children(folder.parentId) : folderKeys.roots(), exact: true }),
+  ])
+}
 export function renameFolderMutationOptions(client: QueryClient) {
   return mutationOptions({
     mutationKey: ['folders', 'rename'], mutationFn: renameFolder, retry: false, networkMode: 'always',
-    onSuccess: async folder => {
-      await client.cancelQueries({ queryKey: workspaceKeys.tree(), exact: true })
-      client.setQueryData<WorkspaceTreeResponse>(workspaceKeys.tree(), current => current ? {
-        ...current, folders: current.folders.map(item => item.id === folder.id ? folder : item),
-      } : undefined)
-      client.setQueryData(folderKeys.detail(folder.id), folder)
-      void Promise.all([
-        client.invalidateQueries({ queryKey: workspaceKeys.tree(), exact: true }),
-        client.invalidateQueries({ queryKey: folder.parentId ? folderKeys.children(folder.parentId) : folderKeys.roots(), exact: true }),
-      ])
-    },
+    onSuccess: folder => cacheFolderRename(client, folder),
   })
 }
 export function useRenameFolderMutation() {
-  return useMutation(renameFolderMutationOptions(useQueryClient()))
+  const client=useQueryClient()
+  return useMutation({mutationKey:['folders','rename'],mutationFn:renameFolderEntry,retry:false,networkMode:'always',
+    onSuccess:async result=>{
+      if (!result.localOnly) return cacheFolderRename(client,result.folder)
+      await client.cancelQueries({queryKey:workspaceKeys.tree(),exact:true})
+      client.setQueryData(workspaceKeys.tree(),await loadWorkspace({}, {localRefresh:true,online:()=>false,get:async()=>{throw Error('local only')},storage:workspaceStorage}))
+    },
+  })
 }
 
 export function deleteFolderMutationOptions(client: QueryClient, onDeleted?: (id: UUID) => void) {

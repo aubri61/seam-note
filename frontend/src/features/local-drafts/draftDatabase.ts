@@ -128,6 +128,34 @@ export class DexieDraftRepository implements DraftRepository {
       return note
     })
   }
+  async renamePendingFolder(id: string, name: string): Promise<Folder> {
+    await this.ensureSchema()
+    return this.db.transaction('rw', [this.db.localEntities, this.db.creationOutbox], async () => {
+      const entity = await this.db.localEntities.get(id)
+      const operations = (await this.db.creationOutbox.where('entityId').equals(id).toArray()).map(validateCreation)
+      if (!entity?.folder || entity.confirmed || operations.length !== 1) throw new LocalDraftConflict()
+      const previous = operations[0]
+      if (previous.type !== 'FOLDER_CREATE' || previous.status !== 'pending' || previous.attemptedAt !== null) {
+        throw new Error('이미 전송했거나 결과가 불확실한 폴더는 서버 반영 상태를 확인한 뒤 이름을 변경해주세요.')
+      }
+      const next = creationOperation(id, {type:'FOLDER_CREATE',payload:{...previous.payload,name:name.trim()}})
+      const folder = {...entity.folder,name:name.trim(),updatedAt:new Date().toISOString()}
+      await this.db.localEntities.put({...entity,folder})
+      await this.db.creationOutbox.delete(previous.operationId)
+      await this.db.creationOutbox.add(next)
+      return folder
+    })
+  }
+  async confirmFolderRename(folder: Folder) {
+    await this.ensureSchema()
+    await this.db.transaction('rw', [this.db.localEntities, this.db.workspace], async () => {
+      const entity = await this.db.localEntities.get(folder.id),cache = await this.db.workspace.get('current')
+      if (entity && (!entity.confirmed || entity.kind !== 'folder')) throw new LocalDraftConflict()
+      if (entity) await this.db.localEntities.put({...entity,folder,confirmedAt:Date.now()})
+      if (cache) await this.db.workspace.put({...cache,data:{...cache.data,folders:cache.data.folders.map(f=>f.id===folder.id?folder:f)},
+        requestedAt:Math.max(Date.now(),cache.requestedAt+1),cachedAt:Date.now()})
+    })
+  }
   private async folderDeletionState(id: string) {
     const cache = await this.db.workspace.get('current')
     const entities = await this.db.localEntities.toArray()
@@ -186,22 +214,23 @@ export class DexieDraftRepository implements DraftRepository {
       return chain
     })
   }
-  async claimCreation(entityId:string) {
+  async claimCreation(entityId:string, allowedOperationIds?: readonly string[]) {
     await this.ensureSchema()
     return this.db.transaction('rw',[this.db.localEntities,this.db.creationOutbox],async()=>{
       const chain=await this.creationChain(entityId)
       if(!chain.length)return null
       if(chain.length!==1)throw new Error('부모 폴더가 서버에 확인되기 전 자식 전송을 중단했습니다.')
       const op=chain[0]
+      if (allowedOperationIds && !allowedOperationIds.includes(op.operationId)) return null
       if(op.status==='conflict')throw new Error('생성 충돌 작업입니다. 로컬 데이터를 보존하고 전송을 중단했습니다.')
       if(op.status==='inFlight')return op
       const next={...op,status:'inFlight' as const,attemptedAt:Math.max(Date.now(),op.createdAt)}
       await this.db.creationOutbox.put(next);return next
     })
   }
-  async conflictCreation(id:string){await this.ensureSchema();await this.db.transaction('rw',this.db.creationOutbox,async()=>{
+  async conflictCreation(id:string, failureCode?: string){await this.ensureSchema();await this.db.transaction('rw',this.db.creationOutbox,async()=>{
     const op=await this.db.creationOutbox.get(id);if(!op||op.status!=='inFlight')throw new LocalDraftConflict()
-    await this.db.creationOutbox.put({...op,status:'conflict'})
+    await this.db.creationOutbox.put({...op,status:'conflict', failureCode})
   })}
   private async confirmCreation(op:CreationOperation,response:Folder|Note) {
     const stored=await this.db.creationOutbox.get(op.operationId),entity=await this.db.localEntities.get(op.entityId)
@@ -276,7 +305,11 @@ export class DexieDraftRepository implements DraftRepository {
       validateLocalDraft(record)
       const operations = (await this.db.outbox.where('noteId').equals(noteId).toArray()).map(validateOperation)
       const local = await this.db.localEntities.get(noteId)
-      return local && !local.confirmed || operations.some(op => op.status !== 'pending') ? { ...record, serverOperationPending: true } : record
+      const serverOperationPending = !!(local && !local.confirmed || operations.some(op => op.status !== 'pending'))
+      const canRebaseLocalEdits = !serverOperationPending && (operations.length === 0 || operations.length === 1
+        && operations[0].status === 'pending' && operations[0].title === record.title && operations[0].content === record.content
+        && operations[0].expectedVersion === record.baseVersion && operations[0].localRevision === record.localRevision)
+      return { ...record, serverOperationPending, canRebaseLocalEdits }
     })
   }
   async write(draft: NoteDraft, revision: number, expectedToken: string | undefined, writerId: string) {
@@ -315,6 +348,19 @@ export class DexieDraftRepository implements DraftRepository {
       return next
     })
   }
+  async workspaceSyncCount() {
+    await this.ensureSchema()
+    return this.db.transaction('r', [this.db.outbox, this.db.creationOutbox], async () =>
+      await this.db.outbox.count() + await this.db.creationOutbox.count())
+  }
+  async workspaceSyncSnapshot() {
+    await this.ensureSchema()
+    return this.db.transaction('r', [this.db.drafts, this.db.outbox, this.db.localEntities, this.db.creationOutbox, this.db.workspace], async () => ({
+      drafts: await this.db.drafts.toArray(), updates: await this.db.outbox.toArray(),
+      creations: await this.db.creationOutbox.toArray(), entities: await this.db.localEntities.toArray(),
+      workspace: (await this.db.workspace.get('current'))?.data,
+    }))
+  }
   async listOperations(noteId: string) {
     await this.ensureSchema()
     return (await this.db.outbox.where('noteId').equals(noteId).toArray()).map(validateOperation)
@@ -341,7 +387,7 @@ export class DexieDraftRepository implements DraftRepository {
     })
   }
   /** Atomic head check + manual selection. Retrying inFlight keeps its exact key/payload. */
-  async prepareManual(noteId: string, token: string, revision: number) {
+  async prepareManual(noteId: string, token: string, revision: number, allowedOperationIds?: readonly string[]) {
     await this.ensureSchema()
     return this.db.transaction('rw', [this.db.drafts, this.db.outbox, this.db.localEntities], async () => {
       const local=await this.db.localEntities.get(noteId)
@@ -352,9 +398,10 @@ export class DexieDraftRepository implements DraftRepository {
       if (ops.some(op => op.status === 'conflict')) throw new Error('서버 버전 충돌 작업이 남아 있습니다. 로컬 원고를 보존하고 충돌을 확인해주세요.')
       const frozen = ops.filter(op => op.status === 'inFlight')
       if (frozen.length > 1) throw new LocalDraftConflict()
-      if (frozen.length) return frozen[0]
+      if (frozen.length) return !allowedOperationIds || allowedOperationIds.includes(frozen[0].operationId) ? frozen[0] : null
       if (!ops.length) return null
       const op = ops[0]
+      if (allowedOperationIds && !allowedOperationIds.includes(op.operationId)) return null
       if (ops.length !== 1 || op.localRevision !== revision || op.title !== current.title
         || op.content !== current.content || op.expectedVersion !== current.baseVersion) throw new LocalDraftConflict()
       const now = Math.max(Date.now(), op.updatedAt)
@@ -389,14 +436,14 @@ export class DexieDraftRepository implements DraftRepository {
       return next
     })
   }
-  async markConflict(operationId: string) {
+  async markConflict(operationId: string, failureCode?: string) {
     await this.ensureSchema()
     return this.db.transaction('rw', this.db.outbox, async () => {
       const operation = await this.db.outbox.get(operationId)
       if (!operation) throw new LocalDraftConflict()
       validateOperation(operation)
       if (operation.status !== 'inFlight') throw new LocalDraftConflict()
-      const next: NoteUpdateOperation = { ...operation, status: 'conflict', updatedAt: Math.max(Date.now(), operation.updatedAt) }
+      const next: NoteUpdateOperation = { ...operation, status: 'conflict', failureCode, updatedAt: Math.max(Date.now(), operation.updatedAt) }
       await this.db.outbox.put(next)
       return next
     })

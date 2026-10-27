@@ -59,11 +59,11 @@ const Search = styled.label(({ theme }) => ({
   gap: theme.spacing.sm,
   padding: `${theme.spacing.sm} ${theme.spacing.md}`,
   marginBottom: theme.spacing.lg,
-  border: '1px solid transparent',
+  border: 0,
   borderRadius: theme.radii.pill,
   transition: `border-color ${theme.motion.duration[100]} ${theme.motion.easing.standard}, background ${theme.motion.duration[100]} ${theme.motion.easing.standard}`,
-  '&:hover, &:focus-within': { borderColor: theme.colors.border, background: theme.colors.surface },
-  '&:focus-within': { outline: `2px solid ${theme.colors.mutedText}`, outlineOffset: theme.spacing.xxs },
+  '&:hover, &:focus-within': { background: theme.colors.surface },
+  '&:focus-within': { outline: 'none' },
   color: theme.colors.mutedText,
   input: {
     width: '100%',
@@ -169,7 +169,7 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
         {folders.workspace.data && <FolderTree
           actionsBusy={folders.busy || !!folders.pendingFolder} onFolderAction={onFolderAction}
           tree={folders.tree} localIds={folders.localIds} draftTitles={draftTitles} selectedNoteId={folders.selectedNoteId}
-          editingFolderId={folders.editingFolderId} onFolderName={folders.renameCreatedFolder}
+          creatingFolderId={folders.pendingFolder?.id ?? null} editingFolderId={folders.editingFolderId} onFolderName={folders.renameCreatedFolder}
           onCancelFolderName={folders.cancelFolderName} namingBusy={folders.busy} namingError={(folders.pendingFolder ? folders.createFolderMutation.error : folders.renameFolderMutation.error)?.message}
           selectedFolderId={folders.selectedFolderId} onFolderSelect={folders.selectFolder} search={folders.search}
           openFolders={folders.openFolders} onFolderOpen={folders.setFolderOpen} onSelect={onSelectNote}

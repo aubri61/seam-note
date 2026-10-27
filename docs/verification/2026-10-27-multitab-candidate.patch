@@ -1,0 +1,428 @@
+--- a/frontend/src/features/local-drafts/draftSession.ts
++++ b/frontend/src/features/local-drafts/draftSession.ts
+@@ -15,6 +15,9 @@
+   serverProtected?: boolean
+ }
+ interface WorkingEntry extends DraftEntry {
++  checkpoint?: NoteDraft
++  headCheckRequested?: boolean
++  casRecoveryUsed?: boolean
+   ready: boolean
+   edited: boolean
+   token?: string
+@@ -37,13 +40,16 @@
+   return a.noteId === b.noteId && a.title === b.title && a.content === b.content && a.baseVersion === b.baseVersion
+     && a.baseTitle === b.baseTitle && a.baseContent === b.baseContent && a.latestServerVersion === b.latestServerVersion
+ }
++function sameText(a: NoteDraft, b: NoteDraft) {
++  return a.noteId === b.noteId && a.title === b.title && a.content === b.content
++}
+ function fromRecord(record: LocalNoteDraft): NoteDraft {
+   const { noteId, title, content, baseVersion, baseTitle, baseContent, latestServerVersion } = record
+   return { noteId, title, content, baseVersion, baseTitle, baseContent, latestServerVersion }
+ }
+ function failureMessage(error: unknown) {
+   const name = error instanceof Error ? error.name : 'UnknownError'
+-  if (name === 'LocalDraftConflict') return '다른 탭 또는 로컬 원고가 변경되어 저장을 중단했습니다. 현재 입력은 유지됩니다. 원고를 복사하고 다른 탭의 변경을 확인해주세요.'
++  if (name === 'LocalDraftConflict') return '다른 탭 또는 로컬 원고가 변경되어 저장을 중단했습니다. 현재 입력은 유지됩니다. 이 탭과 다른 탭의 원고가 달라졌거나 저장 기준을 안전하게 확인할 수 없습니다. 현재 입력을 복사하거나 파일로 보관한 뒤 다른 탭을 확인해주세요. 새로고침·탭 종료 시 아직 로컬 저장되지 않은 입력이 사라질 수 있습니다.'
+   if (name === 'QuotaExceededError') return '브라우저 저장 공간이 부족해 로컬 저장에 실패했습니다. 현재 입력은 메모리에 유지됩니다.'
+   if (name === 'InvalidLocalDraft') return '기존 로컬 원고의 형식을 확인할 수 없어 덮어쓰지 않았습니다. 현재 입력을 보관하고 저장소 상태를 확인해주세요.'
+   return '로컬 저장소를 읽거나 저장하지 못했습니다. 현재 입력은 메모리에 유지됩니다. 저장소 이용 설정을 확인하고 다시 시도해주세요.'
+@@ -112,6 +118,7 @@
+         entry.serverProtected = !!record.serverOperationPending
+         const stored = fromRecord(record)
+         if (memory && entry.edited && isDraftDirty(stored) && !sameDraft(memory, stored)) throw new LocalDraftConflict()
++        entry.checkpoint = stored
+         entry.token = record.storageToken
+         entry.savedRevision = record.localRevision
+         entry.savedAt = record.localSavedAt
+@@ -156,7 +163,7 @@
+     if (!entry.draft) return
+     const next = editDraft({ [id]: entry.draft }, id, patch)[id]
+     if (next === entry.draft) return
+-    entry.draft = next; entry.revision++; entry.edited = true
++    entry.draft = next; entry.revision++; entry.edited = true; entry.casRecoveryUsed = false
+     if (entry.ready && entry.phase !== 'conflict' && entry.phase !== 'failed') this.schedule(id)
+     this.publish(id)
+   }
+@@ -181,12 +188,25 @@
+     entry.phase = 'saving'; entry.firstPendingAt = undefined; entry.flushRequested = false
+     this.publish(id)
+     entry.writing = this.repository.write(draft, revision, expected, this.writerId).then(record => {
++      entry.checkpoint = fromRecord(record); entry.casRecoveryUsed = false
+       entry.token = record.storageToken; entry.savedRevision = revision; entry.savedAt = record.localSavedAt
+       entry.phase = entry.revision === revision ? 'saved' : 'waiting'; entry.error = null
+       this.channel?.postMessage({ noteId: id, writerId: this.writerId })
+       this.publish(id)
+-    }).catch(error => this.fail(id, error)).finally(() => {
++    }).catch(async error => {
++      // A missed notification can reach the transaction CAS first. Re-read once;
++      // the retry still uses the repository's original token/revision CAS.
++      if (error instanceof LocalDraftConflict && !entry.casRecoveryUsed && !entry.acknowledging) {
++        entry.casRecoveryUsed = true
++        try {
++          const record = await this.repository.read(id)
++          if (!entry.acknowledging && this.reconcile(id, record)) { entry.flushRequested = true; return }
++        } catch (readError) { this.fail(id, readError); return }
++      }
++      this.fail(id, error)
++    }).finally(() => {
+       entry.writing = undefined
++      if (entry.headCheckRequested) { entry.headCheckRequested = false; void this.checkHead(id) }
+       if (entry.phase === 'failed' || entry.phase === 'conflict' || entry.revision <= entry.savedRevision) return
+       if (entry.flushRequested || this.clock.now() - (entry.lastChangedAt ?? 0) >= 400 || this.clock.now() - (entry.firstPendingAt ?? this.clock.now()) >= 2000) void this.flush(id)
+       // Otherwise the latest edit's existing debounce timer remains armed.
+@@ -204,7 +224,7 @@
+   }
+   async readyForSync(id: string) {
+     const entry = this.entry(id)
+-    if (entry.phase === 'failed' || entry.phase === 'conflict') throw new Error('이 원고의 로컬 저장·복구 문제를 먼저 확인해주세요.')
++    if (entry.phase === 'failed' || entry.phase === 'conflict') throw new Error(entry.phase === 'conflict' ? '다른 탭과 로컬 원고 충돌: 현재 입력을 보관하고 다른 탭의 변경을 확인해주세요.' : '이 원고의 로컬 저장·복구 문제를 먼저 확인해주세요.')
+     if (!entry.ready) await this.recover(id)
+     if (!entry.ready || !entry.draft || ['failed', 'conflict'].includes(entry.phase)) throw new Error('로컬 원고를 복구하지 못했습니다.')
+   }
+@@ -240,6 +260,7 @@
+       const memory = entry.draft!, stored = fromRecord(record)
+       const merged = { ...stored, title: memory.title, content: memory.content,
+         latestServerVersion: Math.max(stored.latestServerVersion, memory.latestServerVersion) }
++      entry.checkpoint = stored
+       entry.draft = merged; entry.token = record.storageToken; entry.savedRevision = record.localRevision
+       entry.revision = Math.max(entry.revision, record.localRevision) + (sameDraft(merged, stored) ? 0 : 1)
+       entry.savedAt = record.localSavedAt; entry.error = null
+@@ -252,6 +273,7 @@
+     } catch (error) { this.fail(id, error); throw error }
+     finally {
+       entry.acknowledging = false
++      if (entry.headCheckRequested) { entry.headCheckRequested = false; void this.checkHead(id) }
+       if (acknowledged) { this.applyServer(id); this.publish(id) }
+       if (entry.revision > entry.savedRevision) this.schedule(id)
+     }
+@@ -261,38 +283,52 @@
+     if (entry.reading || entry.writing) return
+     if (!entry.ready) return this.recover(id)
+     if (entry.phase === 'conflict' || entry.revision <= entry.savedRevision) {
+-      try {
+-        const record = await this.repository.read(id)
+-        if (!record || !entry.draft || !sameDraft(entry.draft, record)) throw new LocalDraftConflict()
+-        entry.token = record.storageToken; entry.revision = Math.max(entry.revision, record.localRevision)
+-        entry.savedRevision = entry.revision; entry.savedAt = record.localSavedAt; entry.phase = 'saved'; entry.error = null
+-        this.publish(id)
+-      } catch (error) { this.fail(id, error) }
++      await this.checkHead(id, true)
++      if (entry.phase === 'conflict' || entry.phase === 'failed') return
++      await this.flush(id)
+       return
+     }
+     entry.phase = 'waiting'; entry.error = null
+     this.publish(id)
+     await this.flush(id)
+   }
+-  private async checkHead(id: string) {
++  /** Compare current text with our last committed checkpoint, never with a stale server GET. */
++  private reconcile(id: string, record: LocalNoteDraft | undefined) {
++    const entry = this.entry(id), memory = entry.draft, checkpoint = entry.checkpoint
++    if (!record || !memory || record.baseVersion < memory.baseVersion) return false
++    const stored = fromRecord(record)
++    const identical = sameText(memory, stored)
++    const unedited = !!checkpoint && sameText(memory, checkpoint)
++    const metadataOnly = !!checkpoint && sameText(stored, checkpoint) && record.canRebaseLocalEdits === true
++    if (!identical && !unedited && !metadataOnly) return false
++    this.stopTimer(entry)
++    const next = identical || unedited ? stored : { ...stored, title: memory.title, content: memory.content }
++    next.latestServerVersion = Math.max(next.latestServerVersion, memory.latestServerVersion)
++    entry.checkpoint = stored; entry.token = record.storageToken
++    entry.savedRevision = record.localRevision; entry.savedAt = record.localSavedAt
++    entry.draft = next
++    // Local revisions are fencing counters; never mark a larger memory revision as committed.
++    entry.revision = Math.max(entry.revision, record.localRevision) + (sameDraft(next, stored) ? 0 : 1)
++    if (sameDraft(next, stored)) entry.revision = record.localRevision
++    entry.serverProtected = !!record.serverOperationPending
++    entry.phase = entry.revision === entry.savedRevision ? 'saved' : 'waiting'; entry.error = null
++    if (entry.phase === 'waiting') this.schedule(id)
++    this.publish(id)
++    return true
++  }
++  private async checkHead(id: string, retry = false) {
+     const entry = this.entries.get(id)
+-    if (!entry?.ready || entry.acknowledging || entry.writing || entry.phase === 'conflict') return
++    if (!entry?.ready) return
++    if (entry.acknowledging || entry.writing) { entry.headCheckRequested = true; return }
+     const token = entry.token
+     try {
+       const record = await this.repository.read(id)
+-      if (entry.acknowledging || entry.writing || token !== entry.token) return
++      if (entry.acknowledging || entry.writing || token !== entry.token) { entry.headCheckRequested = true; return }
+       if (record?.serverOperationPending && !entry.serverProtected) {
+-        entry.serverProtected = true
+-        this.publish(id)
+-      }
+-      if (record?.storageToken !== token) {
+-        if (record && entry.draft && sameDraft(entry.draft, record)) {
+-          // Another tab committed the identical snapshot: acknowledging it loses no edits.
+-          this.stopTimer(entry)
+-          entry.token = record.storageToken; entry.revision = Math.max(entry.revision, record.localRevision)
+-          entry.savedRevision = entry.revision; entry.savedAt = record.localSavedAt; entry.phase = 'saved'; entry.error = null
+-          this.publish(id)
+-        } else this.fail(id, new LocalDraftConflict())
++        entry.serverProtected = true; this.publish(id)
++      }
++      if (record?.storageToken !== token || entry.phase === 'conflict' || retry) {
++        if (!this.reconcile(id, record)) this.fail(id, new LocalDraftConflict())
+       }
+     } catch (error) { this.fail(id, error) }
+   }
+--- a/frontend/src/features/local-drafts/draftDatabase.ts
++++ b/frontend/src/features/local-drafts/draftDatabase.ts
+@@ -305,7 +305,11 @@
+       validateLocalDraft(record)
+       const operations = (await this.db.outbox.where('noteId').equals(noteId).toArray()).map(validateOperation)
+       const local = await this.db.localEntities.get(noteId)
+-      return local && !local.confirmed || operations.some(op => op.status !== 'pending') ? { ...record, serverOperationPending: true } : record
++      const serverOperationPending = !!(local && !local.confirmed || operations.some(op => op.status !== 'pending'))
++      const canRebaseLocalEdits = !serverOperationPending && (operations.length === 0 || operations.length === 1
++        && operations[0].status === 'pending' && operations[0].title === record.title && operations[0].content === record.content
++        && operations[0].expectedVersion === record.baseVersion && operations[0].localRevision === record.localRevision)
++      return { ...record, serverOperationPending, canRebaseLocalEdits }
+     })
+   }
+   async write(draft: NoteDraft, revision: number, expectedToken: string | undefined, writerId: string) {
+--- a/frontend/src/features/local-drafts/localDraftTypes.ts
++++ b/frontend/src/features/local-drafts/localDraftTypes.ts
+@@ -5,6 +5,8 @@
+ export interface LocalNoteDraft extends NoteDraft {
+   /** Read projection from Outbox, never a persisted drafts schema field. */
+   serverOperationPending?: boolean
++  /** Transactional read projection only; never persisted. Unknown means unsafe to rebase edits. */
++  canRebaseLocalEdits?: boolean
+   localRevision: number
+   localSavedAt: number
+   storageToken: string
+--- a/frontend/src/features/local-drafts/localDraftStatus.ts
++++ b/frontend/src/features/local-drafts/localDraftStatus.ts
+@@ -3,7 +3,8 @@
+ import type { DraftEntry } from './draftSession'
+
+ export function localDraftStatus(entry: DraftEntry | undefined, recovering: boolean, loading: boolean, error: Error | null): DraftStatus {
+-  if (entry?.phase === 'failed' || entry?.phase === 'conflict') return '로컬 저장 실패'
++  if (entry?.phase === 'conflict') return '다른 탭과 로컬 충돌'
++  if (entry?.phase === 'failed') return '로컬 저장 실패'
+   if (recovering) return '로컬 원고 복구 중'
+   if (error) return '원고 조회 실패'
+   if (loading) return '원고 로딩 중'
+--- a/frontend/src/features/notes/noteDrafts.ts
++++ b/frontend/src/features/notes/noteDrafts.ts
+@@ -13,7 +13,7 @@
+ }
+ export type NoteDrafts = Readonly<Record<UUID, NoteDraft>>
+ export type DraftPatch = Partial<Pick<NoteDraft, 'title' | 'content'>>
+-export type DraftStatus = '서버 결과 확인 필요' | '변경사항 없음' | '저장되지 않은 변경사항' | '원고 로딩 중' | '원고 조회 실패' | '로컬 원고 복구 중' | '편집 중 / 로컬 저장 대기' | '로컬 저장 중' | '로컬 저장됨 · 서버 미동기화' | '로컬 저장 실패'
++export type DraftStatus = '다른 탭과 로컬 충돌' | '서버 결과 확인 필요' | '변경사항 없음' | '저장되지 않은 변경사항' | '원고 로딩 중' | '원고 조회 실패' | '로컬 원고 복구 중' | '편집 중 / 로컬 저장 대기' | '로컬 저장 중' | '로컬 저장됨 · 서버 미동기화' | '로컬 저장 실패'
+
+ export function isDraftDirty(draft: NoteDraft): boolean {
+   return draft.title !== draft.baseTitle || draft.content !== draft.baseContent
+--- a/frontend/src/features/notes/NoteEditor.tsx
++++ b/frontend/src/features/notes/NoteEditor.tsx
+@@ -1,4 +1,4 @@
+-import type { RefObject } from 'react'
++import { useState, type RefObject } from 'react'
+ import styled from '@emotion/styled'
+ import { Icon } from '@/components/Icon'
+ import { IconButton } from '@/components/primitives'
+@@ -121,7 +121,23 @@
+   onCreateNote: () => void
+   onDeleteNote: () => void
+ }) {
++  const [backup, setBackup] = useState<{ noteId: string; revision: number; message: string } | null>(null)
+   const visible = draft?.noteId === selectedNoteId ? draft : null
++  const copyCurrent = async () => {
++    if (!visible) return
++    try {
++      await navigator.clipboard.writeText(`${visible.title}\n\n${visible.content}`)
++      setBackup({ noteId: visible.noteId, revision: localEntry?.revision ?? 0, message: '현재 입력을 복사했습니다. 안전한 곳에 붙여 넣어 보관해주세요.' })
++    } catch { setBackup({ noteId: visible.noteId, revision: localEntry?.revision ?? 0, message: '복사하지 못했습니다. 파일로 내려받거나 제목·본문을 직접 선택해 보관해주세요.' }) }
++  }
++  const downloadCurrent = () => {
++    if (!visible) return
++    const url = URL.createObjectURL(new Blob([`${visible.title}\n\n${visible.content}`], { type: 'text/plain;charset=utf-8' }))
++    const anchor = document.createElement('a')
++    anchor.href = url; anchor.download = `seam-note-${visible.noteId}.txt`; anchor.click()
++    setTimeout(() => URL.revokeObjectURL(url), 60_000)
++    setBackup({ noteId: visible.noteId, revision: localEntry?.revision ?? 0, message: '파일 다운로드를 요청했습니다. 파일에 현재 입력이 보관됐는지 확인해주세요.' })
++  }
+   return (
+     <Panel aria-label="노트 편집기" data-note-id={visible?.noteId ?? undefined} aria-busy={loading}>
+       <Document>
+@@ -130,6 +146,11 @@
+         {!loading && !error && !visible && <p role="status">{selectedNoteId ? '원고를 선택해주세요.' : '표시할 원고가 없습니다.'}</p>}
+         {localEntry?.error && <div role="alert">
+           <p>{localEntry.error}</p>
++          {visible && <>
++            <button type="button" onClick={() => { void copyCurrent() }}>현재 입력 복사</button>
++            <button type="button" onClick={downloadCurrent}>현재 입력 파일로 보관</button>
++            {backup?.noteId === visible.noteId && backup.revision === (localEntry?.revision ?? 0) && <p role="status">{backup.message}</p>}
++          </>}
+           <button type="button" onClick={onRetryLocal}>{localEntry.phase === 'conflict' ? '로컬 저장 상태 다시 확인' : '로컬 저장 다시 시도'}</button>
+         </div>}
+         <Title ref={titleRef} aria-label="문서 제목" placeholder={visible ? '제목 없음' : ''} value={visible?.title ?? ''} maxLength={200}
+--- a/frontend/src/features/manual-sync/SyncCoordinator.ts
++++ b/frontend/src/features/manual-sync/SyncCoordinator.ts
+@@ -1,3 +1,4 @@
++import { LocalDraftConflict } from '@/features/local-drafts/localDraftTypes'
+ import { ApiError } from '@/lib/api/client'
+ import type { Note } from '@/lib/api/types'
+ import type { DraftSession } from '@/features/local-drafts/draftSession'
+@@ -71,6 +72,10 @@
+   }
+   return {ordered,bad,dependencies,updates,issues}
+ }
++function localCause(error: unknown): boolean {
++  for (let i=0; error instanceof Error && i<8; i++, error=error.cause) if (error instanceof LocalDraftConflict) return true
++  return false
++}
+ function apiCause(error: unknown): ApiError | undefined {
+   for(let i=0;error instanceof Error&&i<8;i++,error=error.cause)if(error instanceof ApiError)return error
+ }
+@@ -100,7 +105,11 @@
+     const ack=(op:CreationOperation|NoteUpdateOperation)=>{acknowledged.add(op.operationId);issues.delete(op.operationId);consecutiveNetwork=0}
+     const handle=(op:CreationOperation|NoteUpdateOperation,error:unknown)=>{
+       const api=apiCause(error),id=entityId(op),phase=session.getSnapshot()[id]?.phase
+-      if(phase==='failed'||phase==='conflict')localFailures.set(id,'로컬 저장 또는 ACK 확인이 필요합니다. 원고를 보존했습니다.')
++      if (!api && localCause(error)) {
++        localFailures.set(id,'다른 탭의 로컬 저장 기준이 변경되어 전송·ACK를 확정하지 못했습니다. 현재 입력과 미확정 작업을 보존했습니다.')
++        return
++      }
++      if(phase==='failed'||phase==='conflict')localFailures.set(id,phase==='conflict'?'다른 탭과 로컬 원고 충돌: 현재 입력과 미확정 작업을 보존했습니다.':'로컬 저장 또는 ACK 확인이 필요합니다. 원고를 보존했습니다.')
+       if(acknowledged.has(op.operationId)){localFailures.set(id,'서버 ACK 후 후속 작업 또는 로컬 저장 확인이 필요합니다.');return}
+       const network=!!api&&(api.status===0||api.status>=500)
+       if(network){if(++consecutiveNetwork>=2)stopReason='네트워크 장애가 연속되어 나머지 작업을 보류했습니다.'}
+--- a/frontend/tests/localDraftStorage.test.mjs
++++ b/frontend/tests/localDraftStorage.test.mjs
+@@ -301,3 +301,73 @@
+   assert.equal(get().draft.content,'서버 본문');assert.equal(get().draft.baseVersion,2)
+   assert.equal(get().serverProtected,true)
+ })
++
++// Multi-tab reconciliation: checkpoint means the last committed local text, not the server baseline.
++const external = (repo, changes = {}) => {
++  const old = repo.records.get('A')
++  const record = { ...old, localRevision: old.localRevision + 1, storageToken: old.storageToken + '-external', ...changes }
++  repo.records.set('A', record); return record
++}
++test('ACK-only changes adopt the verified base and leave the body unchanged', async t => {
++  const { repo, session, get } = setup(t, stored()); await ready(session)
++  const record = external(repo, { baseVersion: 3, baseContent: '로컬 원고', latestServerVersion: 3 })
++  await session.checkHead('A')
++  assert.equal(get().phase, 'saved'); assert.equal(get().draft.content, '로컬 원고'); assert.equal(get().draft.baseVersion, 3)
++  assert.deepEqual(session.savedHead('A'), { token: record.storageToken, revision: record.localRevision })
++})
++test('uncommitted edit rebases over metadata only with a transactional compatibility proof', async t => {
++  const { repo, session, get } = setup(t, stored()); await ready(session)
++  session.edit('A', { content: 'new memory' })
++  external(repo, { baseVersion: 3, baseContent: '로컬 원고', latestServerVersion: 3, canRebaseLocalEdits: true })
++  await session.checkHead('A')
++  assert.equal(get().phase, 'waiting'); assert.equal(get().draft.content, 'new memory'); assert.equal(get().draft.baseVersion, 3)
++  assert.ok(get().revision > get().savedRevision); assert.equal(hasUnprotectedChanges(session.getSnapshot()), true)
++  await session.flushLatest('A'); assert.equal(repo.records.get('A').content, 'new memory'); assert.equal(get().phase, 'saved')
++})
++test('uncertain operation blocks carrying new edits onto a different token', async t => {
++  const { repo, session, get } = setup(t, stored()); await ready(session); session.edit('A', { content: 'memory' })
++  external(repo, { baseVersion: 3, serverOperationPending: true, canRebaseLocalEdits: false })
++  await session.checkHead('A'); assert.equal(get().phase, 'conflict'); assert.equal(get().draft.content, 'memory'); assert.equal(repo.attempts.length, 0)
++})
++test('equal text can follow the record without deleting an uncertain operation protection', async t => {
++  const { repo, session, get } = setup(t, stored()); await ready(session)
++  external(repo, { serverOperationPending: true, canRebaseLocalEdits: false })
++  await session.checkHead('A'); assert.equal(get().phase, 'saved'); assert.equal(get().serverProtected, true)
++})
++test('observer follows latest local text after previously editing and committing its own text', async t => {
++  const { repo, session, get } = setup(t, stored()); await ready(session); session.edit('A', { content: 'own committed' }); await session.flushLatest('A')
++  external(repo, { content: 'other tab committed' }); await session.checkHead('A')
++  assert.equal(get().draft.content, 'other tab committed'); assert.equal(get().phase, 'saved')
++})
++test('divergent text remains a conflict across repeated retry without writes', async t => {
++  const { repo, session, get } = setup(t, stored()); await ready(session); session.edit('A', { content: 'my memory' }); external(repo, { content: 'other text', canRebaseLocalEdits: true })
++  await session.checkHead('A'); await session.retry('A'); await session.retry('A')
++  assert.equal(get().phase, 'conflict'); assert.equal(get().draft.content, 'my memory'); assert.equal(repo.records.get('A').content, 'other text'); assert.equal(repo.attempts.length, 0)
++  assert.equal(localDraftStatus(get(), false, false, null), '다른 탭과 로컬 충돌')
++})
++test('missing committed record is never interpreted as permission to recreate', async t => {
++  const { repo, session, get } = setup(t, stored()); await ready(session); repo.records.delete('A'); await session.checkHead('A'); await session.retry('A')
++  assert.equal(get().phase, 'conflict'); assert.equal(get().draft.content, '로컬 원고'); assert.equal(repo.attempts.length, 0)
++})
++test('older base cannot be adopted even with equal text', async t => {
++  const { repo, session, get } = setup(t, stored()); await ready(session); external(repo, { baseVersion: 1 }); await session.checkHead('A')
++  assert.equal(get().phase, 'conflict'); assert.equal(get().draft.baseVersion, 2)
++})
++test('missed ACK notification re-reads after CAS then retries using the normal CAS', async t => {
++  const { repo, session, get } = setup(t, stored()); await ready(session)
++  const record = external(repo, { baseVersion: 3, latestServerVersion: 3, canRebaseLocalEdits: true }); session.edit('A', { content: 'memory after ACK' })
++  await session.flushLatest('A'); assert.equal(get().phase, 'saved'); assert.equal(repo.records.get('A').baseVersion, 3)
++  assert.equal(repo.attempts.length, 2); assert.notEqual(repo.attempts[0].expectedToken, record.storageToken); assert.equal(repo.attempts[1].expectedToken, record.storageToken)
++})
++test('second concurrent change is still caught by CAS after a verified metadata rebase', async t => {
++  const { repo, session, get } = setup(t, stored()); await ready(session); session.edit('A', { content: 'my memory' })
++  external(repo, { baseVersion: 3, canRebaseLocalEdits: true }); await session.checkHead('A')
++  external(repo, { content: 'other changed again' }); await session.flushLatest('A').catch(() => {})
++  assert.equal(get().phase, 'conflict'); assert.equal(get().draft.content, 'my memory'); assert.equal(repo.records.get('A').content, 'other changed again')
++})
++test('input during head read is compared at resolution and is not replaced by an old captured memory', async t => {
++  const { repo, session, get } = setup(t, stored()); await ready(session)
++  repo.readGate = deferred(); const checking = session.checkHead('A'); session.edit('A', { content: 'during read' })
++  external(repo, { content: 'other text' }); repo.readGate.resolve(); await checking
++  assert.equal(get().phase, 'conflict'); assert.equal(get().draft.content, 'during read')
++})
+--- a/frontend/tests/syncCoordinator.test.mjs
++++ b/frontend/tests/syncCoordinator.test.mjs
+@@ -94,3 +94,12 @@
+  }
+  const result=await syncWorkspace(h.session,h.deps);assert.deepEqual(sent,[uuid(300),uuid(302)]);assert.equal(result.remaining,0);assert.equal(result.acknowledged.length,2)
+ })
++
++test('a local transaction CAS rejection is a local failure, separate from server409/404, and independent work continues',async()=>{
++ const { LocalDraftConflict } = await load('features/local-drafts/localDraftTypes')
++ const h=harness(snapshot([],[update(note),update(other,201)])),base=h.deps.update
++ h.deps.update=async(id,s,options)=>{if(id===note)throw new Error('ACK not confirmed',{cause:new LocalDraftConflict()});return base(id,s,options)}
++ const result=await syncWorkspace(h.session,h.deps)
++ assert.deepEqual(h.calls,[other]);assert.equal(result.localFailures.length,1);assert.match(result.localFailures[0].message,/다른 탭/)
++ assert.equal(result.issues.length,0);assert.equal(result.remaining,1)
++})
+--- a/frontend/tests/browser/localDraftStorage.cjs
++++ b/frontend/tests/browser/localDraftStorage.cjs
+@@ -282,6 +282,15 @@
+       assert.equal(queued[0].content, (await record(right)).content)
+       assert.equal(queued[0].status, 'pending', 'foundation does not auto-send')
+       assert.equal(await warning(right), true)
++      await context.grantPermissions(['clipboard-read', 'clipboard-write'])
++      await right.getByRole('button', { name: '현재 입력 복사', exact: true }).click()
++      assert.match(await right.evaluate(() => navigator.clipboard.readText()), /오래된 탭의 독립 편집/)
++      const downloaded = right.waitForEvent('download')
++      await right.getByRole('button', { name: '현재 입력 파일로 보관', exact: true }).click()
++      const download = await downloaded
++      const fileText = require('node:fs').readFileSync(await download.path(), 'utf8')
++      assert.match(fileText, /오래된 탭의 독립 편집/)
++      await right.getByText('다른 탭과 로컬 충돌', { exact: true }).waitFor()
+       await right.getByRole('button', { name: '로컬 저장 상태 다시 확인', exact: true }).click()
+       assert.equal((await record(right)).content, '다른 탭의 먼저 완료된 편집')
+       await left.close(); await right.close()
+--- a/frontend/tests/browser/workspaceSyncLive.cjs
++++ b/frontend/tests/browser/workspaceSyncLive.cjs
+@@ -14,8 +14,8 @@
+ async function records(p){return p.evaluate(async()=>{const db=await new Promise((ok,no)=>{const r=indexedDB.open('seam-note-local');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});try{return await new Promise((ok,no)=>{const tx=db.transaction([...db.objectStoreNames],'readonly'),out={version:db.version};for(const name of db.objectStoreNames){const r=tx.objectStore(name).getAll();r.onsuccess=()=>out[name]=r.result}tx.oncomplete=()=>ok(out);tx.onerror=()=>no(tx.error)})}finally{db.close()}})}
+ async function launch(profile,offline=false){const ctx=await chromium.launchPersistentContext(profile,{channel:'chrome',headless:true,viewport:{width:1360,height:1000}});contexts.add(ctx);ctx.on('page',p=>{p.setDefaultTimeout(15000);p.on('pageerror',e=>browserErrors.push(e.message))});await ctx.setOffline(offline);return ctx}
+ async function visit(ctx,id=fixture.noteId){const p=await ctx.newPage();await p.goto(origin+'/notes/'+id);await until(async()=>await title(p).getAttribute('readonly')===null&&await title(p).inputValue()!=='','editor ready');await until(()=>all(p).isEnabled(),'global control ready');return p}
+-async function open(p,id){const folder=p.locator(`[data-node-key="folder:${fixture.folderId}"]`);if(await folder.getAttribute('aria-expanded')!=='true')await folder.click();await p.locator(`[data-node-key="note:${id}"]`).click();await until(async()=>new URL(p.url()).pathname==='/notes/'+id&&await title(p).getAttribute('readonly')===null,'note selection')}
+-async function edit(p,id,text,stored=true){await title(p).fill('title '+text);await body(p).fill(text);if(stored)await until(async()=>(await records(p)).drafts.some(d=>d.noteId===id&&d.content===text),'local commit')}
++async function open(p,id){const folder=p.locator(`[data-node-key="folder:${fixture.folderId}"]`);if(await folder.getAttribute('aria-expanded')!=='true')await folder.click();await p.locator(`[data-node-key="note:${id}"]`).click();await until(async()=>new URL(p.url()).pathname==='/notes/'+id&&await p.locator('[aria-label="노트 편집기"]').getAttribute('data-note-id')===id&&await title(p).getAttribute('readonly')===null,'note selection')}
++async function edit(p,id,text,stored=true){assert.equal(await p.locator('[aria-label="노트 편집기"]').getAttribute('data-note-id'),id,'wait for React editor identity before typing');await title(p).fill('title '+text);await body(p).fill(text);if(stored)await until(async()=>(await records(p)).drafts.some(d=>d.noteId===id&&d.content===text),'local commit')}
+ async function result(p){await p.getByText(/마지막 실행: ACK 성공/).waitFor({timeout:35000});await until(()=>all(p).isEnabled(),'run finished');return p.getByText(/마지막 실행: ACK 성공/).innerText()}
+ async function sync(p){await until(()=>all(p).isEnabled(),'sync enabled');await all(p).click();return result(p)}
+ async function newFolder(p,name,top=true){await p.getByLabel('폴더 또는 문서 추가',{exact:true}).click();await p.getByRole('button',{name:top?'새 최상위 폴더':'새 폴더',exact:true}).click();await p.getByLabel('새 폴더 이름',{exact:true}).fill(name);await p.getByLabel('새 폴더 이름',{exact:true}).press('Enter');await until(async()=>(await records(p)).localEntities.some(e=>e.folder?.name===name),'local folder');return (await records(p)).localEntities.find(e=>e.folder?.name===name).id}
+@@ -45,7 +45,7 @@
+  });await new Promise(ok=>server.listen(0,'127.0.0.1',ok));origin='http://127.0.0.1:'+server.address().port;console.log('Production fixture '+origin+'; artifacts '+work)
+  await run('folder-only-workspace-wide',async({page})=>{const p=await page(),a=await newFolder(p,'folder-only A'),b=await newFolder(p,'folder-only B');const message=await sync(p),r=await records(p);assert.equal(r.creationOutbox.length,0);assert.equal(r.outbox.length,0);assert.match(message,/ACK 성공 2개/);assert.equal((await api('GET','/folders/'+a)).id,a);assert.equal((await api('GET','/folders/'+b)).id,b);return {acked:2,remaining:0}})
+  await run('hierarchy-parent-child-note',async({page})=>{const p=await page(),a=await newFolder(p,'hierarchy A'),b=await newFolder(p,'hierarchy B',false),c=await newNote(p);await edit(p,c,'hierarchy content');const ops=(await records(p)).creationOutbox.map(o=>o.operationId);await sync(p);assert.equal((await records(p)).creationOutbox.length,0);const requests=events.filter(e=>e.case===caseName&&e.method==='POST');assert.deepEqual(requests.map(e=>e.entityId),[a,b,c]);ops.forEach(key=>assert.equal(ledger(key,'creation_operations'),1));assert.equal((await api('GET','/notes/'+c)).content,'hierarchy content');return {acked:3,ledgerRecords:3}})
+- await run('three-existing-notes-and-unselected-memory',async({page})=>{const ns=await seeds(3),p=await page();await p.reload();for(let i=0;i<ns.length;i++){await open(p,ns[i].id);await edit(p,ns[i].id,'three '+i,i!==2)}const message=await sync(p);assert.match(message,/ACK 성공 3개/);assert.equal((await records(p)).outbox.length,0);for(let i=0;i<ns.length;i++)assert.equal((await api('GET','/notes/'+ns[i].id)).content,'three '+i);return {acked:3,finalVersions:await Promise.all(ns.map(async n=>(await api('GET','/notes/'+n.id)).version))}})
++ await run('three-existing-notes-and-unselected-memory',async({page})=>{const ns=await seeds(3),p=await page();await p.reload();for(let i=0;i<ns.length;i++){await open(p,ns[i].id);await edit(p,ns[i].id,'three '+i,i!==2)}const message=await sync(p);if(!/ACK 성공 3개/.test(message)){const r=await records(p);console.log('DIAGNOSTIC',JSON.stringify({url:p.url(),shown:await p.locator('[aria-label="노트 편집기"]').getAttribute('data-note-id'),memoryHash:sha(await body(p).inputValue()),drafts:r.drafts.map(d=>({id:d.noteId,hash:sha(d.content),base:d.baseVersion,revision:d.localRevision})),server:await Promise.all(ns.map(async n=>{const v=await api('GET','/notes/'+n.id);return {id:n.id,hash:sha(v.content),version:v.version}}))}))}assert.match(message,/ACK 성공 3개/);assert.equal((await records(p)).outbox.length,0);for(let i=0;i<ns.length;i++)assert.equal((await api('GET','/notes/'+ns[i].id)).content,'three '+i);return {acked:3,finalVersions:await Promise.all(ns.map(async n=>(await api('GET','/notes/'+n.id)).version))}})
+  await run('mixed-create-and-update',async({page})=>{const [n]=await seeds(),p=await page();await p.reload();await open(p,n.id);await edit(p,n.id,'mixed old');await newFolder(p,'mixed folder');const id=await newNote(p);await edit(p,id,'mixed new');assert.match(await sync(p),/ACK 성공 3개/);const r=await records(p);assert.equal(r.creationOutbox.length+r.outbox.length,0);return {acked:3}})
+  await run('parent-success-child-failure-independent-success-and-retry',async({page})=>{const p=await page(),a=await newFolder(p,'partial A'),b=await newFolder(p,'partial B',false),c=await newNote(p);await edit(p,c,'partial child');const d=await newFolder(p,'independent D');controls.failIds=[b];const message=await sync(p);assert.match(message,/ACK 성공 2개/);assert.equal((await records(p)).creationOutbox.length,2);assert.ok(!events.some(e=>e.case===caseName&&e.entityId===c));assert.equal((await api('GET','/folders/'+a)).id,a);assert.equal((await api('GET','/folders/'+d)).id,d);controls.failIds=[];await sync(p);assert.equal((await records(p)).creationOutbox.length,0);assert.equal(events.filter(e=>e.case===caseName&&e.entityId===a).length,1);return {firstAcked:2,firstRemaining:2,finalRemaining:0}})
+  await run('lost-POST-response-replays-same-key',async({page})=>{const p=await page(),a=await newFolder(p,'lost POST');controls.drop=a;await sync(p);const op=(await records(p)).creationOutbox[0];assert.equal(op.status,'inFlight');assert.equal(ledger(op.operationId,'creation_operations'),1);await sync(p);assert.equal((await records(p)).creationOutbox.length,0);const requests=events.filter(e=>e.case===caseName);assert.equal(requests.length,2);assert.equal(requests[0].operationId,requests[1].operationId);return {requests:requests,ledgerRecords:1}})

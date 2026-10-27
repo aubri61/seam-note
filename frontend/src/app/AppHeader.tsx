@@ -3,7 +3,7 @@ import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
 import { IconButton } from '@/components/primitives'
 import type { DraftStatus } from '@/features/notes/noteDrafts'
-import type { useManualSync } from '@/features/manual-sync/useManualSync'
+import type { useWorkspaceSync } from '@/features/manual-sync/useWorkspaceSync'
 import { SyncStatus } from '@/features/sync/SyncStatus'
 
 const Header = styled.header(({ theme }) => ({
@@ -38,7 +38,7 @@ const SaveButton = styled.button(({ theme }) => ({
 }))
 
 interface AppHeaderProps {
-  manualSync: ReturnType<typeof useManualSync>
+  workspaceSync: ReturnType<typeof useWorkspaceSync>
   sidebarOpen: boolean
   isMobile: boolean
   sidebarId: string
@@ -48,7 +48,7 @@ interface AppHeaderProps {
   status: DraftStatus
 }
 
-export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, toggleRef, path, status, manualSync }: AppHeaderProps) {
+export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, toggleRef, path, status, workspaceSync }: AppHeaderProps) {
   return (
     <Header>
       <div>
@@ -68,15 +68,22 @@ export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, t
       </div>
       <div>
         <SyncStatus status={status} />
-        <SaveButton type="button" disabled={manualSync.disabled} onClick={manualSync.onSync}
-          title={manualSync.summary} aria-describedby="server-save-feedback">서버에 저장</SaveButton>
         <IconButton type="button" disabled aria-label="More note options (coming later)" title="Note options are not connected">
           <Icon name="more" />
         </IconButton>
       </div>
-      <section id="server-save-feedback" aria-live="polite" style={{ flexBasis: '100%', textAlign: 'right', overflowWrap: 'anywhere' }}>
-        <span>{manualSync.summary}{manualSync.remaining !== undefined ? ` · 남은 Outbox 작업 ${manualSync.remaining}개` : ''}</span>
-        {manualSync.message && <p role={manualSync.error ? 'alert' : 'status'} style={{ justifyContent: 'flex-end', margin: '4px 0 0' }}>{manualSync.message}</p>}
+      <section aria-label="Workspace 동기화" style={{flexBasis:'100%',minWidth:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+          <SaveButton type="button" disabled={workspaceSync.disabled} onClick={workspaceSync.onSync} aria-describedby="workspace-sync-feedback">
+            {workspaceSync.busy ? '전체 동기화 중…' : '모든 변경사항 동기화'}
+          </SaveButton>
+          <span>{workspaceSync.summary}</span>
+        </div>
+        <div id="workspace-sync-feedback" aria-live="polite" style={{overflowWrap:'anywhere',lineHeight:1.7}}>
+          {workspaceSync.message&&<p>{workspaceSync.message}</p>}
+          {workspaceSync.error&&<p role="alert">{workspaceSync.error}</p>}
+          {!!workspaceSync.details.length&&<details><summary>확인이 필요한 항목</summary><ul>{workspaceSync.details.map(item=><li key={item.id}>{item.label}: {item.message}</li>)}</ul></details>}
+        </div>
       </section>
     </Header>
   )

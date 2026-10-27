@@ -2,13 +2,14 @@
 """Disposable PostgreSQL + Spring + Vite. Writes only freshly created lab databases.
 Default: run verification and stop. --serve: keep the seeded single-note lab open until Ctrl-C.
 """
-import argparse, hashlib, json, os, signal, socket, subprocess, tempfile, time, urllib.request, uuid
+import argparse, json, os, signal, socket, subprocess, tempfile, time, urllib.request, uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 p = argparse.ArgumentParser()
 p.add_argument('--serve', action='store_true')
-p.add_argument('--creation', action='store_true')
+p.add_argument('--creation', action='store_true', help='Compatibility flag; runs the current Workspace-wide flow')
+p.add_argument('--workspace', action='store_true')
 p.add_argument('--db-port', type=int, default=25442)
 p.add_argument('--api-port', type=int, default=18766)
 p.add_argument('--ui-port', type=int, default=25175)
@@ -70,37 +71,28 @@ try:
     print('Lab note:',fixture['origin']+'/notes/'+note['id'],flush=True)
     print('Isolated fixture/logs:',work,flush=True)
     if a.serve:
-        print('The fresh lab note uses the regular manual-save button. Ctrl-C stops the lab; development services are untouched.',flush=True)
+        print('Use the regular Workspace sync button for the fresh lab note. Ctrl-C stops the lab; development services are untouched.',flush=True)
         while True: time.sleep(1)
     else:
         playwright=base.get('SEAM_NOTE_PLAYWRIGHT_MODULE','/Users/jueon/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright')
         test_env={**base,'SEAM_NOTE_PLAYWRIGHT_MODULE':playwright,'SEAM_NOTE_LAB_FIXTURE':str(work/'fixture.json')}
         with open(work/'browser.log','w') as log:
-            run(['node',ROOT/('frontend/tests/browser/offlineCreationLive.cjs' if a.creation else 'frontend/tests/browser/manualSyncLive.cjs')],cwd=ROOT,env=test_env,stdout=log,stderr=subprocess.STDOUT)
+            run(['node',ROOT/'frontend/tests/browser/workspaceSyncLive.cjs'],cwd=ROOT,env=test_env,stdout=log,stderr=subprocess.STDOUT)
         result=json.loads((work/'browser-results.json').read_text())
-        if a.creation:
-            print('Offline creation real API/PWA verification passed.',flush=True)
-            with open(work/'manual-update-regression.log','w') as log:
-                run(['node',ROOT/'frontend/tests/browser/manualSyncLive.cjs'],cwd=ROOT,env=test_env,stdout=log,stderr=subprocess.STDOUT)
-            manual_result=json.loads((work/'browser-results.json').read_text())
-            (ROOT/'docs/verification/2026-10-26-offline-creation-update-results.json').write_text(json.dumps(manual_result,ensure_ascii=False,indent=2)+'\n')
-            result=None
-        if result is not None:
-            sql="select json_build_object('noteVersion',n.version,'noteId',n.id,'ledger',coalesce((select json_agg(json_build_object('operationId',operation_id,'version',(response_json::jsonb->>'version')::bigint)) from note_update_operations where note_id=n.id),'[]'::json)) from notes n where id='"+note['id']+"'::uuid"
-            raw=subprocess.check_output(['psql','-h','127.0.0.1','-p',str(a.db_port),'-U','postgres','-d','seam_note_manual_lab','-Atc',sql],text=True)
-            result['postgres']=json.loads(raw)
-            assert result['postgres']['noteVersion']==result['finalVersion']
-            result['environment']={'postgres':subprocess.check_output(['psql','-h','127.0.0.1','-p',str(a.db_port),'-U','postgres','-d','seam_note_manual_lab','-Atc','show server_version'],text=True).strip(),'dbName':'seam_note_manual_lab','dbPort':a.db_port,'apiPort':a.api_port,'uiPort':a.ui_port,'fixtureNoteId':note['id']}
-            result['sourceHashes']={str(f.relative_to(ROOT)):hashlib.sha256(f.read_bytes()).hexdigest() for f in [ROOT/'frontend/src/features/local-drafts/draftDatabase.ts',ROOT/'frontend/src/features/local-drafts/draftSession.ts',ROOT/'frontend/src/features/manual-sync/manualSync.ts']}
-            output=Path(base.get('SEAM_NOTE_VERIFICATION_OUTPUT',str(ROOT/'docs/verification/2026-10-26-manual-save-results.json')));output.parent.mkdir(parents=True,exist_ok=True)
-            output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
-            print('Verified real PUT + PostgreSQL + ack. Result:',output,flush=True)
+        output=Path(base.get('SEAM_NOTE_VERIFICATION_OUTPUT',str(ROOT/'docs/verification/2026-10-27-workspace-ui-results.json')))
+        output.parent.mkdir(parents=True,exist_ok=True)
+        output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+        print('Workspace real production/Spring/PostgreSQL verification passed. Result:',output,flush=True)
         # Existing UI regressions use mock APIs on the dedicated origin.
-        for name in (['outboxStorage','localDraftStorage','noteDrafts','noteRouting','workspaceCreateDelete','workspaceReadonly','sidebarDraftTitles','manualSaveUx']):
+        for name in (['outboxStorage','localDraftStorage','noteDrafts','noteRouting','workspaceCreateDelete','workspaceReadonly','sidebarDraftTitles','manualSaveUx'] + (['inlineFolderCreation','folderExpansion','folderMenu','folderRenameFocus'] if a.workspace else [])):
             env={**test_env,'SEAM_NOTE_UI_URL':fixture['origin']}
             with open(work/(name+'.log'),'w') as log:
                 run(['node',ROOT/f'frontend/tests/browser/{name}.cjs'],env=env,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT)
-        print('Seven existing browser regressions and manual-save UX passed.',flush=True)
+        print('Existing browser regressions passed.',flush=True)
+        if a.workspace:
+            with open(work/'pwa-regression.log','w') as log:
+                run(['node',ROOT/'frontend/tests/browser/pwaOffline.cjs'],env={**test_env,'SEAM_NOTE_PWA_VERIFICATION_OUTPUT':str(ROOT/'docs/verification/2026-10-27-workspace-ui-pwa-results.json'),'SEAM_NOTE_PWA_SCREENSHOT_DIR':str(work)},cwd=ROOT,stdout=log,stderr=subprocess.STDOUT)
+            print('Production PWA regressions passed.',flush=True)
 except KeyboardInterrupt:
     print('Stopping isolated lab.',flush=True)
 finally:

@@ -17,7 +17,7 @@ import { useNoteDrafts } from '@/features/notes/useNoteDrafts'
 import { notePath } from '@/app/routing/noteRoutes'
 import { useConnectivity } from '@/features/offline/useConnectivity'
 import { PwaStatus } from '@/features/pwa/PwaStatus'
-import { useManualSync } from '@/features/manual-sync/useManualSync'
+import { useWorkspaceSync } from '@/features/manual-sync/useWorkspaceSync'
 import { localDraftStatus } from '@/features/local-drafts/localDraftStatus'
 import type { NoteEditor } from '@/features/notes/NoteEditor'
 
@@ -55,14 +55,14 @@ export function AppLayout() {
   const offlineDetail = !online || folders.detailError instanceof ApiError && (folders.detailError.status === 0 || folders.detailError.status >= 500)
   const editorError = offlineDetail && drafts.draft && !folders.routeError && folders.workspace.data ? null : queryError
   const serverAvailable = online && !folders.workspace.data?.localSnapshot?.cachedAt
-  const manualSync = useManualSync(folders.selectedNoteId, drafts.session, drafts.entry,
-    online && !!folders.selectedNoteId && folders.tree.notes.has(folders.selectedNoteId)
-      && (folders.localNote || folders.activeNote?.id === folders.selectedNoteId) && !editorError && !editorLoading && !folders.busy)
+  const workspaceSync = useWorkspaceSync(drafts.session, online, folders.workspace.data)
   const status = folders.localNote && drafts.entry?.phase === 'saved' ? '로컬 저장됨 · 서버 미동기화' : localDraftStatus(drafts.entry, drafts.recovering, editorLoading, editorError)
   const [action, setAction] = useState<WorkspaceAction | null>(null)
   const [creationMessage, setCreationMessage] = useState('')
   const titleRef = useRef<HTMLInputElement>(null)
   const pendingEditorFocus = useRef(false)
+  const pendingCreatedFocus = useRef<{noteId:string;reached:boolean}|null>(null)
+  const [createdFocusRequest,setCreatedFocusRequest] = useState<string|null>(null)
   const sidebarId = 'folders-sidebar'
 
   // Reset before rendering the new presentation so an open desktop sidebar
@@ -80,6 +80,21 @@ export function AppLayout() {
     }
   }, [isMobile])
 
+  useEffect(() => {
+    const request = pendingCreatedFocus.current
+    if (!request || request.noteId !== createdFocusRequest) return
+    if (isMobile || request.reached && folders.selectedNoteId !== request.noteId) {
+      pendingCreatedFocus.current = null
+      return
+    }
+    if (folders.selectedNoteId !== request.noteId) return
+    request.reached = true
+    if (drafts.draft?.noteId === request.noteId && !drafts.recovering && titleRef.current && !titleRef.current.readOnly) {
+      titleRef.current.focus()
+      pendingCreatedFocus.current = null
+    }
+  }, [createdFocusRequest, folders.selectedNoteId, drafts.draft?.noteId, drafts.recovering, isMobile])
+
   function closeSidebar() {
     setSidebarOpen(false)
     // Modal focus restoration belongs to Radix's onCloseAutoFocus.
@@ -87,6 +102,7 @@ export function AppLayout() {
   }
 
   function selectNote(id: string) {
+    pendingCreatedFocus.current = null
     folders.select(id)
     if (isMobile) {
       pendingEditorFocus.current = true
@@ -94,8 +110,10 @@ export function AppLayout() {
     }
   }
 
-  function showCreatedNote() {
-    if (isMobile) { pendingEditorFocus.current = true; setSidebarOpen(false) }
+  function showCreatedNote(noteId: string) {
+    if (isMobile) return
+    pendingCreatedFocus.current = {noteId,reached:false}
+    setCreatedFocusRequest(noteId)
   }
   function create(kind: 'folder' | 'root-folder' | 'document') {
     if (folders.busy || folders.pendingFolder) return
@@ -103,7 +121,7 @@ export function AppLayout() {
     if (kind === 'folder' || kind === 'root-folder') {
       folders.beginFolderCreation(kind === 'root-folder')
     } else if (folders.creationParentId) {
-      void folders.createEmptyNote(folders.creationParentId).then(success => { if (success) showCreatedNote() })
+      void folders.createEmptyNote(folders.creationParentId).then(success => { if (success) showCreatedNote(success) })
     } else {
       setCreationMessage('먼저 폴더를 만들거나 원고를 넣을 폴더를 선택해주세요.')
     }
@@ -114,8 +132,9 @@ export function AppLayout() {
     if (!folder) return
     setCreationMessage('')
     if (kind === 'add-folder') folders.beginFolderCreation(false, id)
+    else if (kind === 'rename') folders.beginFolderRename(id)
     else if (kind === 'add-note') {
-      void folders.createEmptyNote(id).then(success => { if (success) showCreatedNote() })
+      void folders.createEmptyNote(id).then(success => { if (success) showCreatedNote(success) })
     } else {
       folders.resetMutationErrors()
       setAction({ kind: 'delete-folder', folder })
@@ -128,7 +147,8 @@ export function AppLayout() {
       await folders.createFolder(folders.createFolderMutation.variables)
     } else if (folders.createNoteMutation.isError && folders.createNoteMutation.variables) {
       const request = folders.createNoteMutation.variables
-      if (await folders.createEmptyNote(request.folderId, request.id ?? undefined)) showCreatedNote()
+      const createdId = await folders.createEmptyNote(request.folderId, request.id ?? undefined)
+      if (createdId) showCreatedNote(createdId)
     }
   }
   function openDeleteNote() {
@@ -149,7 +169,7 @@ export function AppLayout() {
           </>}
         </div>
 
-  const sidebar = <Sidebar onClose={closeSidebar} folders={{ ...folders, renameCreatedFolder: folders.pendingFolder || serverAvailable ? folders.renameCreatedFolder : async () => null }} draftTitles={drafts.draftTitles} onSelectNote={selectNote}
+  const sidebar = <Sidebar onClose={closeSidebar} folders={folders} draftTitles={drafts.draftTitles} onSelectNote={selectNote}
     onCreate={create} onFolderAction={folderAction} creationFeedback={isMobile ? creationFeedback : undefined} />
 
   return (
@@ -174,15 +194,14 @@ export function AppLayout() {
           onToggleSidebar={() => setSidebarOpen(open => !open)}
           toggleRef={toggleRef}
           status={status}
-          manualSync={manualSync}
+          workspaceSync={workspaceSync}
           path={folders.ancestors.map(item => item.name)}
         />
         <PwaStatus />
-        {(!online || folders.workspace.data?.localSnapshot) && <aside role="status" style={{ padding: '8px 24px', fontSize: 12 }}>
-          {!online ? '오프라인 편집 · 변경사항은 이 브라우저에 로컬 저장됩니다.' : '로컬 목록을 표시합니다. 생성한 항목은 서버에 저장을 눌러 반영해주세요.'}
+        {(!online || folders.workspace.data?.localSnapshot && folders.workspace.data.localSnapshot.reason !== 'local-refresh') && <aside role="status" style={{ padding: '8px 24px', fontSize: 12 }}>
+          {!online ? '오프라인 편집 · 변경사항은 이 브라우저에 로컬 저장됩니다.' : '저장된 로컬 목록을 표시합니다. 서버 변경사항을 아직 확인하지 못했습니다.'}
           <p>{folders.workspace.data?.localSnapshot?.warning ?? '이 브라우저에 본문이 로컬 저장된 원고만 열 수 있습니다.'}</p>
           <p>서버 반영·삭제는 온라인에서만 가능합니다. 생성과 원고 편집은 오프라인에서도 가능합니다. 브라우저 저장소 삭제·회수 시 로컬 데이터가 사라질 수 있습니다.</p>
-          {online && <button type="button" onClick={() => { void folders.workspace.refetch(); if(!folders.localNote)void folders.noteQuery.refetch() }}>서버 목록 다시 확인</button>}
         </aside>}
         {!drafts.recovering && !drafts.draft && offlineDetail && <p role="alert" style={{ padding: '8px 24px' }}>이 원고의 본문은 이 브라우저에 저장되어 있지 않아 오프라인에서 열 수 없습니다. 온라인에서 먼저 열어주세요.</p>}
         {(!isMobile || !sidebarOpen) && creationFeedback}

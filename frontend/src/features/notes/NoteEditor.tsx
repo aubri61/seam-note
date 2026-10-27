@@ -1,4 +1,4 @@
-import type { RefObject } from 'react'
+import { useState, type RefObject } from 'react'
 import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
 import { IconButton } from '@/components/primitives'
@@ -121,7 +121,23 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
   onCreateNote: () => void
   onDeleteNote: () => void
 }) {
+  const [backup, setBackup] = useState<{ noteId: string; revision: number; message: string } | null>(null)
   const visible = draft?.noteId === selectedNoteId ? draft : null
+  const copyCurrent = async () => {
+    if (!visible) return
+    try {
+      await navigator.clipboard.writeText(`${visible.title}\n\n${visible.content}`)
+      setBackup({ noteId: visible.noteId, revision: localEntry?.revision ?? 0, message: '현재 입력을 복사했습니다. 안전한 곳에 붙여 넣어 보관해주세요.' })
+    } catch { setBackup({ noteId: visible.noteId, revision: localEntry?.revision ?? 0, message: '복사하지 못했습니다. 파일로 내려받거나 제목·본문을 직접 선택해 보관해주세요.' }) }
+  }
+  const downloadCurrent = () => {
+    if (!visible) return
+    const url = URL.createObjectURL(new Blob([`${visible.title}\n\n${visible.content}`], { type: 'text/plain;charset=utf-8' }))
+    const anchor = document.createElement('a')
+    anchor.href = url; anchor.download = `seam-note-${visible.noteId}.txt`; anchor.click()
+    setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    setBackup({ noteId: visible.noteId, revision: localEntry?.revision ?? 0, message: '파일 다운로드를 요청했습니다. 파일에 현재 입력이 보관됐는지 확인해주세요.' })
+  }
   return (
     <Panel aria-label="노트 편집기" data-note-id={visible?.noteId ?? undefined} aria-busy={loading}>
       <Document>
@@ -130,6 +146,11 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
         {!loading && !error && !visible && <p role="status">{selectedNoteId ? '원고를 선택해주세요.' : '표시할 원고가 없습니다.'}</p>}
         {localEntry?.error && <div role="alert">
           <p>{localEntry.error}</p>
+          {visible && <>
+            <button type="button" onClick={() => { void copyCurrent() }}>현재 입력 복사</button>
+            <button type="button" onClick={downloadCurrent}>현재 입력 파일로 보관</button>
+            {backup?.noteId === visible.noteId && backup.revision === (localEntry?.revision ?? 0) && <p role="status">{backup.message}</p>}
+          </>}
           <button type="button" onClick={onRetryLocal}>{localEntry.phase === 'conflict' ? '로컬 저장 상태 다시 확인' : '로컬 저장 다시 시도'}</button>
         </div>}
         <Title ref={titleRef} aria-label="문서 제목" placeholder={visible ? '제목 없음' : ''} value={visible?.title ?? ''} maxLength={200}
