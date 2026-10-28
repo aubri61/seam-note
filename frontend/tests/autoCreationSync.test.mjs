@@ -1,0 +1,15 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {load} from './helpers/loadModules.mjs'
+const {syncCreations}=await load('features/manual-sync/autoCreationSync')
+const folder=(id,parentId=null,status='pending')=>({entityId:id,operationId:'key-'+id,type:'FOLDER_CREATE',status,payload:{id,parentId,name:id}})
+const note=id=>({entityId:id,operationId:'key-'+id,type:'NOTE_CREATE',status:'pending',payload:{id,folderId:'A',title:'',content:''}})
+const session={readyForSync:async()=>{}}
+function setup(ops){const pending=new Map(ops.map(o=>[o.entityId,o])),sent=[];return {pending,sent,deps:{list:async()=>[...pending.values()],chain:async id=>pending.has(id)?[pending.get(id)]:[],online:()=>true,lock:async fn=>fn(),folder:async(id,options)=>{assert.equal(options.lockHeld,true);sent.push(id);pending.delete(id)},note:async(id,_,canSend,options)=>{assert.equal(options.lockHeld,true);assert.equal(canSend(),true);sent.push(id);pending.delete(id);return {id,version:0}}}}}
+test('automatic creation pass sends folders and note only; no update dependency exists',async()=>{const {deps,sent}=setup([folder('A'),note('B')]);const result=await syncCreations(session,deps);assert.deepEqual(sent,['A','B']);assert.equal(result.completed,2);assert.equal(result.error,'')})
+test('offline pass keeps every local creation',async()=>{const {deps,sent,pending}=setup([folder('A')]);deps.online=()=>false;await syncCreations(session,deps);assert.deepEqual(sent,[]);assert.equal(pending.size,1)})
+test('failed parent blocks dependent note but permits independent folder',async()=>{const {deps,sent}=setup([folder('A'),note('B'),folder('C')]);deps.chain=async id=>id==='B'?[folder('A'),note('B')]:[folder(id)];deps.folder=async id=>{if(id==='A')throw Error('network');sent.push(id)};const result=await syncCreations(session,deps);assert.deepEqual(sent,['C']);assert.equal(result.retryable,true)})
+test('known conflict is retained without a repeated send',async()=>{const {deps,sent,pending}=setup([folder('A',null,'conflict')]);const result=await syncCreations(session,deps);assert.deepEqual(sent,[]);assert.equal(pending.size,1);assert.ok(result.error);assert.equal(result.retryable,false)})
+test('unconfirmed inFlight creation retries existing entity via the existing claim path',async()=>{const op=folder('A',null,'inFlight'),{deps}=setup([op]);let key;deps.folder=async id=>{key=(await deps.chain(id))[0].operationId};await syncCreations(session,deps);assert.equal(key,op.operationId)})
+test('note recovery must complete before sending and server response is published',async()=>{const {deps}=setup([note('B')]),order=[];deps.note=async()=>{order.push('POST');return {id:'B',version:0}};deps.onNote=()=>order.push('response');await syncCreations({readyForSync:async()=>order.push('recover')},deps);assert.deepEqual(order,['recover','POST','response'])})
+test('failed local recovery prevents POST and preserves creation',async()=>{const {deps,sent,pending}=setup([note('B')]);const result=await syncCreations({readyForSync:async()=>{throw Error('IDB')}},deps);assert.deepEqual(sent,[]);assert.equal(pending.size,1);assert.equal(result.retryable,true)})

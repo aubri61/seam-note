@@ -113,13 +113,15 @@ const Footnote = styled.p(({ theme }) => ({
   color: theme.colors.mutedText,
 }))
 
-export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate, onFolderAction, creationFeedback }: {
+export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate, onFolderAction, onDeleteNote, canDeleteNote, creationFeedback }: {
   onClose: () => void
   folders: ReturnType<typeof useFolders>
   draftTitles: Readonly<Partial<Record<string, string>>>
   onSelectNote: (id: string) => void
   onCreate: (kind: 'folder' | 'root-folder' | 'document') => void
   onFolderAction: (id: string, action: FolderAction) => void
+  onDeleteNote:(id:string)=>void
+  canDeleteNote:(id:string)=>boolean
   creationFeedback?: ReactNode
 }) {
   const createRef = useRef<HTMLDetailsElement>(null)
@@ -153,7 +155,6 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
             <summary aria-label="폴더 또는 문서 추가"><Icon name="plus" size={17} /></summary>
             <div aria-label="추가할 항목">
               <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('folder') }}><Icon name="folder" size={17} />새 폴더</button>
-              <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('root-folder') }}><Icon name="folder" size={17} />새 최상위 폴더</button>
               <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('document') }}><Icon name="note" size={17} />새 문서</button>
             </div>
           </CreatePicker>
@@ -165,7 +166,7 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
           <button type="button" onClick={() => void folders.workspace.refetch()}>다시 시도</button>
         </div>}
         {folders.workspace.data && <FolderTree
-          actionsBusy={folders.busy || !!folders.pendingFolder} onFolderAction={onFolderAction}
+          actionsBusy={folders.busy || !!folders.pendingFolder} onFolderAction={onFolderAction} onDeleteNote={onDeleteNote} canDeleteNote={canDeleteNote}
           tree={folders.tree} localIds={folders.localIds} draftTitles={draftTitles} selectedNoteId={folders.selectedNoteId}
           creatingFolderId={folders.pendingFolder?.id ?? null} editingFolderId={folders.editingFolderId} onFolderName={folders.renameCreatedFolder}
           onCancelFolderName={folders.cancelFolderName} namingBusy={folders.busy} namingError={(folders.pendingFolder ? folders.createFolderMutation.error : folders.renameFolderMutation.error)?.message}

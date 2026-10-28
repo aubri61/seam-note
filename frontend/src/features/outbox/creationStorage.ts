@@ -7,6 +7,7 @@ async function withCreationLock<T>(action: () => Promise<T>) {
 }
 const repository=async()=>(await import('@/features/local-drafts/draftDatabase')).draftRepository
 export const creationStorage={
+  list:async()=>(await repository()).listCreations(),
   createFolder:async(r:CreateFolderRequest)=>withCreationLock(async () => (await repository()).createLocalFolder(r)),
   createNote:async(r:CreateNoteRequest)=>withCreationLock(async () => (await repository()).createLocalNote(r)),
   local:async(id:string)=>(await repository()).localEntity(id),

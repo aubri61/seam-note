@@ -1,0 +1,57 @@
+{
+  "environment": "Headless Chromium production build, isolated ephemeral contexts, service workers blocked; native installed-window chrome not exercised",
+  "results": [
+    {
+      "viewport": {
+        "width": 1182,
+        "height": 1340
+      },
+      "textarea": {
+        "top": 374,
+        "bottom": 1303,
+        "height": 929,
+        "viewport": 1340,
+        "documentHeight": 1340,
+        "resize": "none"
+      },
+      "longContentScrollable": true,
+      "offlineReplacement": true,
+      "reconnectRestored": true
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "textarea": {
+        "top": 377,
+        "bottom": 683,
+        "height": 306,
+        "viewport": 720,
+        "documentHeight": 720,
+        "resize": "none"
+      },
+      "longContentScrollable": true,
+      "offlineReplacement": true,
+      "reconnectRestored": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "textarea": {
+        "top": 377,
+        "bottom": 815,
+        "height": 438,
+        "viewport": 844,
+        "documentHeight": 844,
+        "resize": "none"
+      },
+      "longContentScrollable": true,
+      "offlineReplacement": true,
+      "reconnectRestored": true
+    }
+  ],
+  "serverWrites": 0
+}

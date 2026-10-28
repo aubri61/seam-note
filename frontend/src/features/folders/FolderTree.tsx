@@ -16,7 +16,7 @@ const Frame = styled.div(({ theme }) => ({
   '[role="treeitem"]:focus-visible': { outlineOffset: '-2px', borderRadius: theme.radii.sm },
 }))
 const Row = styled.div<{ selected: boolean; to?: string }>(({ theme, selected }) => ({
-  display: 'flex', alignItems: 'center', gap: theme.spacing.sm,
+  position:'relative',display: 'flex', alignItems: 'center', gap: theme.spacing.sm,
   height: '40px', width: '100%', border: 0, textAlign: 'left', paddingRight: theme.spacing.sm, borderRadius: theme.radii.sm,
   background: selected ? theme.colors.selected : 'transparent',
   color: selected ? theme.colors.text : theme.colors.mutedText,
@@ -38,6 +38,8 @@ interface FolderTreeProps {
   localIds?: string[]
   actionsBusy: boolean
   onFolderAction: (id: string, action: FolderAction) => void
+  onDeleteNote: (id:string)=>void
+  canDeleteNote: (id:string)=>boolean
   tree: WorkspaceTreeModel
   draftTitles: Readonly<Partial<Record<string, string>>>
   selectedNoteId: string | null
@@ -55,7 +57,7 @@ interface FolderTreeProps {
   onSelect: (id: string) => void
 }
 
-export function FolderTree({ creatingFolderId, actionsBusy, onFolderAction, localIds = [], tree, draftTitles, selectedNoteId, selectedFolderId, onFolderSelect, search, openFolders, onFolderOpen, onSelect, editingFolderId, onFolderName, onCancelFolderName, namingBusy, namingError }: FolderTreeProps) {
+export function FolderTree({ creatingFolderId, actionsBusy, onFolderAction, onDeleteNote, canDeleteNote, localIds = [], tree, draftTitles, selectedNoteId, selectedFolderId, onFolderSelect, search, openFolders, onFolderOpen, onSelect, editingFolderId, onFolderName, onCancelFolderName, namingBusy, namingError }: FolderTreeProps) {
   const rows = useMemo(() => visibleWorkspaceRows(tree, openFolders, search), [tree, openFolders, search])
   const [focusedKey, setFocusedKey] = useState<string | null>(null)
   const selectedKey = selectedFolderId ? `folder:${selectedFolderId}` : selectedNoteId ? `note:${selectedNoteId}` : null
@@ -92,7 +94,7 @@ export function FolderTree({ creatingFolderId, actionsBusy, onFolderAction, loca
           const label = folder ? nodeLabel(node) : (draftTitles[node.note.id] ?? node.note.title) || '제목 없음'
           const expanded = folder && (!!search.trim() || !!openFolders[node.folder.id])
           return <Row
-            key={node.key} as={folder ? 'div' : Link} to={folder ? undefined : notePath(node.note.id)} role="treeitem" aria-level={depth + 1}
+            key={node.key} aria-label={label} role="treeitem" aria-level={depth + 1}
             tabIndex={node.key === tabKey ? 0 : -1} onFocus={() => setFocusedKey(node.key)}
             aria-selected={node.key === selectedKey}
             selected={node.key === selectedKey}
@@ -102,7 +104,7 @@ export function FolderTree({ creatingFolderId, actionsBusy, onFolderAction, loca
             data-node-key={node.key}
             data-creation-target={folder && node.folder.id === selectedFolderId || undefined}
             onKeyDown={event => {
-              if (folder && event.target === event.currentTarget && event.shiftKey && event.key === 'F10') {
+              if (event.target === event.currentTarget && event.shiftKey && event.key === 'F10') {
                 event.preventDefault(); event.currentTarget.querySelector<HTMLButtonElement>('[data-folder-menu]')?.click(); return
               }
               if (event.target === event.currentTarget && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && (event.key === 'Enter' || event.key === ' ')) {
@@ -116,6 +118,10 @@ export function FolderTree({ creatingFolderId, actionsBusy, onFolderAction, loca
               else onSelect(node.note.id)
             }}
           >
+            {!folder&&<Link to={notePath(node.note.id)} aria-label={label} tabIndex={-1} style={{position:'absolute',inset:0,zIndex:1,borderRadius:'inherit'}} onClick={event=>{
+              event.stopPropagation()
+              if(event.button===0&&!event.ctrlKey&&!event.metaKey&&!event.shiftKey&&!event.altKey){event.preventDefault();onSelect(node.note.id)}
+            }}/>}
             <Chevron data-open={expanded}>{folder && <Icon name="chevron" size={13} />}</Chevron>
             <Icon name={folder ? 'folder' : 'note'} size={16} />
             {folder && node.folder.id === editingFolderId ? <FolderName key={node.folder.id} name={node.folder.name} creating={node.folder.id === creatingFolderId}
@@ -124,6 +130,8 @@ export function FolderTree({ creatingFolderId, actionsBusy, onFolderAction, loca
             {localIds.includes(folder ? node.folder.id : node.note.id) && <small aria-label="서버 미반영" style={{fontSize:10,opacity:.7}}>로컬</small>}
             {folder && node.folder.id !== editingFolderId && <FolderMenu name={label} tabIndex={node.key === tabKey ? 0 : -1}
               disabled={actionsBusy} onAction={action => onFolderAction(node.folder.id, action)} />}
+            {!folder&&<FolderMenu kind="note" name={label} tabIndex={node.key===tabKey?0:-1}
+              disabled={actionsBusy||!canDeleteNote(node.note.id)} onAction={()=>onDeleteNote(node.note.id)}/>}
           </Row>
         })}
       </div>

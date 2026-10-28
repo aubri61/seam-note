@@ -213,6 +213,10 @@ export class DexieDraftRepository implements DraftRepository {
       await this.db.localEntities.delete(id)
     })
   }
+  async listCreations() {
+    await this.ensureSchema()
+    return (await this.db.creationOutbox.toArray()).map(validateCreation).sort((a,b)=>a.createdAt-b.createdAt||a.operationId.localeCompare(b.operationId))
+  }
   async creationChain(id:string) {
     await this.ensureSchema()
     return this.db.transaction('r',[this.db.localEntities,this.db.creationOutbox],async()=>{

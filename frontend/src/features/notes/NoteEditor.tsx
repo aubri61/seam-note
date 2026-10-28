@@ -46,6 +46,8 @@ const Toolbar = styled.div(({ theme }) => ({
 }))
 
 const Writing = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
   flex: 1,
   paddingTop: theme.spacing.xl,
   p: {
@@ -56,8 +58,9 @@ const Writing = styled.div(({ theme }) => ({
   textarea: {
     display: 'block',
     width: '100%',
-    minHeight: '300px',
-    resize: 'vertical',
+    flex: 1,
+    minHeight: '160px',
+    resize: 'none',
     marginTop: theme.spacing.md,
     padding: `${theme.spacing.xs} 0`,
     border: 0,
@@ -86,7 +89,7 @@ const NewDocumentButton = styled.button(({ theme }) => ({
   [`@media (max-width: ${theme.breakpoints.mobile})`]: { right: theme.spacing.md, bottom: theme.spacing.md },
 }))
 
-export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNoteId, titleRef, loading, error, onRetry, canRetry, busy, canCreate, canDelete, onCreateNote, onDeleteNote }: {
+export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNoteId, titleRef, loading, error, onRetry, canRetry, busy, canCreate, onCreateNote }: {
   draft: NoteDraft | null
   localEntry?: DraftEntry
   onRetryLocal: () => void
@@ -151,7 +154,6 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
           <IconButton type="button" disabled aria-label="Numbered list (coming later)" title="Formatting is not connected">
             <Icon name="ordered" size={19} />
           </IconButton>
-          <IconButton type="button" aria-label="원고 삭제" title="원고 삭제" disabled={busy || !canDelete} onClick={onDeleteNote} style={{ marginLeft: 'auto' }}><Icon name="trash" size={18} /></IconButton>
         </Toolbar>
         <Writing>
           <textarea aria-label="문서 내용" placeholder="" value={visible?.content ?? ''} readOnly={!visible}

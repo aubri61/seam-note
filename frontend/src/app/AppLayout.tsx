@@ -18,6 +18,7 @@ import { useNoteDrafts } from '@/features/notes/useNoteDrafts'
 import { notePath } from '@/app/routing/noteRoutes'
 import { useConnectivity } from '@/features/offline/useConnectivity'
 import { PwaStatus } from '@/features/pwa/PwaStatus'
+import { useAutoCreationSync } from '@/features/manual-sync/useAutoCreationSync'
 import { useWorkspaceSync } from '@/features/manual-sync/useWorkspaceSync'
 import { localDraftStatus } from '@/features/local-drafts/localDraftStatus'
 import type { NoteEditor } from '@/features/notes/NoteEditor'
@@ -54,6 +55,7 @@ export function AppLayout() {
   const online = useConnectivity()
   const folders = useFolders()
   const drafts = useNoteDrafts(folders.selectedNoteId, folders.activeNote)
+  const creationSyncError=useAutoCreationSync(drafts.session,online)
   const editorLoading = !folders.routeError && (folders.workspace.isPending || !!folders.selectedNoteId && folders.noteQuery.isFetching)
   const queryError = folders.routeError ?? (!folders.workspace.data ? folders.workspace.error : null) ?? folders.detailError
   const offlineDetail = !online || folders.detailError instanceof ApiError && (folders.detailError.status === 0 || folders.detailError.status >= 500)
@@ -172,12 +174,12 @@ export function AppLayout() {
       if (createdId) showCreatedNote(createdId)
     }
   }
-  function openDeleteNote() {
-    if (!serverAvailable || folders.busy || !folders.selectedNoteId) return
-    const node = folders.tree.notes.get(folders.selectedNoteId)
+  function openDeleteNote(id=folders.selectedNoteId) {
+    if (!serverAvailable || folders.busy || !id||folders.localIds.includes(id)) return
+    const node = folders.tree.notes.get(id)
     if (!node) return
     folders.resetMutationErrors()
-    setAction({ kind: 'delete-note', note: node.note })
+    setAction({ kind: 'delete-note', note: {...node.note,title:drafts.draftTitles[id]??node.note.title} })
   }
 
   const creationFeedback = (creationMessage || creationError) && <div role="alert" style={{ padding: '8px 24px', fontSize: 13 }}>
@@ -191,7 +193,7 @@ export function AppLayout() {
         </div>
 
   const sidebar = <Sidebar onClose={closeSidebar} folders={folders} draftTitles={drafts.draftTitles} onSelectNote={selectNote}
-    onCreate={create} onFolderAction={folderAction} creationFeedback={isMobile ? creationFeedback : undefined} />
+    onCreate={create} onFolderAction={folderAction} onDeleteNote={openDeleteNote} canDeleteNote={id=>serverAvailable&&!folders.localIds.includes(id)} creationFeedback={isMobile ? creationFeedback : undefined} />
 
   return (
     <Shell>
@@ -209,6 +211,7 @@ export function AppLayout() {
       )}
       <EditorArea aria-label="문서 편집 영역">
         <AppHeader
+          online={online}
           sidebarOpen={sidebarOpen}
           isMobile={isMobile}
           sidebarId={sidebarId}
@@ -217,9 +220,11 @@ export function AppLayout() {
           status={status}
           workspaceSync={workspaceSync}
           hasConflict={conflicts.items.length>0}
+          canDelete={serverAvailable&&!folders.busy&&!!folders.selectedNoteId&&!folders.localNote&&!folders.routeError&&folders.tree.notes.has(folders.selectedNoteId)} onDelete={()=>openDeleteNote()}
           path={folders.ancestors.map(item => item.name)}
         />
         <PwaStatus />
+        {creationSyncError&&<p role="alert" style={{padding:'8px 24px',fontSize:13}}>{creationSyncError}</p>}
         {conflicts.error&&<p role="alert">{conflicts.error}</p>}
         {(!online || folders.workspace.data?.localSnapshot && folders.workspace.data.localSnapshot.reason !== 'local-refresh') && <aside role="status" style={{ padding: '8px 24px', fontSize: 12 }}>
           {!online ? '오프라인 편집 · 변경사항은 이 브라우저에 로컬 저장됩니다.' : '저장된 로컬 목록을 표시합니다. 서버 변경사항을 아직 확인하지 못했습니다.'}
@@ -240,7 +245,7 @@ export function AppLayout() {
           canRetry: !folders.routeError || !!folders.selectedNoteId,
           busy: folders.busy, canCreate: true,
           canDelete: serverAvailable && !folders.localNote && !!folders.selectedNoteId && folders.tree.notes.has(folders.selectedNoteId) && !folders.routeError,
-          onCreateNote: openCreateNote, onDeleteNote: openDeleteNote,
+          onCreateNote: openCreateNote, onDeleteNote: ()=>openDeleteNote(),
           onRetry: () => { void (folders.routeError || folders.workspace.isError ? folders.workspace.refetch() : folders.noteQuery.refetch()) },
         } satisfies ComponentProps<typeof NoteEditor>} />
       </EditorArea>

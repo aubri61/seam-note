@@ -28,9 +28,11 @@ export function GlobalStyles() {
       outline: 'none',
       boxShadow: 'none',
     },
-    button: {
-      cursor: 'pointer',
-    },
+    'button:not(:disabled):hover, summary:hover': { filter: 'brightness(.96)', boxShadow:'inset 0 0 0 100vmax rgba(40,35,25,.035)' },
+    'button:not(:disabled):active, summary:active': { filter:'brightness(.91)', scale:'.97' },
+    'button:not(:disabled), summary': { transition:'filter 160ms ease, scale 120ms ease, background-color 160ms ease, box-shadow 160ms ease',cursor:'pointer' },
+    '@keyframes seam-sync-spin': { to: {transform:'rotate(360deg)'} },
+    'button[data-workspace-sync][aria-busy="true"] svg': {animation:'seam-sync-spin 900ms linear infinite'},
     'button:disabled': {
       cursor: 'not-allowed',
     },

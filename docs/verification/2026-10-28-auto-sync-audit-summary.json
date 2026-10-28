@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-28",
+  "head": "14d6759a53ea198d227c9383a675939a9b8999f3",
+  "scope": "Investigation and test harnesses/docs only. No startup/reconnect NOTE_UPDATE implementation. Existing creation-only automatic sync kept.",
+  "productSourceFilesChecked": 126,
+  "productSourceBeforeEqualsAfter": true,
+  "tests": {
+    "crash": 4,
+    "conflicts": 14,
+    "multitab": 9,
+    "readiness": 4,
+    "actualChromeSigkillBoundaries": 5,
+    "node": 169,
+    "lint": "passed"
+  },
+  "findings": {
+    "normalAdditionalInputAlreadyRecordsSuccessorAtomically": true,
+    "injectedMissingSuccessorRecoveredByAck": true,
+    "getBeforeRecoveryDirtyAndCleanRevertPreserved": true,
+    "putBeforeRecovery": 0,
+    "twoTabsSinglePut": true,
+    "ownIntentionalDeleteWithPendingUpdateReproducesRecoveryDialog": true,
+    "ownerApiIdentityBindingPresent": false
+  },
+  "remainingDecisions": [
+    "Intentional deletion intent and local queue archive/cancellation semantics",
+    "Typed ACK/local-CAS/recovery result classification",
+    "Finite ACK-derived successor pass scheduling",
+    "Single scheduler with existing creation-only automation",
+    "Authentication/resource ownership and API/account/workspace-bound queues"
+  ],
+  "environment": {
+    "uiPort": 25175,
+    "apiPort": 18766,
+    "pgPort": 25442,
+    "db": "seam_note_manual_lab"
+  },
+  "limits": [
+    "Synthetic data only, developer manuscripts untouched.",
+    "SIGKILL is not a disk failure/power loss guarantee.",
+    "Injected B absence is a test fault, not an observed normal-path loss.",
+    "Exact cause of the user actual popup cannot be inferred without that note history.",
+    "No commit/push. Existing worktree changes preserved."
+  ]
+}

@@ -12,7 +12,7 @@ function ledger(id){assert.match(id,/^[a-f0-9-]{36}$/);return Number(sql(`select
 async function launch(profile,id,note){
  fs.mkdirSync(profile,{recursive:true});const portFile=path.join(profile,'DevToolsActivePort');try{fs.unlinkSync(portFile)}catch{}
  const log=fs.openSync(path.join(profile,'chrome.log'),'a'),child=spawn(chrome,['--headless=new','--no-sandbox','--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-component-update','--disable-extensions','--password-store=basic','--use-mock-keychain','--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],{stdio:['ignore',log,log]});fs.closeSync(log);children.add(child)
- child.on('exit',()=>children.delete(child));await until(()=>fs.existsSync(portFile),'Chrome CDP port')
+ child.on('exit',()=>children.delete(child));await until(()=>{if(!fs.existsSync(portFile))return false;const lines=fs.readFileSync(portFile,'utf8').split('\n');return Number(lines[0])>0&&!!lines[1]},'Chrome CDP port contents ready')
  const port=Number(fs.readFileSync(portFile,'utf8').split('\n')[0]),browser=await chromium.connectOverCDP('http://127.0.0.1:'+port);connections.add(browser)
  const ctx=browser.contexts()[0];await ctx.setOffline(true);await ctx.setOffline(false)
  await ctx.route('**/__inflight_crash__',r=>r.fulfill({contentType:'text/html',body:'<html><body>Isolated crash verification</body></html>'}))
@@ -85,6 +85,6 @@ async function main(){try{
   await run.browser.close();connections.delete(run.browser)
  }
  const source=['frontend/src/features/local-drafts/draftDatabase.ts','frontend/src/features/local-drafts/draftSession.ts','frontend/src/features/outbox/outboxModel.ts','frontend/src/features/manual-sync/SyncCoordinator.ts']
- fs.writeFileSync(path.join(root,'docs/verification/2026-10-28-inflight-crash-recovery.json'),JSON.stringify({results,environment:{origin:fixture.origin,apiOrigin:fixture.apiOrigin,dbName:fixture.dbName,dbPort:fixture.dbPort,profiles:work},method:'Each normal additional-input write already creates B atomically. missing=true explicitly deletes only the synthetic pending successor to test ACK repair; not a naturally observed product bug. Chrome root process SIGKILL; no close/pagehide flush at crash boundary. Not a power-loss durability guarantee.',sourceHashes:Object.fromEntries(source.map(f=>[f,hash(fs.readFileSync(path.join(root,f)))]))},null,2)+'\n')
+ fs.writeFileSync(process.env.SEAM_NOTE_CRASH_REPORT||path.join(root,'docs/verification/2026-10-28-inflight-crash-recovery.json'),JSON.stringify({results,environment:{origin:fixture.origin,apiOrigin:fixture.apiOrigin,dbName:fixture.dbName,dbPort:fixture.dbPort,profiles:work},method:'Each normal additional-input write already creates B atomically. missing=true explicitly deletes only the synthetic pending successor to test ACK repair; not a naturally observed product bug. Chrome root process SIGKILL; no close/pagehide flush at crash boundary. Not a power-loss durability guarantee.',sourceHashes:Object.fromEntries(source.map(f=>[f,hash(fs.readFileSync(path.join(root,f)))]))},null,2)+'\n')
  }finally{for(const browser of connections)try{await browser.close()}catch{};for(const child of children)try{child.kill('SIGKILL')}catch{}}}
 main().catch(e=>{console.error(e);process.exitCode=1})

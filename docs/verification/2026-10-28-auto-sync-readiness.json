@@ -1,0 +1,82 @@
+{
+  "results": [
+    {
+      "name": "dirty-AB-GET-first",
+      "passed": true,
+      "earlySendCount": 0,
+      "recoveredBaseVersion": 2,
+      "protected": true,
+      "finalVersion": 4,
+      "finalContentHash": "0f6cd005539a348799a1f691cc30d3524b6a8164bf2608125be9929fa5586815",
+      "requests": [
+        {
+          "key": "956bde0d-dd35-4680-b5af-7fa6882e4ad8",
+          "version": 2,
+          "titleHash": "0a9a20f49dbd422283b6a858111d86882d94027385d849a3dfd5bf3d6c1dd71f",
+          "contentHash": "ad3fc6d8272b2d0a31443195c174b71b53b43a6a863f221ca581f410eeb72a00"
+        },
+        {
+          "key": "b8b30879-81e4-4b46-9915-6270af14c5fe",
+          "version": 3,
+          "titleHash": "163166c31dad501e41f2ff42d3b72b6ed2b2a99f3799eac388f66e365da7288b",
+          "contentHash": "0f6cd005539a348799a1f691cc30d3524b6a8164bf2608125be9929fa5586815"
+        }
+      ]
+    },
+    {
+      "name": "clean-revert-with-uncertain-A-GET-first",
+      "passed": true,
+      "earlySendCount": 0,
+      "recoveredBaseVersion": 2,
+      "protected": true,
+      "finalVersion": 4,
+      "finalContentHash": "de8ac41e3ab3c83776d08a40a3ae26da50d6f4943c554f2181b2eec0460c307a",
+      "requests": [
+        {
+          "key": "cd5f3600-b5f8-4ae7-9fbd-63bbfe56b568",
+          "version": 2,
+          "titleHash": "0a9a20f49dbd422283b6a858111d86882d94027385d849a3dfd5bf3d6c1dd71f",
+          "contentHash": "ad3fc6d8272b2d0a31443195c174b71b53b43a6a863f221ca581f410eeb72a00"
+        },
+        {
+          "key": "9cf66dfa-bc80-46b5-9eb8-af4fc2f8b97e",
+          "version": 3,
+          "titleHash": "09d97c109e757e60ac6ec82ed35e395f88381ae93257f76de662d30fc10fc472",
+          "contentHash": "de8ac41e3ab3c83776d08a40a3ae26da50d6f4943c554f2181b2eec0460c307a"
+        }
+      ]
+    },
+    {
+      "name": "two-tabs-explicit-coordinator-global-exclusion",
+      "passed": true,
+      "actualPuts": 1,
+      "secondCallerBlocked": true,
+      "serverVersion": 1
+    },
+    {
+      "name": "own-intentional-delete-pending-update-causes-recovery-dialog",
+      "passed": true,
+      "noteId": "b26e3297-ccc0-4270-8a0c-aa1099deeb1a",
+      "retainedContentHash": "41037576a229d0f522659676b88ba1a087824ff2fa205836baecd6b19000ecc2",
+      "failureCode": "NOTE_NOT_FOUND",
+      "writes": [
+        {
+          "method": "DELETE",
+          "path": "/api/notes/b26e3297-ccc0-4270-8a0c-aa1099deeb1a"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/notes/b26e3297-ccc0-4270-8a0c-aa1099deeb1a"
+        }
+      ],
+      "interpretation": "Actual current UX path: preserves local text, but does not distinguish own intentional delete from remote disappearance. No fix applied."
+    }
+  ],
+  "environment": {
+    "origin": "http://127.0.0.1:25175",
+    "api": "http://127.0.0.1:18766",
+    "db": "seam_note_manual_lab",
+    "artifacts": "/var/folders/j0/4ncpc9m90tg_c7d24lc1kvnr0000gn/T/seam-sync-readiness-K3Sl6A"
+  },
+  "scope": "Analysis harness explicitly invokes existing syncWorkspace; no automatic product NOTE_UPDATE implementation added."
+}
