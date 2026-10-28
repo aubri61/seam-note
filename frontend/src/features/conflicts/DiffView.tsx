@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import styled from '@emotion/styled'
 import { useTheme } from '@emotion/react'
+import { documentText } from '@/features/notes/richTextDocument'
 import { changedRange } from './lineDiff'
 import type { DiffResult } from './lineDiff'
 const Panels=styled.div(({theme})=>({display:'grid',gridTemplateColumns:'1fr 1fr',gap:theme.spacing.md,minWidth:0,[`@media(max-width:${theme.breakpoints.mobile})`]:{gridTemplateColumns:'1fr'}}))
@@ -14,23 +15,28 @@ function Range({value,other,changed}:{value:string;other:string;changed:boolean}
 }
 export function DiffView({left,right,leftLabel,rightLabel,leftTitle,rightTitle,leftAction,rightAction,onReady}:{left:string;right:string;leftLabel:string;rightLabel:string;leftTitle?:string;rightTitle?:string;leftAction?:ReactNode;rightAction?:ReactNode;onReady:()=>void}) {
   const theme=useTheme()
+  const comparison=useMemo(()=>{try{return {left:documentText(left,true),right:documentText(right,true),error:''}}catch(cause){return {left:'',right:'',error:(cause as Error).message}}},[left,right])
   const [result,setResult]=useState<{left:string;right:string;data:DiffResult}|null>(null),[error,setError]=useState(''),[top,setTop]=useState(0)
   const l=useRef<HTMLDivElement>(null),r=useRef<HTMLDivElement>(null)
   useEffect(()=>{
+    if(comparison.error)return
     let active=true
     const worker=new Worker(new URL('./diffWorker.ts',import.meta.url),{type:'module'})
     worker.onmessage=event=>{if(active){setResult({left,right,data:event.data});setError('');onReady()}}
     worker.onerror=()=>{if(active)setError('차이를 계산하지 못했습니다. 버전을 선택하지 않고 입력을 보관한 뒤 다시 비교해주세요.')}
-    worker.postMessage({left,right})
+    worker.postMessage({left:comparison.left,right:comparison.right})
     return()=>{active=false;worker.terminate()}
-  },[left,right,onReady])
+  },[left,right,onReady,comparison])
   const data=result?.left===left&&result.right===right?result.data:null
   const start=Math.max(0,Math.floor(top/24)-8),end=Math.min(data?.rows.length??0,start+90)
   const scroll=(value:number)=>{setTop(value);for(const ref of [l,r])if(ref.current&&Math.abs(ref.current.scrollTop-value)>1)ref.current.scrollTop=value}
 
+  if(comparison.error)return <p role="alert">{comparison.error}</p>
   if(error)return <p role="alert">{error}</p>
   if(!data)return <p role="status">원고 차이 계산 중</p>
   return <>
+    <p>본문의 굵게는 **표기**, 기울임은 _표기_, 목록은 기호로 비교합니다.</p>
+    {left!==right&&comparison.left===comparison.right&&<p role="status">본문 문장은 같지만 서식 또는 문서 구조가 다릅니다.</p>}
     <Panels>{(['left','right'] as const).map((side,index)=><section key={side} style={{minWidth:0}}>
       <h3>{index?rightLabel:leftLabel}</h3>
       <div aria-label={`${index?rightLabel:leftLabel} 제목 비교`} style={{padding:12,marginBottom:16,borderRadius:theme.radii.sm,background:leftTitle!==rightTitle?(index?theme.colors.diffAdded:theme.colors.diffRemoved):theme.colors.background}}>

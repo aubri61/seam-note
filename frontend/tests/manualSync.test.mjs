@@ -4,13 +4,14 @@ import { load } from './helpers/loadModules.mjs'
 const {verifySyncResponse,isManualSyncNote,manualSaveState}=await load('features/manual-sync/syncContract')
 const {sendNoteSnapshot,syncOneNote}=await load('features/manual-sync/manualSync')
 const {apiClient,ApiError}=await load('lib/api/client')
+const {EMPTY_DOCUMENT}=await load('features/notes/richTextDocument')
 const id='00000000-0000-4000-8000-000000000701',key='00000000-0000-4000-8000-000000000702'
-const operation={operationId:key,noteId:id,type:'NOTE_UPDATE',title:'',content:'snapshot',expectedVersion:0,localRevision:7,createdAt:1,updatedAt:1,status:'inFlight',attemptedAt:1}
-const note={id,folderId:'folder',title:'',content:'snapshot',version:1,sortOrder:0,createdAt:'2026-10-26T00:00:00Z',updatedAt:'2026-10-26T00:00:01Z'}
+const operation={operationId:key,noteId:id,type:'NOTE_UPDATE',title:'',content:EMPTY_DOCUMENT,expectedVersion:0,localRevision:7,createdAt:1,updatedAt:1,status:'inFlight',attemptedAt:1}
+const note={id,folderId:'folder',title:'',content:EMPTY_DOCUMENT,version:1,sortOrder:0,createdAt:'2026-10-26T00:00:00Z',updatedAt:'2026-10-26T00:00:01Z'}
 const locks={request:async(name,options,callback)=>{assert.equal(options.ifAvailable,true);return callback({name})}}
 function fake() {
   const calls={send:0,ack:0,conflict:0,flush:0}
-  const draft={noteId:id,title:'',content:'snapshot',baseTitle:'',baseContent:'before',baseVersion:0,latestServerVersion:0}
+  const draft={noteId:id,title:'',content:EMPTY_DOCUMENT,baseTitle:'',baseContent:'before',baseVersion:0,latestServerVersion:0}
   const session={protectServerForManual:()=>{},releaseServerProtection:()=>{},getSnapshot:()=>({[id]:{phase:'saved',draft}}),flushLatest:async()=>{calls.flush++},savedHead:()=>({token:'token',revision:7}),acceptServerAck:async(_id,response,commit)=>{await commit('token',7,'writer');draft.baseContent=response.content;draft.baseVersion=response.version}}
   const storage={prepareManual:async()=>structuredClone(operation),acknowledge:async()=>{calls.ack++},markConflict:async()=>{calls.conflict++}}
   return {session,storage,calls}
@@ -29,7 +30,7 @@ test('Axios PUT sends immutable snapshot and Idempotency-Key, then validates the
   apiClient.defaults.adapter=async config=>{
     assert.equal(config.method,'put');assert.equal(config.url,'/notes/'+id)
     assert.equal(config.headers.get('Idempotency-Key'),key)
-    assert.deepEqual(JSON.parse(config.data),{title:'',content:'snapshot',expectedVersion:0})
+    assert.deepEqual(JSON.parse(config.data),{title:'',content:EMPTY_DOCUMENT,expectedVersion:0})
     assert.equal(config.timeout,15000)
     return {data:note,status:200,statusText:'OK',headers:{'idempotency-key':key},config}
   }
@@ -58,7 +59,7 @@ test('VERSION_CONFLICT records conflict and never acknowledges the local snapsho
   const f=fake()
   await assert.rejects(()=>syncOneNote(id,f.session,{storage:f.storage,locks,send:async()=>{throw new ApiError(409,{code:'VERSION_CONFLICT',message:'conflict',errors:[]})}}),/VERSION_CONFLICT/)
   assert.equal(f.calls.conflict,1);assert.equal(f.calls.ack,0)
-  assert.equal(f.session.getSnapshot()[id].draft.content,'snapshot')
+  assert.equal(f.session.getSnapshot()[id].draft.content,EMPTY_DOCUMENT)
 })
 test('empty Outbox ends a manual click without an HTTP request',async()=>{
   const f=fake();f.storage.prepareManual=async()=>null

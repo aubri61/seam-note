@@ -1,3 +1,4 @@
+import { parseDocument } from '@/features/notes/richTextDocument'
 import { withSyncLock } from './syncLock'
 import type { Note } from '@/lib/api/types'
 import { ApiError, putJsonWithOperation } from '@/lib/api/client'
@@ -8,6 +9,7 @@ import { outboxRepository } from '@/features/outbox/outboxRepository'
 import { isManualSyncNote, verifySyncResponse } from './syncContract'
 
 export async function sendNoteSnapshot(operation: NoteUpdateOperation): Promise<Note> {
+  parseDocument(operation.content)
   const response = await putJsonWithOperation<Note>(`/notes/${encodeURIComponent(operation.noteId)}`, {
     title: operation.title, content: operation.content, expectedVersion: operation.expectedVersion,
   }, operation.operationId)

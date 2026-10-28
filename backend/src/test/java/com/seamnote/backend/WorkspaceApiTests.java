@@ -66,7 +66,7 @@ class WorkspaceApiTests {
         var child = call("POST", "/folders", Map.of("name", "child", "parentId", parentId), 201);
         String childId = child.get("id").asString();
         for(String folder : List.of(parentId, childId))
-            call("POST", "/notes", Map.of("folderId", folder, "title", "", "content", "must not be selected"), 201);
+            call("POST", "/notes", Map.of("folderId", folder, "title", "", "content", TiptapFixtures.doc("must not be selected")), 201);
         var stats = emf.unwrap(SessionFactory.class).getStatistics();
         stats.clear();
         var result = call("GET", "/workspace/tree", null, 200);

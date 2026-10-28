@@ -1,3 +1,4 @@
+import { parseDocument } from '@/features/notes/richTextDocument'
 import { withSyncLock } from './syncLock'
 import type { Folder, Note } from '@/lib/api/types'
 import { ApiError, postJsonWithOperation } from '@/lib/api/client'
@@ -18,6 +19,7 @@ export function verifyCreation(op:CreationOperation,body:Folder|Note,key:unknown
 }
 async function send(op:CreationOperation){
   try{
+    if(op.type==='NOTE_CREATE')parseDocument(op.payload.content)
     const result=await postJsonWithOperation<Note|Folder>(op.type==='FOLDER_CREATE'?'/folders':'/notes',op.payload,op.operationId)
     return verifyCreation(op,result.body,result.operationId)
   }catch(error){

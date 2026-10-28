@@ -91,9 +91,10 @@ export function AppLayout() {
   const [createdFocusRequest,setCreatedFocusRequest] = useState<string|null>(null)
   const sidebarId = 'folders-sidebar'
   const onSidebarShortcut = useEffectEvent((event: KeyboardEvent) => {
-    if (event.defaultPrevented || event.isComposing || event.altKey || event.shiftKey
+    if (event.isComposing || event.altKey || event.shiftKey
       || !(event.metaKey || event.ctrlKey) || !(event.key.toLowerCase() === 'b' || event.code === 'KeyB')) return
     event.preventDefault()
+    event.stopPropagation()
     if (event.repeat || Array.from(document.querySelectorAll('[role="dialog"][aria-modal="true"]')).some(dialog => dialog.id !== sidebarId)) return
     // Closing the desktop sidebar must not leave focus inside its inert subtree.
     // Radix restores mobile drawer focus through onCloseAutoFocus.
@@ -102,8 +103,8 @@ export function AppLayout() {
   })
   useEffect(() => {
     const listener = (event: KeyboardEvent) => onSidebarShortcut(event)
-    window.addEventListener('keydown', listener)
-    return () => window.removeEventListener('keydown', listener)
+    window.addEventListener('keydown', listener, true)
+    return () => window.removeEventListener('keydown', listener, true)
   }, [])
 
   // Reset before rendering the new presentation so an open desktop sidebar

@@ -38,7 +38,8 @@ async function forward(r){const request=r.request(),response=await fetch(fixture
 function windowlessId(url){return new URL(url).pathname.split('/').at(-1)}
 async function main(){try{
  for(const config of [{mode:'before-server',missing:false},{mode:'after-server-response-held',missing:false},{mode:'before-server',missing:true},{mode:'after-server-response-held',missing:true,abortAck:true}]){
-  const id=randomUUID(),profile=path.join(work,'profile-'+results.length),base='synthetic baseline '+'.'.repeat(20000),aBody=base+' A',abBody=base+' A+B'
+  const rich=(text,mark)=>JSON.stringify({type:'doc',content:[{type:'paragraph',content:[{type:'text',text,...(mark?{marks:[{type:mark}]}:{})}]}]}),raw='synthetic baseline '+'.'.repeat(20000)
+  const id=randomUUID(),profile=path.join(work,'profile-'+results.length),base=rich(raw),aBody=rich(raw+' A','bold'),abBody=rich(raw+' A+B','italic')
   await api('POST','/notes',{id,folderId:fixture.folderId,title:'baseline',content:base})
   await api('PUT','/notes/'+id,{title:'baseline1',content:base,expectedVersion:0},randomUUID())
   const server2=await api('PUT','/notes/'+id,{title:'baseline2',content:base,expectedVersion:1},randomUUID());assert.equal(server2.version,2)

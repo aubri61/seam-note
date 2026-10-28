@@ -1,8 +1,8 @@
 import type { RecoveryCopy } from '@/features/conflicts/conflictModel'
 import type { NoteDraft } from '@/features/notes/noteDrafts'
 
-export const DRAFT_DB_NAME = 'seam-note-local'
-export const DRAFT_CHANNEL = 'seam-note-local-drafts-v1'
+export const DRAFT_DB_NAME = 'seam-note-tiptap-v1'
+export const DRAFT_CHANNEL = 'seam-note-tiptap-drafts-v1'
 export interface LocalNoteDraft extends NoteDraft {
   /** Additive unindexed fields in existing drafts records; no schema version change. */
   conflictHistory?: RecoveryCopy[]

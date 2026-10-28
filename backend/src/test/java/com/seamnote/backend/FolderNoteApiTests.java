@@ -38,9 +38,9 @@ class FolderNoteApiTests {
     }
     String note(String folder, String title, String content) throws Exception {
         String id = UUID.randomUUID().toString();
-        var r = call("POST", "/notes", Map.of("id", id, "folderId", folder, "title", title, "content", content));
+        var r = call("POST", "/notes", Map.of("id", id, "folderId", folder, "title", title, "content", TiptapFixtures.doc(content)));
         assertEquals(201, r.status, String.valueOf(r.body)); assertEquals(id, r.body.get("id").asString());
-        assertEquals(title, r.body.get("title").asString()); assertEquals(content, r.body.get("content").asString());
+        assertEquals(title, r.body.get("title").asString()); assertEquals(TiptapFixtures.doc(content), r.body.get("content").asString());
         assertEquals(folder, r.body.get("folderId").asString()); assertEquals(0, r.body.get("version").asInt());
         assertEquals("/api/notes/" + id, r.location); return id;
     }
@@ -85,8 +85,8 @@ class FolderNoteApiTests {
         var summaries=call("GET","/folders/"+a+"/notes",null);
         assertEquals(4,summaries.body.size());
         for(int i=0;i<4;i++){ assertFalse(summaries.body.get(i).has("content")); assertEquals(i,summaries.body.get(i).get("sortOrder").asInt()); }
-        assertEquals(200,call("PUT","/notes/"+id,Map.of("title","changed","content","new body","expectedVersion",0)).status);
-        var changed=call("PATCH","/notes/"+id,Map.of("title","", "content","","expectedVersion",1));
+        assertEquals(200,call("PUT","/notes/"+id,Map.of("title","changed","content",TiptapFixtures.doc("new body"),"expectedVersion",0)).status);
+        var changed=call("PATCH","/notes/"+id,Map.of("title","", "content",TiptapFixtures.doc(""),"expectedVersion",1));
         assertEquals(200,changed.status); assertEquals("",changed.body.get("title").asString());
         assertTrue(changed.body.get("version").asInt()>0);
         assertEquals(id,call("GET","/folders/"+a+"/notes",null).body.get(0).get("id").asString());
@@ -99,9 +99,9 @@ class FolderNoteApiTests {
     }
     @Test void noteValidationErrorsAndDuplicatePreservation() throws Exception {
         String a=folder(null), id=note(a,"original","body");
-        error("POST","/notes",Map.of("id",id,"folderId",a,"title","overwrite","content",""),409,"DUPLICATE_ENTITY_ID");
+        error("POST","/notes",Map.of("id",id,"folderId",a,"title","overwrite","content",TiptapFixtures.doc("")),409,"DUPLICATE_ENTITY_ID");
         assertEquals("original",call("GET","/notes/"+id,null).body.get("title").asString());
-        error("POST","/notes",Map.of("folderId",a,"title","x".repeat(201),"content",""),400,"INVALID_REQUEST");
+        error("POST","/notes",Map.of("folderId",a,"title","x".repeat(201),"content",TiptapFixtures.doc("")),400,"INVALID_REQUEST");
         for(String body:List.of("{}","{\"title\":null,\"content\":\"\"}","{\"title\":\"\"}","{\"title\":\"\",\"content\":null}")){
             error("POST","/notes",body,400,"INVALID_REQUEST"); error("PATCH","/notes/"+id,body,400,"INVALID_REQUEST");
         }
@@ -111,14 +111,14 @@ class FolderNoteApiTests {
             "{\"folderId\":\""+a+"\",\"title\":\"\"}",
             "{\"folderId\":\""+a+"\",\"title\":\"\",\"content\":null}"))
             error("POST","/notes",body,400,"INVALID_REQUEST");
-        error("PUT","/notes/"+id,Map.of("title","x".repeat(201),"content","","expectedVersion",0),400,"INVALID_REQUEST");
-        error("POST","/notes",Map.of("folderId",UUID.randomUUID().toString(),"title","","content",""),404,"FOLDER_NOT_FOUND");
+        error("PUT","/notes/"+id,Map.of("title","x".repeat(201),"content",TiptapFixtures.doc(""),"expectedVersion",0),400,"INVALID_REQUEST");
+        error("POST","/notes",Map.of("folderId",UUID.randomUUID().toString(),"title","","content",TiptapFixtures.doc("")),404,"FOLDER_NOT_FOUND");
         error("PATCH","/notes/"+id+"/move",Map.of("targetFolderId",UUID.randomUUID().toString()),404,"FOLDER_NOT_FOUND");
         error("PATCH","/notes/"+id+"/move","{\"targetFolderId\":null}",400,"INVALID_REQUEST");
         error("GET","/notes/not-a-uuid",null,400,"INVALID_REQUEST");
         error("GET","/folders?parentId=invalid",null,400,"INVALID_REQUEST");
         error("POST","/notes","{",400,"MALFORMED_JSON");
-        error("POST","/notes",Map.of("id","invalid","folderId",a,"title","","content",""),400,"MALFORMED_JSON");
+        error("POST","/notes",Map.of("id","invalid","folderId",a,"title","","content",TiptapFixtures.doc("")),400,"MALFORMED_JSON");
         error("GET","/folders/"+UUID.randomUUID(),null,404,"FOLDER_NOT_FOUND");
         error("GET","/folders/"+UUID.randomUUID()+"/notes",null,404,"FOLDER_NOT_FOUND");
     }
@@ -139,7 +139,7 @@ class FolderNoteApiTests {
         String a=folder(null);
         try(var executor=Executors.newFixedThreadPool(4)) {
             List<Future<Reply>> tasks=new ArrayList<>();
-            for(int i=0;i<8;i++)tasks.add(executor.submit(()->call("POST","/notes",Map.of("folderId",a,"title","","content",""))));
+            for(int i=0;i<8;i++)tasks.add(executor.submit(()->call("POST","/notes",Map.of("folderId",a,"title","","content",TiptapFixtures.doc("")))));
             for(var task:tasks)assertEquals(201,task.get(15,TimeUnit.SECONDS).status);
         }
         var list=call("GET","/folders/"+a+"/notes",null).body;
@@ -149,28 +149,28 @@ class FolderNoteApiTests {
     @Test void consecutiveContentUpdatesReturnIncrementedVersions() throws Exception {
         String id = note(folder(null), "initial", "initial body");
         var first = call("PUT", "/notes/" + id,
-            Map.of("title", "1화", "content", "수정한 원고 내용", "expectedVersion", 0));
+            Map.of("title", "1화", "content", TiptapFixtures.doc("수정한 원고 내용"), "expectedVersion", 0));
         assertEquals(200, first.status, String.valueOf(first.body));
         assertEquals(1, first.body.get("version").asLong());
         assertEquals("1화", first.body.get("title").asString());
-        assertEquals("수정한 원고 내용", first.body.get("content").asString());
+        assertEquals(TiptapFixtures.doc("수정한 원고 내용"), first.body.get("content").asString());
         var second = call("PATCH", "/notes/" + id,
-            Map.of("title", "", "content", "", "expectedVersion", 1));
+            Map.of("title", "", "content", TiptapFixtures.doc(""), "expectedVersion", 1));
         assertEquals(200, second.status, String.valueOf(second.body));
         assertEquals(2, second.body.get("version").asLong());
         assertEquals("", second.body.get("title").asString());
-        assertEquals("", second.body.get("content").asString());
+        assertEquals(TiptapFixtures.doc(""), second.body.get("content").asString());
         assertEquals(second.body, call("GET", "/notes/" + id, null).body);
     }
 
     @Test void staleExpectedVersionPreservesServerNote() throws Exception {
         String id = note(folder(null), "initial", "initial body");
         var latest = call("PUT", "/notes/" + id,
-            Map.of("title", "server title", "content", "server body", "expectedVersion", 0));
+            Map.of("title", "server title", "content", TiptapFixtures.doc("server body"), "expectedVersion", 0));
         assertEquals(200, latest.status);
         for (String method : List.of("PUT", "PATCH")) {
             error(method, "/notes/" + id,
-                Map.of("title", "offline title", "content", "offline body", "expectedVersion", 0),
+                Map.of("title", "offline title", "content", TiptapFixtures.doc("offline body"), "expectedVersion", 0),
                 409, "VERSION_CONFLICT");
             assertEquals(latest.body, call("GET", "/notes/" + id, null).body,
                 "Stale request must preserve title, content, timestamps and version");
@@ -182,9 +182,9 @@ class FolderNoteApiTests {
         var before = call("GET", "/notes/" + id, null).body;
         for (String method : List.of("PUT", "PATCH")) {
             for (String json : List.of(
-                "{\"title\":\"changed\",\"content\":\"changed\"}",
-                "{\"title\":\"changed\",\"content\":\"changed\",\"expectedVersion\":null}",
-                "{\"title\":\"changed\",\"content\":\"changed\",\"expectedVersion\":-1}")) {
+                "{\"title\":\"changed\",\"content\":"+mapper.writeValueAsString(TiptapFixtures.doc("changed"))+"}",
+                "{\"title\":\"changed\",\"content\":"+mapper.writeValueAsString(TiptapFixtures.doc("changed"))+",\"expectedVersion\":null}",
+                "{\"title\":\"changed\",\"content\":"+mapper.writeValueAsString(TiptapFixtures.doc("changed"))+",\"expectedVersion\":-1}")) {
                 var result = call(method, "/notes/" + id, json);
                 assertEquals(400, result.status, String.valueOf(result.body));
                 assertEquals("INVALID_REQUEST", result.body.get("code").asString());
@@ -215,9 +215,9 @@ class FolderNoteApiTests {
                 try (var rows = statement.executeQuery()) { assertTrue(rows.next()); }
             }
             var first = executor.submit(() -> call("PUT", "/notes/" + id,
-                Map.of("title", "first title", "content", "first body", "expectedVersion", 0)));
+                Map.of("title", "first title", "content", TiptapFixtures.doc("first body"), "expectedVersion", 0)));
             var second = executor.submit(() -> call("PATCH", "/notes/" + id,
-                Map.of("title", "second title", "content", "second body", "expectedVersion", 0)));
+                Map.of("title", "second title", "content", TiptapFixtures.doc("second body"), "expectedVersion", 0)));
             boolean bothWaiting = false;
             try {
                 long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
@@ -244,5 +244,21 @@ class FolderNoteApiTests {
             assertTrue(loser.body.get("errors").isArray());
             assertEquals(winner.body, call("GET", "/notes/" + id, null).body);
         }
+    }
+
+    @Test void tiptapJsonContractRejectsInvalidContentWithoutChangingNote() throws Exception {
+        String parent=folder(null), id=note(parent,"rich", "기준 원고");
+        var before=call("GET","/notes/"+id,null).body;
+        for(String invalid:List.of("", "plain text", "null", "{}", "{\"type\":\"doc\",\"content\":[]}",
+            "{\"type\":\"doc\",\"content\":[{\"type\":\"image\"}]}")) {
+            var body=Map.of("title","bad","content",invalid,"expectedVersion",0);
+            assertEquals(400,call("PUT","/notes/"+id,body).status);
+            assertEquals(400,call("POST","/notes",Map.of("folderId",parent,"title","bad","content",invalid)).status);
+            assertEquals(before,call("GET","/notes/"+id,null).body);
+        }
+        String rich="{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"한글\",\"marks\":[{\"type\":\"bold\"},{\"type\":\"italic\"}]},{\"type\":\"hardBreak\"}]},{\"type\":\"orderedList\",\"attrs\":{\"start\":2,\"type\":null},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\"}]}]}]}";
+        var saved=call("PUT","/notes/"+id,Map.of("title","rich","content",rich,"expectedVersion",0));
+        assertEquals(200,saved.status,String.valueOf(saved.body));
+        assertEquals(rich,saved.body.get("content").asString());assertEquals(1,saved.body.get("version").asLong());
     }
 }

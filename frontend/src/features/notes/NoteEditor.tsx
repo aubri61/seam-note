@@ -1,9 +1,11 @@
-import { useState, type RefObject } from 'react'
+import { lazy, Suspense, useState, type RefObject } from 'react'
 import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
-import { IconButton } from '@/components/primitives'
+import { EMPTY_DOCUMENT, documentText } from './richTextDocument'
 import type { DraftEntry } from '@/features/local-drafts/draftSession'
 import type { DraftPatch, NoteDraft } from './noteDrafts'
+
+const RichTextEditor = lazy(() => import('./RichTextEditor'))
 
 const Panel = styled.section(({ theme }) => ({
   position: 'relative',
@@ -36,44 +38,6 @@ const Title = styled.input(({ theme }) => ({
   letterSpacing: '-1.2px',
   '&::placeholder': { color: theme.colors.secondary, opacity: 1 },
   '&:focus, &:focus-visible': { outline: 'none', boxShadow: 'none' },
-}))
-
-const Toolbar = styled.div(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.xs,
-  padding: `${theme.spacing.lg} 0 ${theme.spacing.lg}`,
-  borderBottom: `1px solid ${theme.colors.border}`,
-}))
-
-const Writing = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-  paddingTop: theme.spacing.xl,
-  p: {
-    color: theme.colors.mutedText,
-    fontSize: '16px',
-    lineHeight: 1.9,
-  },
-  textarea: {
-    display: 'block',
-    width: '100%',
-    flex: 1,
-    minHeight: '160px',
-    resize: 'none',
-    marginTop: theme.spacing.md,
-    padding: `${theme.spacing.xs} 0`,
-    border: 0,
-    background: 'transparent',
-    fontSize: '15px',
-    lineHeight: 1.9,
-    color: theme.colors.mutedText,
-  },
-  'textarea::placeholder': {
-    color: theme.colors.mutedText,
-    opacity: 1,
-  },
-  'textarea:focus, textarea:focus-visible': { outline: 'none', boxShadow: 'none' },
 }))
 
 const NewDocumentButton = styled.button(({ theme }) => ({
@@ -112,13 +76,13 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
   const copyCurrent = async () => {
     if (!visible) return
     try {
-      await navigator.clipboard.writeText(`${visible.title}\n\n${visible.content}`)
+      await navigator.clipboard.writeText(`${visible.title}\n\n${documentText(visible.content)}`)
       setBackup({ noteId: visible.noteId, revision: localEntry?.revision ?? 0, message: '현재 입력을 복사했습니다. 안전한 곳에 붙여 넣어 보관해주세요.' })
     } catch { setBackup({ noteId: visible.noteId, revision: localEntry?.revision ?? 0, message: '복사하지 못했습니다. 파일로 내려받거나 제목·본문을 직접 선택해 보관해주세요.' }) }
   }
   const downloadCurrent = () => {
     if (!visible) return
-    const url = URL.createObjectURL(new Blob([`${visible.title}\n\n${visible.content}`], { type: 'text/plain;charset=utf-8' }))
+    const url = URL.createObjectURL(new Blob([`${visible.title}\n\n${documentText(visible.content)}`], { type: 'text/plain;charset=utf-8' }))
     const anchor = document.createElement('a')
     anchor.href = url; anchor.download = `seam-note-${visible.noteId}.txt`; anchor.click()
     setTimeout(() => URL.revokeObjectURL(url), 60_000)
@@ -141,24 +105,8 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
         </div>}
         <Title ref={titleRef} aria-label="문서 제목" placeholder={visible ? '제목 없음' : ''} value={visible?.title ?? ''} maxLength={200}
           readOnly={!visible} onChange={event => { if (visible) onEdit(visible.noteId, { title: event.target.value }) }} />
-        <Toolbar role="group" aria-label="Formatting preview (not connected)">
-          <IconButton type="button" disabled aria-label="Bold (coming later)" title="Formatting is not connected">
-            <strong style={{ fontSize: 18 }}>B</strong>
-          </IconButton>
-          <IconButton type="button" disabled aria-label="Italic (coming later)" title="Formatting is not connected">
-            <i style={{ fontFamily: 'Georgia, serif', fontSize: 20 }}>I</i>
-          </IconButton>
-          <IconButton type="button" disabled aria-label="Bullet list (coming later)" title="Formatting is not connected">
-            <Icon name="list" size={19} />
-          </IconButton>
-          <IconButton type="button" disabled aria-label="Numbered list (coming later)" title="Formatting is not connected">
-            <Icon name="ordered" size={19} />
-          </IconButton>
-        </Toolbar>
-        <Writing>
-          <textarea aria-label="문서 내용" placeholder="" value={visible?.content ?? ''} readOnly={!visible}
-            onChange={event => { if (visible) onEdit(visible.noteId, { content: event.target.value }) }} />
-        </Writing>
+        <Suspense fallback={<p role="status">에디터 준비 중</p>}><RichTextEditor key={visible?.noteId ?? 'empty'} content={visible?.content ?? EMPTY_DOCUMENT} editable={!!visible}
+          onChange={content=>{if(visible)onEdit(visible.noteId,{content})}} /></Suspense>
       </Document>
       <NewDocumentButton type="button" disabled={busy || !canCreate} onClick={onCreateNote} aria-label="새 문서" title="빈 원고 생성"><Icon name="pencil" size={24} /></NewDocumentButton>
     </Panel>

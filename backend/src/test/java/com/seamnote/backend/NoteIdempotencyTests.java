@@ -36,11 +36,11 @@ class NoteIdempotencyTests {
     String note() throws Exception {
         var folder = call("POST", "/folders", Map.of("name", "idempotency fixture"), null);
         assertEquals(201, folder.status);
-        var note = call("POST", "/notes", Map.of("id", UUID.randomUUID().toString(), "folderId", folder.body.get("id").asString(), "title", "before", "content", "before body"), null);
+        var note = call("POST", "/notes", Map.of("id", UUID.randomUUID().toString(), "folderId", folder.body.get("id").asString(), "title", "before", "content", TiptapFixtures.doc("before body")), null);
         assertEquals(201, note.status);
         return note.body.get("id").asString();
     }
-    Map<String,Object> update(String text, long version) { return Map.of("title", "", "content", text, "expectedVersion", version); }
+    Map<String,Object> update(String text, long version) { return Map.of("title", "", "content", TiptapFixtures.doc(text), "expectedVersion", version); }
     long records(String key) { return jdbc.queryForObject("select count(*) from note_update_operations where operation_id=?", Long.class, UUID.fromString(key)); }
     void code(Reply r, String code) { assertEquals(409,r.status);assertEquals(code,r.body.get("code").asString());assertTrue(r.body.get("errors").isArray()); }
 
@@ -54,7 +54,7 @@ class NoteIdempotencyTests {
     @Test void reusedKeyWithDifferentContentTitleVersionOrNoteIsRejected() throws Exception {
         String id=note(), other=note(),key=UUID.randomUUID().toString();var payload=update("snapshot",0);
         var first=call("PUT","/notes/"+id,payload,key);assertEquals(200,first.status);
-        for(var changed:List.of(update("different",0),update("snapshot",1),Map.of("title","different","content","snapshot","expectedVersion",0)))
+        for(var changed:List.of(update("different",0),update("snapshot",1),Map.of("title","different","content",TiptapFixtures.doc("snapshot"),"expectedVersion",0)))
             code(call("PUT","/notes/"+id,changed,key),"IDEMPOTENCY_KEY_REUSED");
         code(call("PUT","/notes/"+other,payload,key),"IDEMPOTENCY_KEY_REUSED");
         assertEquals(first.body,call("GET","/notes/"+id,null,null).body);

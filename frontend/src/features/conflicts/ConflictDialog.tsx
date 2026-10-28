@@ -13,6 +13,7 @@ import { chooseConflict, inspectConflict, saveChosenNote } from './conflictServi
 import { ApiError } from '@/lib/api/client'
 import { useQueryClient } from '@tanstack/react-query'
 import { noteKeys, workspaceKeys } from '@/lib/query/queryKeys'
+import { documentText } from '@/features/notes/richTextDocument'
 import { DiffView } from './DiffView'
 const Overlay=styled(Dialog.Overlay)({position:'fixed',inset:0,background:'rgba(36,35,32,.3)',zIndex:40})
 const Content=styled(Dialog.Content)(({theme})=>({position:'fixed',inset:'4vh 3vw',zIndex:41,overflowY:'auto',padding:theme.spacing.lg,
@@ -91,7 +92,7 @@ export default function ConflictDialog({id,session,folders,initialFolderId,onClo
       leftTitle={preview.mine.title} rightTitle={other.title} onReady={onDiffReady}
       leftAction={<SyncButton type="button" disabled={disabled||!!pendingSave&&pendingSave.choice!=='mine'} onClick={()=>{void choose('mine')}}>{pendingSave?.choice==='mine'?'현재 원고 서버 저장 재시도':'현재 원고 선택'}</SyncButton>}
       rightAction={<SyncButton type="button" disabled={disabled||!!pendingSave&&pendingSave.choice!=='other'} onClick={()=>{void choose('other')}}>{pendingSave?.choice==='other'?'선택한 원고 서버 저장 재시도':preview.server?'서버 원고 선택':'다른 탭 원고 선택'}</SyncButton>}/>}
-    {deleted&&<><h3>복구할 로컬 원고</h3><p><strong>{mine?.title||'제목 없음'}</strong></p><textarea aria-label="복구할 로컬 원고 본문" readOnly value={mine?.content??''} rows={5} style={{width:'100%',resize:'vertical',background:theme.colors.background}}/><p>서버가 NOTE_NOT_FOUND를 반환했습니다. 기존 UUID로 재생성하지 않고 새 UUID와 NOTE_CREATE로 복구합니다.</p>
+    {deleted&&<><h3>복구할 로컬 원고</h3><p><strong>{mine?.title||'제목 없음'}</strong></p><textarea aria-label="복구할 로컬 원고 본문" readOnly value={mine ? documentText(mine.content,true) : ''} rows={5} style={{width:'100%',resize:'vertical',background:theme.colors.background}}/><p>서버가 NOTE_NOT_FOUND를 반환했습니다. 기존 UUID로 재생성하지 않고 새 UUID와 NOTE_CREATE로 복구합니다.</p>
       <label>새 원고를 보관할 폴더 <select value={folderId} onChange={e=>setFolderId(e.target.value)} disabled={busy}><option value="">폴더 선택</option>{folders.map(f=><option key={f.id} value={f.id}>{f.name}</option>)}</select></label></>}
     {deleted&&<div style={{marginTop:16}}><SyncButton type="button" disabled={disabled||!folderId} onClick={()=>{void choose('recover')}}>새 원고로 복구</SyncButton></div>}
   </Content></Dialog.Portal></Dialog.Root>

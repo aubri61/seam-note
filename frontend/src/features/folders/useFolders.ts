@@ -1,3 +1,4 @@
+import { EMPTY_DOCUMENT } from '@/features/notes/richTextDocument'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { readFolderExpansion, writeFolderExpansion } from './folderExpansion'
 import { useLocation, useMatch, useNavigate } from 'react-router-dom'
@@ -152,7 +153,7 @@ export function useFolders() {
     busy, createFolderMutation, createNoteMutation, deleteNoteMutation, deleteFolderMutation, resetMutationErrors,
     createFolder: (request: CreateFolderRequest) => perform(() => createFolderMutation.mutateAsync(request)),
     createEmptyNote: async (folderId: string, id: string = crypto.randomUUID()) => {
-      const success = await perform(() => createNoteMutation.mutateAsync({ id, folderId, title: '', content: '' }))
+      const success = await perform(() => createNoteMutation.mutateAsync({ id, folderId, title: '', content: EMPTY_DOCUMENT }))
       return success ? id : success
     },
     deleteFolder: (id: string) => perform(() => deleteFolderMutation.mutateAsync(id)),

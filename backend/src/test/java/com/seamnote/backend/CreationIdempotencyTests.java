@@ -32,11 +32,11 @@ class CreationIdempotencyTests {
   var bad=call("POST","/folders",Map.of("id",id,"name","changed"),key);assertEquals(409,bad.status);assertEquals("IDEMPOTENCY_KEY_REUSED",bad.body.get("code").asString());
  }
  @Test void noteReplayIsOriginalVersionEvenAfterLaterUpdate()throws Exception{
-  String id=uuid(),key=uuid();var p=Map.of("id",id,"folderId",parent(),"title","","content","initial");
+  String id=uuid(),key=uuid();var p=Map.of("id",id,"folderId",parent(),"title","","content",TiptapFixtures.doc("initial"));
   var first=call("POST","/notes",p,key);assertEquals(201,first.status);assertEquals(0,first.body.get("version").asLong());
-  assertEquals(200,call("PUT","/notes/"+id,Map.of("title","later","content","latest","expectedVersion",0),uuid()).status);
+  assertEquals(200,call("PUT","/notes/"+id,Map.of("title","later","content",TiptapFixtures.doc("latest"),"expectedVersion",0),uuid()).status);
   assertEquals(first,call("POST","/notes",p,key));assertEquals(1,call("GET","/notes/"+id,null,null).body.get("version").asLong());
-  assertEquals(409,call("POST","/notes",Map.of("id",id,"folderId",p.get("folderId"),"title","different","content","initial"),uuid()).status);
+  assertEquals(409,call("POST","/notes",Map.of("id",id,"folderId",p.get("folderId"),"title","different","content",TiptapFixtures.doc("initial")),uuid()).status);
  }
  @Test void sameKeyConcurrentCreateAppliesOnce()throws Exception{
   String id=uuid(),key=uuid();var p=folder(id);var start=new CountDownLatch(1);
@@ -51,15 +51,15 @@ class CreationIdempotencyTests {
   assertEquals("합성 생성 폴더",call("GET","/folders/"+id,null,null).body.get("name").asString());
  }
  @Test void keysCannotCrossCreationAndUpdateLedgers()throws Exception{
-  String parent=parent(),id=uuid(),create=uuid();var p=Map.of("id",id,"folderId",parent,"title","","content","");
+  String parent=parent(),id=uuid(),create=uuid();var p=Map.of("id",id,"folderId",parent,"title","","content",TiptapFixtures.doc(""));
   assertEquals(201,call("POST","/notes",p,create).status);
-  assertEquals(409,call("PUT","/notes/"+id,Map.of("title","x","content","x","expectedVersion",0),create).status);
+  assertEquals(409,call("PUT","/notes/"+id,Map.of("title","x","content",TiptapFixtures.doc("x"),"expectedVersion",0),create).status);
   assertEquals(409,call("POST","/folders",folder(uuid()),create).status);
-  String update=uuid();assertEquals(200,call("PUT","/notes/"+id,Map.of("title","x","content","x","expectedVersion",0),update).status);
+  String update=uuid();assertEquals(200,call("PUT","/notes/"+id,Map.of("title","x","content",TiptapFixtures.doc("x"),"expectedVersion",0),update).status);
   assertEquals(409,call("POST","/folders",folder(uuid()),update).status);
  }
  @Test void parentFailureLeavesNoLedgerAndSameKeyCanRetryAfterParentCreated()throws Exception{
-  String id=uuid(),parent=uuid(),key=uuid();var p=Map.of("id",id,"folderId",parent,"title","","content","");
+  String id=uuid(),parent=uuid(),key=uuid();var p=Map.of("id",id,"folderId",parent,"title","","content",TiptapFixtures.doc(""));
   assertEquals(404,call("POST","/notes",p,key).status);assertEquals(0,records(key));
   assertEquals(201,call("POST","/folders",folder(parent),uuid()).status);assertEquals(201,call("POST","/notes",p,key).status);
  }
