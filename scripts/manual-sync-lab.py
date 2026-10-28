@@ -8,6 +8,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 p = argparse.ArgumentParser()
 p.add_argument('--serve', action='store_true')
+p.add_argument('--open-browser', action='store_true', help='Open a separate Chrome profile for this served lab')
+p.add_argument('--delay', action='store_true', help='Serve a designated-note-only 10s response/ACK lab')
 p.add_argument('--creation', action='store_true', help='Compatibility flag; runs the current Workspace-wide flow')
 p.add_argument('--workspace', action='store_true')
 p.add_argument('--conflicts', action='store_true', help='Also run manuscript conflict selection and UI regressions')
@@ -15,6 +17,7 @@ p.add_argument('--db-port', type=int, default=25442)
 p.add_argument('--api-port', type=int, default=18766)
 p.add_argument('--ui-port', type=int, default=25175)
 a = p.parse_args()
+if a.delay: a.serve = True
 if a.conflicts: a.workspace = True
 if len({a.db_port,a.api_port,a.ui_port}) != 3 or {a.db_port,a.api_port,a.ui_port} & {15439,18765,5173}:
     raise SystemExit('Use three distinct research ports, never development ports.')
@@ -42,9 +45,9 @@ def wait_http(url, child, timeout=90):
         time.sleep(.2)
     raise RuntimeError('Timed out waiting for isolated lab; logs: '+str(work))
 
-def api(method,path,body=None):
+def api(method,path,body=None,operation_id=None):
     raw=None if body is None else json.dumps(body).encode()
-    req=urllib.request.Request(f'http://127.0.0.1:{a.api_port}/api'+path,data=raw,headers={'Content-Type':'application/json'},method=method)
+    req=urllib.request.Request(f'http://127.0.0.1:{a.api_port}/api'+path,data=raw,headers={'Content-Type':'application/json',**({'Idempotency-Key':operation_id} if operation_id else {})},method=method)
     with urllib.request.urlopen(req,timeout=10) as response:
         return json.loads(response.read())
 
@@ -63,9 +66,15 @@ try:
     wait_http(f'http://127.0.0.1:{a.api_port}/api/workspace/tree',server)
     folder=api('POST','/folders',{'id':str(uuid.uuid4()),'name':'수동 동기화 실험 전용'})
     note=api('POST','/notes',{'id':str(uuid.uuid4()),'folderId':folder['id'],'title':'실험 원고','content':'격리된 초기 본문'})
+    if a.delay:
+        for _ in range(2):
+            note=api('PUT','/notes/'+note['id'],{'title':note['title'],'content':note['content']+' 실험 기준','expectedVersion':note['version']},str(uuid.uuid4()))
     config=work/'vite.config.mjs'
     config.write_text("import config from "+json.dumps(str(ROOT/'frontend/vite.config.ts'))+"\nexport default {...config,cacheDir:"+json.dumps(str(work/'vite-cache'))+"}\n")
     ui_env={**base,'SEAM_NOTE_API_TARGET':f'http://127.0.0.1:{a.api_port}'}
+    if a.delay:
+        ui_env['VITE_SYNC_DELAY_NOTE_ID']=note['id']
+        config.write_text('import config from '+json.dumps(str(ROOT/'frontend/vite.config.ts'))+'\nimport delay from '+json.dumps(str(ROOT/'scripts/sync-delay-proxy.mjs'))+'\nexport default {...config,cacheDir:'+json.dumps(str(work/'vite-cache'))+',plugins:[...config.plugins,delay('+json.dumps({'noteId':note['id'],'apiOrigin':f'http://127.0.0.1:{a.api_port}'})+')],server:{...config.server,proxy:{}}}\n')
     vite=start(['pnpm','exec','vite','--config',config,'--host','127.0.0.1','--port',a.ui_port,'--strictPort'],'vite.log',ui_env,ROOT/'frontend')
     wait_http(f'http://127.0.0.1:{a.ui_port}/',vite)
     fixture={'noteId':note['id'],'folderId':folder['id'],'origin':f'http://127.0.0.1:{a.ui_port}','apiOrigin':f'http://127.0.0.1:{a.api_port}','dbPort':a.db_port,'dbName':'seam_note_manual_lab','workDirectory':str(work)}
@@ -73,6 +82,11 @@ try:
     print('Lab note:',fixture['origin']+'/notes/'+note['id'],flush=True)
     print('Isolated fixture/logs:',work,flush=True)
     if a.serve:
+        if a.open_browser:
+            start(['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome','--no-first-run','--no-default-browser-check','--user-data-dir='+str(work/'chrome-manual'),fixture['origin']+'/notes/'+note['id']],'chrome-manual.log')
+        if a.delay:
+            print('Development-only delay panel: arm A or B, edit the test note, then click the regular sync button. Initial server version: 2.',flush=True)
+            print('Dedicated manual Chrome profile:',work/'chrome-manual',flush=True)
         print('Use the regular Workspace sync button for the fresh lab note. Ctrl-C stops the lab; development services are untouched.',flush=True)
         while True: time.sleep(1)
     else:

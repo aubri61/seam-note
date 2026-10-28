@@ -1,0 +1,14 @@
+{
+  "results": [
+    {
+      "name": "desktop-menus-delete-selected-and-unselected-failure-preservation-sync-icon-effects-reduced-motion",
+      "passed": true
+    },
+    {
+      "name": "mobile-note-menu-confirm-cancel-no-navigation",
+      "passed": true
+    }
+  ],
+  "chrome": "156.0.8078.49",
+  "transport": "Synthetic GET/DELETE mocks only. No developer DB access."
+}

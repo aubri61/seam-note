@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import type { DraftSession } from '@/features/local-drafts/draftSession'
 import type { WorkspaceTreeResponse, Note } from '@/lib/api/types'
@@ -36,10 +36,23 @@ export function useWorkspaceSync(session: DraftSession, online: boolean, workspa
       void client.invalidateQueries({queryKey:workspaceKeys.tree()})
     }
   }
+  const disabled = !online || busy || count.error || count.value === undefined
+  const onSaveShortcut = useEffectEvent((event: KeyboardEvent) => {
+    if (event.defaultPrevented || event.isComposing || event.altKey || event.shiftKey
+      || !(event.metaKey || event.ctrlKey) || !(event.key.toLowerCase() === 's' || event.code === 'KeyS')) return
+    event.preventDefault()
+    if (event.repeat || disabled || document.querySelector('[role="dialog"][aria-modal="true"]')) return
+    void run()
+  })
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => onSaveShortcut(event)
+    window.addEventListener('keydown', listener)
+    return () => window.removeEventListener('keydown', listener)
+  }, [])
   const memoryPending=Object.values(entries).filter(e=>!!e.draft&&e.revision!==e.savedRevision).length
   const categories=result?.issues.reduce<Record<string,number>>((counts,item)=>({...counts,[item.kind]:(counts[item.kind]??0)+1}),{})??{}
   const summary=count.error?'Outbox 조회 실패 · 작업 수를 확인할 수 없습니다.':count.value===undefined?'미동기화 작업 확인 중':`미동기화 작업 ${count.value}개${memoryPending?` · 로컬 저장 대기 원고 ${memoryPending}개`:''}`
   const message=result?`마지막 실행: ACK 성공 ${result.acknowledged.length}개 · 충돌 ${categories.conflict??0}개 · 확인 필요 ${categories.review??0}개 · 보류 ${categories.deferred??0}개 · 네트워크 오류 ${categories.network??0}개 · 기타 실패 ${categories.failed??0}개 · 로컬 저장 실패 ${result.localFailures.length}개 · 종료 시 남은 작업 ${result.remaining??'확인 불가'}개${result.newOrRebased?` (새로 기록·재조정된 작업 ${result.newOrRebased}개 포함)`:''}`:''
   const details=result?[...result.issues.map(i=>({id:i.operationId,entityId:i.entityId,message:i.message})),...result.localFailures.map(i=>({id:'local:'+i.noteId,entityId:i.noteId,message:i.message}))].map(i=>({...i,label:entries[i.entityId]?.draft?.title||workspace?.folders.find(f=>f.id===i.entityId)?.name||workspace?.notes.find(n=>n.id===i.entityId)?.title||'제목 없음'})):[]
-  return {busy,disabled:!online||busy||count.error||count.value===undefined,summary,message,error:error||result?.readError||'',details,onSync:()=>{void run()}}
+  return {busy,disabled,summary,message,error:error||result?.readError||'',details,onSync:()=>{void run()}}
 }

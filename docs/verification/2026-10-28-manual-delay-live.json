@@ -1,0 +1,147 @@
+{
+  "environment": {
+    "noteId": "1fd38c9a-86b3-4776-b196-79947d25eaa1",
+    "folderId": "f508ca47-843b-4089-b6fe-3ce142a08fc1",
+    "origin": "http://127.0.0.1:25181",
+    "apiOrigin": "http://127.0.0.1:18770",
+    "dbPort": 25446,
+    "dbName": "seam_note_manual_lab",
+    "workDirectory": "/private/tmp/seam-note-manual-sync-o6xen7d3",
+    "profiles": "/var/folders/j0/4ncpc9m90tg_c7d24lc1kvnr0000gn/T/seam-delay-ui-8JKOFl"
+  },
+  "method": "Actual rendered UI and dev-only proxy/ACK gates; 10s real timers, PostgreSQL ledger checked, CDP Browser.close or SIGKILL Chrome root; no route mocking or artificial deletion of successors.",
+  "results": [
+    {
+      "mode": "A",
+      "termination": "normal delay completion",
+      "initialVersion": 2,
+      "serverWhileWaiting": 3,
+      "finalVersion": 4,
+      "originalOperationId": "94eee7f6-28bf-4d71-b410-57768405c037",
+      "sameKeyPayloadRetry": false,
+      "localInputCommittedDuringDelay": true,
+      "restoredInFlight": false,
+      "successorBeforeAck": true,
+      "successorSnapshotAfterAck": [
+        {
+          "id": "528aa581-93f3-437b-9337-01419955f357",
+          "expectedVersion": 3,
+          "contentHash": "f5a91af23afae18b3021448e39424c1aebc65bdf6a8c8534aeead399e3b6776d"
+        }
+      ],
+      "finalHash": "f5a91af23afae18b3021448e39424c1aebc65bdf6a8c8534aeead399e3b6776d",
+      "remaining": 0,
+      "ledgerOriginalCount": 1
+    },
+    {
+      "mode": "A",
+      "termination": "SIGKILL and same profile relaunch",
+      "initialVersion": 4,
+      "serverWhileWaiting": 5,
+      "finalVersion": 6,
+      "originalOperationId": "3fe2b688-b3cf-452a-8926-3318008910ba",
+      "sameKeyPayloadRetry": true,
+      "localInputCommittedDuringDelay": true,
+      "restoredInFlight": true,
+      "successorBeforeAck": true,
+      "successorSnapshotAfterAck": [
+        {
+          "id": "1049c200-9f9b-4d56-8a4c-b7c30d5e7aca",
+          "expectedVersion": 5,
+          "contentHash": "b2c89d98d88432274ea5cfea95248845a9a04ecd3075d760093262ce4ca2fa41"
+        }
+      ],
+      "finalHash": "b2c89d98d88432274ea5cfea95248845a9a04ecd3075d760093262ce4ca2fa41",
+      "remaining": 0,
+      "ledgerOriginalCount": 1
+    },
+    {
+      "mode": "B",
+      "termination": "normal delay completion",
+      "initialVersion": 6,
+      "serverWhileWaiting": 7,
+      "finalVersion": 8,
+      "originalOperationId": "91cc8a57-9350-4825-b464-dafba5bdad12",
+      "sameKeyPayloadRetry": false,
+      "localInputCommittedDuringDelay": true,
+      "restoredInFlight": false,
+      "successorBeforeAck": true,
+      "successorSnapshotAfterAck": [
+        {
+          "id": "9b14f289-c08e-43ea-883e-13816d416ce7",
+          "expectedVersion": 7,
+          "contentHash": "470b2daae809ccf9cd7d460ef9945afca43703c234c007e3167dbb5b9fbed501"
+        }
+      ],
+      "finalHash": "470b2daae809ccf9cd7d460ef9945afca43703c234c007e3167dbb5b9fbed501",
+      "remaining": 0,
+      "ledgerOriginalCount": 1
+    },
+    {
+      "mode": "B",
+      "termination": "SIGKILL and same profile relaunch",
+      "initialVersion": 8,
+      "serverWhileWaiting": 9,
+      "finalVersion": 10,
+      "originalOperationId": "f6346b40-e7a1-4ae2-b269-d6c7d98cdc8c",
+      "sameKeyPayloadRetry": true,
+      "localInputCommittedDuringDelay": true,
+      "restoredInFlight": true,
+      "successorBeforeAck": true,
+      "successorSnapshotAfterAck": [
+        {
+          "id": "7a1aa4b8-a8de-4d0a-b4dd-c8ff3f063244",
+          "expectedVersion": 9,
+          "contentHash": "8ecfd68a81118a352d7d4c66966603fa2323c9bf297b3cc143e5046ae991502e"
+        }
+      ],
+      "finalHash": "8ecfd68a81118a352d7d4c66966603fa2323c9bf297b3cc143e5046ae991502e",
+      "remaining": 0,
+      "ledgerOriginalCount": 1
+    },
+    {
+      "mode": "A",
+      "termination": "Browser.close and same profile relaunch",
+      "initialVersion": 10,
+      "serverWhileWaiting": 11,
+      "finalVersion": 12,
+      "originalOperationId": "2c412b51-e52b-40a0-be65-80f15c6da8f5",
+      "sameKeyPayloadRetry": true,
+      "localInputCommittedDuringDelay": true,
+      "restoredInFlight": true,
+      "successorBeforeAck": true,
+      "successorSnapshotAfterAck": [
+        {
+          "id": "7117b5f1-6308-4057-aed3-0f4e40b59e92",
+          "expectedVersion": 11,
+          "contentHash": "9c919ab4c74f4a9180ad50a93fbaad375d7e971eda1a1280619f6e1037b4442f"
+        }
+      ],
+      "finalHash": "9c919ab4c74f4a9180ad50a93fbaad375d7e971eda1a1280619f6e1037b4442f",
+      "remaining": 0,
+      "ledgerOriginalCount": 1
+    },
+    {
+      "mode": "B",
+      "termination": "Browser.close and same profile relaunch",
+      "initialVersion": 12,
+      "serverWhileWaiting": 13,
+      "finalVersion": 14,
+      "originalOperationId": "3d647026-9e25-4fb2-89fc-f0d6b5c8f587",
+      "sameKeyPayloadRetry": true,
+      "localInputCommittedDuringDelay": true,
+      "restoredInFlight": true,
+      "successorBeforeAck": true,
+      "successorSnapshotAfterAck": [
+        {
+          "id": "b7bbfa4d-63c5-4c34-92bd-07880482423c",
+          "expectedVersion": 13,
+          "contentHash": "3b111026f25fef184dfd38a49194190246039e25f06464f0c7c5ceeb9e200bb3"
+        }
+      ],
+      "finalHash": "3b111026f25fef184dfd38a49194190246039e25f06464f0c7c5ceeb9e200bb3",
+      "remaining": 0,
+      "ledgerOriginalCount": 1
+    }
+  ]
+}

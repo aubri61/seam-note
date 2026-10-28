@@ -1,6 +1,6 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import type { ComponentProps } from 'react'
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useConflictList } from '@/features/conflicts/useConflictList'
 import { useTheme } from '@emotion/react'
 import styled from '@emotion/styled'
@@ -22,6 +22,9 @@ import { useAutoCreationSync } from '@/features/manual-sync/useAutoCreationSync'
 import { useWorkspaceSync } from '@/features/manual-sync/useWorkspaceSync'
 import { localDraftStatus } from '@/features/local-drafts/localDraftStatus'
 import type { NoteEditor } from '@/features/notes/NoteEditor'
+
+const ManualSyncDelayPanel = import.meta.env.DEV && import.meta.env.VITE_SYNC_DELAY_NOTE_ID
+  ? lazy(() => import('../dev/ManualSyncDelayPanel')) : null
 
 const ConflictDialog=lazy(()=>import('@/features/conflicts/ConflictDialog'))
 
@@ -87,6 +90,21 @@ export function AppLayout() {
   const pendingCreatedFocus = useRef<{noteId:string;reached:boolean}|null>(null)
   const [createdFocusRequest,setCreatedFocusRequest] = useState<string|null>(null)
   const sidebarId = 'folders-sidebar'
+  const onSidebarShortcut = useEffectEvent((event: KeyboardEvent) => {
+    if (event.defaultPrevented || event.isComposing || event.altKey || event.shiftKey
+      || !(event.metaKey || event.ctrlKey) || !(event.key.toLowerCase() === 'b' || event.code === 'KeyB')) return
+    event.preventDefault()
+    if (event.repeat || Array.from(document.querySelectorAll('[role="dialog"][aria-modal="true"]')).some(dialog => dialog.id !== sidebarId)) return
+    // Closing the desktop sidebar must not leave focus inside its inert subtree.
+    // Radix restores mobile drawer focus through onCloseAutoFocus.
+    if (sidebarOpen && !isMobile && document.getElementById(sidebarId)?.contains(document.activeElement)) toggleRef.current?.focus()
+    setSidebarOpen(open => !open)
+  })
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => onSidebarShortcut(event)
+    window.addEventListener('keydown', listener)
+    return () => window.removeEventListener('keydown', listener)
+  }, [])
 
   // Reset before rendering the new presentation so an open desktop sidebar
   // cannot briefly mount an open modal (or the reverse) during a breakpoint change.
@@ -224,6 +242,7 @@ export function AppLayout() {
           path={folders.ancestors.map(item => item.name)}
         />
         <PwaStatus />
+        {ManualSyncDelayPanel && <Suspense fallback={null}><ManualSyncDelayPanel noteId={folders.selectedNoteId}/></Suspense>}
         {creationSyncError&&<p role="alert" style={{padding:'8px 24px',fontSize:13}}>{creationSyncError}</p>}
         {conflicts.error&&<p role="alert">{conflicts.error}</p>}
         {(!online || folders.workspace.data?.localSnapshot && folders.workspace.data.localSnapshot.reason !== 'local-refresh') && <aside role="status" style={{ padding: '8px 24px', fontSize: 12 }}>

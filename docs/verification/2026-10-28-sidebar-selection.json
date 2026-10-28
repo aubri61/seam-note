@@ -1,0 +1,21 @@
+{
+  "before": "Reproduced unchanged URL/title after Link click: preventDefault + select() without navigate.",
+  "results": [
+    {
+      "mobile": false,
+      "clickChangesURL": true,
+      "keyboardSelects": true,
+      "backForwardDraftPreserved": true,
+      "documentLoads": 1,
+      "writes": 0
+    },
+    {
+      "mobile": true,
+      "clickChangesURL": true,
+      "keyboardSelects": true,
+      "backForwardDraftPreserved": true,
+      "documentLoads": 1,
+      "writes": 0
+    }
+  ]
+}

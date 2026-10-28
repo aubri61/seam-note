@@ -63,7 +63,7 @@ async function main() {
     await until(async () => url(home) === path('A') && await body(home).inputValue() === 'A 서버 본문', 'home -> first sorted descendant')
     assert.equal(await home.evaluate(() => history.length === window.__entryHistoryLength), true, 'home must replace, not push')
     assert.equal(await row(home, 'A').getAttribute('aria-current'), 'page')
-    assert.equal(await row(home, 'B').getAttribute('href'), path('B'))
+    assert.equal(await row(home, 'B').getByRole('link').getAttribute('href'), path('B'))
     const documentId = await home.evaluate(() => window.__routingDocument)
     await body(home).fill('A 미저장 원고')
     await row(home, 'B').click()
@@ -143,7 +143,7 @@ async function main() {
       await invalid.getByRole('alert').filter({ hasText: expected }).waitFor()
       assert.equal(url(invalid), target)
       assert.equal(await body(invalid).inputValue(), '')
-      assert.equal(await invalid.getByRole('button', { name: '원고 삭제', exact: true }).isDisabled(), true)
+      assert.equal(await invalid.getByRole('button', { name: '현재 원고 메뉴', exact: true }).isDisabled(), true)
       assert.ok(invalidState.gets.every(id => id === 'missing'), 'invalid/missing path must not request first note')
       if (options.outsideWorkspace) {
         invalidState.includeMissing = true

@@ -114,6 +114,7 @@ export function useFolders() {
   function select(id: string) {
     if (!tree.notes.has(id)) return
     setSelection({ navigationKey: location.key, folderId: null })
+    void navigate(notePath(id))
   }
 
   return {

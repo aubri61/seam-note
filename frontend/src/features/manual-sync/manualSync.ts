@@ -51,6 +51,11 @@ export async function syncOneNote(noteId: string, session: DraftSession,
       }
       throw new Error('서버 결과를 확정하지 못했습니다. 기존 작업을 보존했으며, 다시 누르면 같은 키·내용으로 재시도합니다.', { cause: error })
     }
+    // DEV-only lab: validated HTTP response, before any ACK/IndexedDB transaction.
+    if (import.meta.env && import.meta.env.DEV && import.meta.env.VITE_SYNC_DELAY_NOTE_ID === noteId) {
+      const { beforeAck } = await import('../../dev/manualSyncDelay')
+      await beforeAck(noteId, operation.operationId)
+    }
     try {
       await session.acceptServerAck(noteId, note, (token, revision, writerId) =>
         dependencies.storage.acknowledge(operation, note, token, revision, writerId))

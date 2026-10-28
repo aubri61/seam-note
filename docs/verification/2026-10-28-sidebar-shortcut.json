@@ -1,0 +1,26 @@
+{
+  "results": [
+    {
+      "mobile": false,
+      "commandB": true,
+      "controlB": true,
+      "editorDraftPreserved": true,
+      "focusRestored": true,
+      "otherModalBlocked": true,
+      "koreanPhysicalKey": true,
+      "repeatModifierGuards": true,
+      "apiWrites": 0
+    },
+    {
+      "mobile": true,
+      "commandB": true,
+      "controlB": true,
+      "editorDraftPreserved": true,
+      "focusRestored": true,
+      "otherModalBlocked": true,
+      "koreanPhysicalKey": true,
+      "repeatModifierGuards": true,
+      "apiWrites": 0
+    }
+  ]
+}
