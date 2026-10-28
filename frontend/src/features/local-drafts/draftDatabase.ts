@@ -1,3 +1,5 @@
+import { blockedChoice, ChangedConflict, headStamp, serverDraft, snapshot } from '@/features/conflicts/conflictModel'
+import type { ConflictHead, ConflictPreview, RecoveryCopy } from '@/features/conflicts/conflictModel'
 import Dexie from 'dexie'
 import { creationOperation, validateCreation } from '@/features/outbox/creationModel'
 import type { LocalEntity, CreationOperation } from '@/features/outbox/creationModel'
@@ -22,6 +24,19 @@ export function validateLocalDraft(value: LocalNoteDraft): LocalNoteDraft {
   if (!strings.every(item => typeof item === 'string') || !value.noteId || !value.storageToken || !value.writerId
     || !numbers.every(item => Number.isSafeInteger(item) && item >= 0) || value.localRevision < 1
     || value.title.length > 200 || value.latestServerVersion < value.baseVersion) throw new InvalidLocalDraft()
+  if(value.recoveredAs!==undefined&&typeof value.recoveredAs!=='string')throw new InvalidLocalDraft()
+  if(value.conflictHistory!==undefined){
+    if(!Array.isArray(value.conflictHistory))throw new InvalidLocalDraft()
+    for(const copy of value.conflictHistory){
+      const valid=(d:NoteDraft|null)=>!d||d.noteId===value.noteId&&typeof d.title==='string'&&d.title.length<=200&&typeof d.content==='string'
+        &&typeof d.baseTitle==='string'&&typeof d.baseContent==='string'&&Number.isSafeInteger(d.baseVersion)&&d.baseVersion>=0
+        &&Number.isSafeInteger(d.latestServerVersion)&&d.latestServerVersion>=d.baseVersion
+      if(!copy||typeof copy.id!=='string'||!Number.isSafeInteger(copy.createdAt)||copy.createdAt<0
+        ||!['LOCAL_DRAFT_CONFLICT','SERVER_VERSION_CONFLICT','SERVER_NOTE_DELETED'].includes(copy.kind)||!['mine','other','recover'].includes(copy.choice)||!copy.mine||!copy.stored
+        ||!valid(copy.mine)||!valid(copy.stored)||!valid(copy.other)||!Array.isArray(copy.operations)||!Array.isArray(copy.creations))throw new InvalidLocalDraft()
+      copy.operations.forEach(validateOperation);copy.creations.forEach(validateCreation)
+    }
+  }
   return value
 }
 
@@ -318,8 +333,10 @@ export class DexieDraftRepository implements DraftRepository {
     return this.db.transaction('rw', [this.db.drafts, this.db.outbox, this.db.localEntities, this.db.creationOutbox], async () => {
       const current = await this.db.drafts.get(draft.noteId)
       if (current) validateLocalDraft(current)
+      if (current?.recoveredAs) throw new Error('이 원고는 새 UUID로 복구됐습니다. 복구된 원고를 열어주세요.')
       if (current?.storageToken !== expectedToken || current && revision <= current.localRevision) throw new LocalDraftConflict()
       const next: LocalNoteDraft = {
+        ...(current?.conflictHistory ? {conflictHistory:current.conflictHistory} : {}),
         noteId: draft.noteId, title: draft.title, content: draft.content,
         baseTitle: draft.baseTitle, baseContent: draft.baseContent,
         baseVersion: draft.baseVersion, latestServerVersion: draft.latestServerVersion,
@@ -346,6 +363,64 @@ export class DexieDraftRepository implements DraftRepository {
       await this.db.outbox.bulkDelete(plan.remove)
       if (plan.add) await this.db.outbox.add(plan.add)
       return next
+    })
+  }
+  async conflictHead(noteId: string): Promise<ConflictHead> {
+    await this.ensureSchema()
+    return this.db.transaction('r',[this.db.drafts,this.db.outbox,this.db.creationOutbox],async()=>{
+      const record=await this.db.drafts.get(noteId)
+      if(record)validateLocalDraft(record)
+      return {record,operations:(await this.db.outbox.where('noteId').equals(noteId).toArray()).map(validateOperation),
+        creations:(await this.db.creationOutbox.where('entityId').equals(noteId).toArray()).map(validateCreation)}
+    })
+  }
+  async conflictNotes() {
+    await this.ensureSchema()
+    return (await this.db.outbox.where('status').equals('conflict').toArray()).map(validateOperation)
+      .map(o=>({noteId:o.noteId,code:o.failureCode}))
+  }
+  /** Selection, recovery copies and queue replacement commit or roll back together. No network in IDB. */
+  async resolveConflict(preview: ConflictPreview, choice: 'mine'|'other'|'recover', writerId: string,
+    isCurrent:()=>boolean, folderId?: string) {
+    await this.ensureSchema()
+    return this.db.transaction('rw',[this.db.drafts,this.db.outbox,this.db.creationOutbox,this.db.localEntities,this.db.workspace],async()=>{
+      const head=await this.conflictHead(preview.noteId)
+      if(!isCurrent()||headStamp(head)!==headStamp(preview.head))throw new ChangedConflict()
+      const blocked=blockedChoice(preview.kind,head)
+      if(blocked)throw new Error(blocked)
+      const current=validateLocalDraft(head.record!),now=Date.now()
+      const copy:RecoveryCopy={id:crypto.randomUUID(),createdAt:now,kind:preview.kind,choice,mine:snapshot(preview.mine),stored:snapshot(current),
+        other:preview.kind==='SERVER_NOTE_DELETED'?null:preview.server?serverDraft(preview.server):head.record?snapshot(head.record):null,
+        operations:head.operations,creations:head.creations}
+      const history=[...(current.conflictHistory??[]),copy]
+      const revision=Math.max(current.localRevision,preview.memoryRevision)+1
+      let next:LocalNoteDraft,replacement:Note|undefined
+      if(preview.kind==='SERVER_NOTE_DELETED') {
+        if(preview.serverMissing!==true)throw new ChangedConflict()
+        if(choice!=='recover'||!folderId)throw new Error('새 원고를 보관할 폴더를 선택해주세요.')
+        replacement=await this.createLocalNote({id:crypto.randomUUID(),folderId,title:preview.mine.title,content:preview.mine.content})
+        next={...current,...snapshot(preview.mine),conflictHistory:history,recoveredAs:replacement.id,
+          localRevision:revision,storageToken:crypto.randomUUID(),localSavedAt:now,writerId}
+        await this.db.drafts.put(next)
+        await this.db.outbox.bulkDelete(head.operations.map(o=>o.operationId))
+      } else if(preview.kind==='LOCAL_DRAFT_CONFLICT') {
+        if(choice==='recover')throw new Error('잘못된 선택입니다.')
+        const text=choice==='mine'?preview.mine:current
+        next=await this.write({...snapshot(current),title:text.title,content:text.content},revision,current.storageToken,writerId)
+        next={...next,conflictHistory:history}
+        await this.db.drafts.put(next)
+      } else {
+        if(!preview.server||preview.server.id!==preview.noteId||choice==='recover'||preview.server.version<Math.max(current.baseVersion,current.latestServerVersion,preview.mine.latestServerVersion))throw new ChangedConflict()
+        const base=serverDraft(preview.server),text=choice==='mine'?preview.mine:base
+        next={...base,title:text.title,content:text.content,conflictHistory:history,localRevision:revision,
+          localSavedAt:now,storageToken:crypto.randomUUID(),writerId}
+        validateLocalDraft(next)
+        await this.db.drafts.put(next)
+        await this.db.outbox.bulkDelete(head.operations.map(o=>o.operationId))
+        if(isDraftDirty(next))await this.db.outbox.add(createOperation(next))
+      }
+      if(!isCurrent())throw new ChangedConflict()
+      return {record:next,replacement}
     })
   }
   async workspaceSyncCount() {

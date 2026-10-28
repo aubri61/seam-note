@@ -76,3 +76,7 @@
 ## 실제 소스 적용 후 최종 확인
 
 사용자 적용 요청 후11개 파일이 검증 후보 해시와 일치함을 확인했다. 실제 프로젝트에서 pnpm test141개/build/TypeScript/lint를 재실행해 통과했다. 별도 Vite origin/cache·격리 Chrome·mock API로 localDraftStorage(두 탭 충돌, 입력 복사/txt 보관, 이탈 경고 포함)와 manualSaveUx 두 suite도 통과했다. 개발 DB에 테스트 요청을 보내거나 IndexedDB를 초기화하지 않았다. 실행 근거는 `docs/verification/2026-10-27-multitab-applied.json`에 있다. commit/push하지 않았다.
+
+## 후속 원고 버전 선택
+
+2026-10-28 실제 로컬/서버 내용 충돌의 읽기 전용 Diff와 안전한 한 버전 선택, 선택 전 사본, 서버 부재 시 새 UUID 복구를 연결했다. 과거 문서의 ‘별도 해결 필요/복제 workflow 미구현’은 당시 범위의 이력이다. 현재 계약·테스트·한계는 [원고 충돌 해결 설계](manuscript-conflict-resolution.md)를 따른다. 자동 병합과 자동 서버 전송은 여전히 없다.

@@ -42,7 +42,7 @@ async function boot(page, options = {}) {
   await page.route(url => url.pathname === '/storage-test-shell', async route => {
     const response = await route.fetch({ url: origin + '/' })
     // Preserve Vite's React refresh preamble, postponing only the application entry.
-    const html = (await response.text()).replace(/<script[^>]*src=["']\/src\/main\.tsx["'][^>]*>\s*<\/script>/, '')
+    const html = (await response.text()).replace(/<script[^>]*src=["']\/src\/main\.tsx(?:\?[^"']*)?["'][^>]*>\s*<\/script>/, '')
     await route.fulfill({ response, body: html })
   })
   await page.goto(origin + '/storage-test-shell')
@@ -85,7 +85,7 @@ async function main() {
   const profile = mkdtempSync(join(tmpdir(), 'seam-note-idb-profile-'))
   const contexts = [], errors = []
   let persistent, browser
-  function watch(page) { page.setDefaultTimeout(8000); page.on('pageerror', error => errors.push(error.message)); return page }
+  function watch(page) { page.setDefaultTimeout(8000); page.setDefaultNavigationTimeout(30000); page.on('pageerror', error => errors.push(error.message)); return page }
   try {
     persistent = await chromium.launchPersistentContext(profile, { channel: 'chrome', headless: true, viewport: { width: 1360, height: 900 } })
     await mock(persistent)

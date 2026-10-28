@@ -73,24 +73,6 @@ const Writing = styled.div(({ theme }) => ({
   'textarea:focus, textarea:focus-visible': { outline: 'none', boxShadow: 'none' },
 }))
 
-const Footer = styled.footer(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  flexWrap: 'wrap',
-  gap: theme.spacing.md,
-  paddingTop: theme.spacing.xxl,
-  paddingBottom: theme.spacing.xxxl,
-  fontSize: '11px',
-  lineHeight: 1.7,
-  color: theme.colors.mutedText,
-  span: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: theme.spacing.sm,
-  },
-}))
-
 const NewDocumentButton = styled.button(({ theme }) => ({
   position: 'fixed', right: theme.spacing.xl, bottom: theme.spacing.xl, zIndex: 2,
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -108,6 +90,7 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
   draft: NoteDraft | null
   localEntry?: DraftEntry
   onRetryLocal: () => void
+  onCompareConflict: () => void
   onEdit: (noteId: string, patch: DraftPatch) => void
   selectedNoteId: string | null
   titleRef: RefObject<HTMLInputElement | null>
@@ -144,14 +127,14 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
         {loading && <p role="status">원고 로딩 중</p>}
         {error && <div role="alert"><p>원고 조회 실패: {error.message}</p>{canRetry && <button type="button" onClick={onRetry}>다시 시도</button>}</div>}
         {!loading && !error && !visible && <p role="status">{selectedNoteId ? '원고를 선택해주세요.' : '표시할 원고가 없습니다.'}</p>}
-        {localEntry?.error && <div role="alert">
+        {localEntry?.error && localEntry.phase!=='conflict' && <div role="alert">
           <p>{localEntry.error}</p>
           {visible && <>
             <button type="button" onClick={() => { void copyCurrent() }}>현재 입력 복사</button>
             <button type="button" onClick={downloadCurrent}>현재 입력 파일로 보관</button>
             {backup?.noteId === visible.noteId && backup.revision === (localEntry?.revision ?? 0) && <p role="status">{backup.message}</p>}
           </>}
-          <button type="button" onClick={onRetryLocal}>{localEntry.phase === 'conflict' ? '로컬 저장 상태 다시 확인' : '로컬 저장 다시 시도'}</button>
+          <button type="button" onClick={onRetryLocal}>로컬 저장 다시 시도</button>
         </div>}
         <Title ref={titleRef} aria-label="문서 제목" placeholder={visible ? '제목 없음' : ''} value={visible?.title ?? ''} maxLength={200}
           readOnly={!visible} onChange={event => { if (visible) onEdit(visible.noteId, { title: event.target.value }) }} />
@@ -174,9 +157,6 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
           <textarea aria-label="문서 내용" placeholder="" value={visible?.content ?? ''} readOnly={!visible}
             onChange={event => { if (visible) onEdit(visible.noteId, { content: event.target.value }) }} />
         </Writing>
-        <Footer>
-          <span>원고는 이 브라우저에 로컬 저장되며 자동으로 서버에 전송되지 않습니다. 저장 완료 전 종료하면 최신 입력이 유실될 수 있고, 브라우저 저장소 삭제·회수 시 로컬 원고도 사라질 수 있습니다.</span>
-        </Footer>
       </Document>
       <NewDocumentButton type="button" disabled={busy || !canCreate} onClick={onCreateNote} aria-label="새 문서" title="빈 원고 생성"><Icon name="pencil" size={24} /></NewDocumentButton>
     </Panel>

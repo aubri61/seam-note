@@ -1,0 +1,910 @@
+{
+  "mode": "after",
+  "sourceHashes": {
+    "local-drafts/draftSession.ts": "4d3f4057913cd651ff958354dad23b61992ca8083efdcf2f5d7e3de1ba94b187",
+    "local-drafts/draftDatabase.ts": "a095d3ff8e6e6455cc2bdc060b9d1817639d05656f14d9b78e1ea1ba14c2124e"
+  },
+  "results": [
+    {
+      "name": "local-mine-atomic-copy-new-operation-and-ACK",
+      "noteId": "ff95f8ec-aff4-46b2-a776-19d8f9600159",
+      "passed": true,
+      "result": {
+        "revision": 3,
+        "history": 1
+      },
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 3,
+          "savedRevision": 3,
+          "error": null,
+          "draft": {
+            "noteId": "ff95f8ec-aff4-46b2-a776-19d8f9600159",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "ff95f8ec-aff4-46b2-a776-19d8f9600159",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 3,
+          "storageToken": "771946fe-20d5-4cf5-b443-c44e6bffe9b0"
+        },
+        "operations": [
+          {
+            "operationId": "ebe71e25-8e01-423a-9f98-105bde82682d",
+            "status": "pending",
+            "expectedVersion": 0,
+            "localRevision": 3
+          }
+        ],
+        "writes": [
+          {
+            "revision": 2,
+            "expectedToken": "3ce88871-4b1a-412e-9e72-24395319ae33",
+            "observedToken": "fa61ede9-d0cf-4921-9286-e121bc019608",
+            "observedRevision": 2,
+            "result": "LocalDraftConflict",
+            "finalToken": "fa61ede9-d0cf-4921-9286-e121bc019608",
+            "finalRevision": 2
+          }
+        ]
+      },
+      "archived": 1,
+      "serverVersion": 1
+    },
+    {
+      "name": "local-other-and-reopen-preserve-recovery-copy",
+      "noteId": "ec68366a-cbd8-43ad-a2ab-c10d6a408a60",
+      "passed": true,
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 3,
+          "savedRevision": 3,
+          "error": null,
+          "draft": {
+            "noteId": "ec68366a-cbd8-43ad-a2ab-c10d6a408a60",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "2cfdf77514ae2c7e85657367e3a4aed162c2fcaec2c770f8e1d827b3fe33a59b",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "ec68366a-cbd8-43ad-a2ab-c10d6a408a60",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "2cfdf77514ae2c7e85657367e3a4aed162c2fcaec2c770f8e1d827b3fe33a59b",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 3,
+          "storageToken": "9d20c142-8886-4ecd-835e-976787575184"
+        },
+        "operations": [
+          {
+            "operationId": "8d5ea9e1-0e7c-4e63-8571-d715f40062ff",
+            "status": "pending",
+            "expectedVersion": 0,
+            "localRevision": 3
+          }
+        ],
+        "writes": []
+      },
+      "archived": 1
+    },
+    {
+      "name": "local-head-changed-after-preview-aborts",
+      "noteId": "f65b00fc-a083-49d5-b032-9edaf8106ba2",
+      "passed": true,
+      "again": {
+        "kind": "LOCAL_DRAFT_CONFLICT"
+      },
+      "after": {
+        "memory": {
+          "phase": "conflict",
+          "revision": 2,
+          "savedRevision": 1,
+          "error": "다른 탭 또는 로컬 원고가 변경되어 저장을 중단했습니다. 현재 입력은 유지됩니다. 이 탭과 다른 탭의 원고가 달라졌거나 저장 기준을 안전하게 확인할 수 없습니다. 현재 입력을 복사하거나 파일로 보관한 뒤 다른 탭을 확인해주세요. 새로고침·탭 종료 시 아직 로컬 저장되지 않은 입력이 사라질 수 있습니다.",
+          "draft": {
+            "noteId": "f65b00fc-a083-49d5-b032-9edaf8106ba2",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "f65b00fc-a083-49d5-b032-9edaf8106ba2",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "d0f306dd19fb8d9c2d967fb704a482402286f4d977288c45e0ae2f1fbea991d5",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 3,
+          "storageToken": "091f7f54-1557-46bd-9cc3-4e79136bb4b3"
+        },
+        "operations": [
+          {
+            "operationId": "8b1669e8-0171-4a50-af25-8f07ff884c88",
+            "status": "pending",
+            "expectedVersion": 0,
+            "localRevision": 3
+          }
+        ],
+        "writes": [
+          {
+            "revision": 2,
+            "expectedToken": "2f10ef7d-900d-4313-8414-95adba307f1f",
+            "observedToken": "7f3a51ad-919c-4d3c-9267-f1d9921fb1b9",
+            "observedRevision": 2,
+            "result": "LocalDraftConflict",
+            "finalToken": "7f3a51ad-919c-4d3c-9267-f1d9921fb1b9",
+            "finalRevision": 2
+          }
+        ]
+      }
+    },
+    {
+      "name": "local-inFlight-prevents-choice-and-preserves-frozen-key",
+      "noteId": "7b79ad71-cc2f-4a77-ab1f-59645bb8dbbd",
+      "passed": true,
+      "blocked": "전송 결과가 미확정인 작업이 있습니다. 기존 작업을 수동 재시도해 결과를 확인한 뒤 다시 비교해주세요.",
+      "after": {
+        "memory": {
+          "phase": "conflict",
+          "revision": 2,
+          "savedRevision": 1,
+          "error": "다른 탭 또는 로컬 원고가 변경되어 저장을 중단했습니다. 현재 입력은 유지됩니다. 이 탭과 다른 탭의 원고가 달라졌거나 저장 기준을 안전하게 확인할 수 없습니다. 현재 입력을 복사하거나 파일로 보관한 뒤 다른 탭을 확인해주세요. 새로고침·탭 종료 시 아직 로컬 저장되지 않은 입력이 사라질 수 있습니다.",
+          "draft": {
+            "noteId": "7b79ad71-cc2f-4a77-ab1f-59645bb8dbbd",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "7b79ad71-cc2f-4a77-ab1f-59645bb8dbbd",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "2cfdf77514ae2c7e85657367e3a4aed162c2fcaec2c770f8e1d827b3fe33a59b",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 2,
+          "storageToken": "101bd77d-60a0-4b1a-a98e-ea25169591fd"
+        },
+        "operations": [
+          {
+            "operationId": "e54a098c-9b04-41af-bffa-3edf14199954",
+            "status": "inFlight",
+            "expectedVersion": 0,
+            "localRevision": 2
+          }
+        ],
+        "writes": [
+          {
+            "revision": 2,
+            "expectedToken": "5fdaf664-386b-4256-af3e-70f110673ea1",
+            "observedToken": "101bd77d-60a0-4b1a-a98e-ea25169591fd",
+            "observedRevision": 2,
+            "result": "LocalDraftConflict",
+            "finalToken": "101bd77d-60a0-4b1a-a98e-ea25169591fd",
+            "finalRevision": 2
+          }
+        ]
+      }
+    },
+    {
+      "name": "server-mine-fresh-version-new-key-no-PUT-until-manual-ACK",
+      "noteId": "7a68437f-8714-4158-b1e0-db7af98b7b7a",
+      "passed": true,
+      "before": {
+        "memory": {
+          "phase": "saved",
+          "revision": 2,
+          "savedRevision": 2,
+          "error": null,
+          "draft": {
+            "noteId": "7a68437f-8714-4158-b1e0-db7af98b7b7a",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "7a68437f-8714-4158-b1e0-db7af98b7b7a",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 2,
+          "storageToken": "1d24d7ff-8f5f-458d-a1de-d1e0625125c1"
+        },
+        "operations": [
+          {
+            "operationId": "cc9c5677-816d-4f38-8f46-3ca41688aa66",
+            "status": "conflict",
+            "expectedVersion": 0,
+            "localRevision": 2
+          }
+        ],
+        "writes": [
+          {
+            "revision": 1,
+            "result": "committed"
+          },
+          {
+            "revision": 2,
+            "expectedToken": "3cb5775b-0d6f-4236-a070-8698bfb7581b",
+            "observedToken": "3cb5775b-0d6f-4236-a070-8698bfb7581b",
+            "observedRevision": 1,
+            "result": "committed"
+          }
+        ]
+      },
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 3,
+          "savedRevision": 3,
+          "error": null,
+          "draft": {
+            "noteId": "7a68437f-8714-4158-b1e0-db7af98b7b7a",
+            "baseVersion": 1,
+            "latestServerVersion": 1,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "96fd9ce7b7bce621ac373c3790db68c59c494c77b39acd181ac2000dbffae237"
+          }
+        },
+        "disk": {
+          "noteId": "7a68437f-8714-4158-b1e0-db7af98b7b7a",
+          "baseVersion": 1,
+          "latestServerVersion": 1,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "96fd9ce7b7bce621ac373c3790db68c59c494c77b39acd181ac2000dbffae237",
+          "localRevision": 3,
+          "storageToken": "72e6fde2-6e2f-4bac-9cf9-b91a4a0b43c4"
+        },
+        "operations": [
+          {
+            "operationId": "39e8ac66-917f-468e-aafc-a20a1db47f72",
+            "status": "pending",
+            "expectedVersion": 1,
+            "localRevision": 3
+          }
+        ],
+        "writes": [
+          {
+            "revision": 1,
+            "result": "committed"
+          },
+          {
+            "revision": 2,
+            "expectedToken": "3cb5775b-0d6f-4236-a070-8698bfb7581b",
+            "observedToken": "3cb5775b-0d6f-4236-a070-8698bfb7581b",
+            "observedRevision": 1,
+            "result": "committed"
+          }
+        ]
+      },
+      "serverVersion": 2
+    },
+    {
+      "name": "server-other-adoption-preserves-mine-and-old-request",
+      "noteId": "c7cd93fe-b9d7-4165-8c5e-c6f728657dab",
+      "passed": true,
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 3,
+          "savedRevision": 3,
+          "error": null,
+          "draft": {
+            "noteId": "c7cd93fe-b9d7-4165-8c5e-c6f728657dab",
+            "baseVersion": 1,
+            "latestServerVersion": 1,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "96fd9ce7b7bce621ac373c3790db68c59c494c77b39acd181ac2000dbffae237",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "96fd9ce7b7bce621ac373c3790db68c59c494c77b39acd181ac2000dbffae237"
+          }
+        },
+        "disk": {
+          "noteId": "c7cd93fe-b9d7-4165-8c5e-c6f728657dab",
+          "baseVersion": 1,
+          "latestServerVersion": 1,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "96fd9ce7b7bce621ac373c3790db68c59c494c77b39acd181ac2000dbffae237",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "96fd9ce7b7bce621ac373c3790db68c59c494c77b39acd181ac2000dbffae237",
+          "localRevision": 3,
+          "storageToken": "e544a233-0f46-45b7-94ca-7cd6a1335689"
+        },
+        "operations": [],
+        "writes": [
+          {
+            "revision": 1,
+            "result": "committed"
+          },
+          {
+            "revision": 2,
+            "expectedToken": "991a8a3c-8568-4b39-8eb9-e55ae0e85c0f",
+            "observedToken": "991a8a3c-8568-4b39-8eb9-e55ae0e85c0f",
+            "observedRevision": 1,
+            "result": "committed"
+          }
+        ]
+      },
+      "archived": 1
+    },
+    {
+      "name": "server-version-change-before-choice-refresh-and-reconflict",
+      "noteId": "3d020bad-6c28-455c-a59a-3a4f5f353478",
+      "passed": true,
+      "again": {
+        "kind": "SERVER_VERSION_CONFLICT",
+        "serverVersion": 3
+      },
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 3,
+          "savedRevision": 3,
+          "error": null,
+          "draft": {
+            "noteId": "3d020bad-6c28-455c-a59a-3a4f5f353478",
+            "baseVersion": 2,
+            "latestServerVersion": 2,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+            "baseTitleHash": "15d5aecfad8bc517ccfb13275789f8e2d1b71a22c18e1c69ffacd02373d29b3f",
+            "baseContentHash": "8a857e4d6f1c23c12d03b0c0d211fb7a4b03e0ec2a5fa2a1be869f2baeff6556"
+          }
+        },
+        "disk": {
+          "noteId": "3d020bad-6c28-455c-a59a-3a4f5f353478",
+          "baseVersion": 2,
+          "latestServerVersion": 2,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+          "baseTitleHash": "15d5aecfad8bc517ccfb13275789f8e2d1b71a22c18e1c69ffacd02373d29b3f",
+          "baseContentHash": "8a857e4d6f1c23c12d03b0c0d211fb7a4b03e0ec2a5fa2a1be869f2baeff6556",
+          "localRevision": 3,
+          "storageToken": "c9f33abc-c94b-4304-a3d4-0ca4d64e2083"
+        },
+        "operations": [
+          {
+            "operationId": "000072e4-6da1-439a-8e67-03c2d307c58e",
+            "status": "conflict",
+            "expectedVersion": 2,
+            "localRevision": 3
+          }
+        ],
+        "writes": [
+          {
+            "revision": 1,
+            "result": "committed"
+          },
+          {
+            "revision": 2,
+            "expectedToken": "70ec49e4-05ec-4a9b-a5c7-0107bff3df9d",
+            "observedToken": "70ec49e4-05ec-4a9b-a5c7-0107bff3df9d",
+            "observedRevision": 1,
+            "result": "committed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "server-deleted-new-UUID-create-atomic-and-manual-ACK",
+      "noteId": "0ab4f15e-a51a-41e2-a086-2ba10fa83549",
+      "passed": true,
+      "result": {
+        "revision": 3,
+        "recoveredAs": "5f238961-c692-44b1-bace-aacf13ae62dc",
+        "history": 1,
+        "replacementId": "5f238961-c692-44b1-bace-aacf13ae62dc"
+      },
+      "creation": [
+        {
+          "id": "5f238961-c692-44b1-bace-aacf13ae62dc",
+          "type": "NOTE_CREATE",
+          "status": "pending"
+        }
+      ],
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 3,
+          "savedRevision": 3,
+          "error": null,
+          "draft": {
+            "noteId": "0ab4f15e-a51a-41e2-a086-2ba10fa83549",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "8e6e9175e4a7ae73a6a2515ce784956171b4338b84059a699a247ef69edb8b24",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "0ab4f15e-a51a-41e2-a086-2ba10fa83549",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "8e6e9175e4a7ae73a6a2515ce784956171b4338b84059a699a247ef69edb8b24",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 3,
+          "storageToken": "3e099b54-80c6-47d2-8f77-9a39cbdbb5eb"
+        },
+        "operations": [],
+        "writes": [
+          {
+            "revision": 1,
+            "result": "committed"
+          },
+          {
+            "revision": 2,
+            "expectedToken": "b82d8b05-255c-4ac1-88c1-1819952d0efd",
+            "observedToken": "b82d8b05-255c-4ac1-88c1-1819952d0efd",
+            "observedRevision": 1,
+            "result": "committed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "indexedDB-failure-rolls-back-record-history-and-queue",
+      "noteId": "7cd11546-6964-40f3-8a00-53d6fce2ec8a",
+      "passed": true,
+      "before": {
+        "memory": {
+          "phase": "saved",
+          "revision": 2,
+          "savedRevision": 2,
+          "error": null,
+          "draft": {
+            "noteId": "7cd11546-6964-40f3-8a00-53d6fce2ec8a",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "7cd11546-6964-40f3-8a00-53d6fce2ec8a",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 2,
+          "storageToken": "425de2c1-5956-4e2a-b4a0-c949dd09f695"
+        },
+        "operations": [
+          {
+            "operationId": "f734e84e-01a3-46b7-a918-d8357ce5ab57",
+            "status": "conflict",
+            "expectedVersion": 0,
+            "localRevision": 2
+          }
+        ],
+        "writes": [
+          {
+            "revision": 1,
+            "result": "committed"
+          },
+          {
+            "revision": 2,
+            "expectedToken": "5ee72808-4e93-414a-85b4-6e1e64d96ad0",
+            "observedToken": "5ee72808-4e93-414a-85b4-6e1e64d96ad0",
+            "observedRevision": 1,
+            "result": "committed"
+          }
+        ]
+      },
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 3,
+          "savedRevision": 3,
+          "error": null,
+          "draft": {
+            "noteId": "7cd11546-6964-40f3-8a00-53d6fce2ec8a",
+            "baseVersion": 1,
+            "latestServerVersion": 1,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "96fd9ce7b7bce621ac373c3790db68c59c494c77b39acd181ac2000dbffae237"
+          }
+        },
+        "disk": {
+          "noteId": "7cd11546-6964-40f3-8a00-53d6fce2ec8a",
+          "baseVersion": 1,
+          "latestServerVersion": 1,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "96fd9ce7b7bce621ac373c3790db68c59c494c77b39acd181ac2000dbffae237",
+          "localRevision": 3,
+          "storageToken": "1212ed6c-7a5c-4d54-ae36-935e1d8ec16b"
+        },
+        "operations": [
+          {
+            "operationId": "a3e814c4-7643-4068-80b4-0ad968c0821e",
+            "status": "pending",
+            "expectedVersion": 1,
+            "localRevision": 3
+          }
+        ],
+        "writes": [
+          {
+            "revision": 1,
+            "result": "committed"
+          },
+          {
+            "revision": 2,
+            "expectedToken": "5ee72808-4e93-414a-85b4-6e1e64d96ad0",
+            "observedToken": "5ee72808-4e93-414a-85b4-6e1e64d96ad0",
+            "observedRevision": 1,
+            "result": "committed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ACK-failure-retains-new-key-and-retry-ledger-result",
+      "noteId": "b2c252fb-30c4-4788-9d2d-d788a07a9d24",
+      "passed": true,
+      "after": {
+        "memory": {
+          "phase": "failed",
+          "revision": 3,
+          "savedRevision": 3,
+          "error": "로컬 저장소를 읽거나 저장하지 못했습니다. 현재 입력은 메모리에 유지됩니다. 저장소 이용 설정을 확인하고 다시 시도해주세요.",
+          "draft": {
+            "noteId": "b2c252fb-30c4-4788-9d2d-d788a07a9d24",
+            "baseVersion": 1,
+            "latestServerVersion": 1,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "96fd9ce7b7bce621ac373c3790db68c59c494c77b39acd181ac2000dbffae237"
+          }
+        },
+        "disk": {
+          "noteId": "b2c252fb-30c4-4788-9d2d-d788a07a9d24",
+          "baseVersion": 1,
+          "latestServerVersion": 1,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "def4bf6a16a235240c7fcb64570e97e74400bea1639cdaa77f5d087c8c9f9eab",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "96fd9ce7b7bce621ac373c3790db68c59c494c77b39acd181ac2000dbffae237",
+          "localRevision": 3,
+          "storageToken": "250fa85b-86ea-48c7-ab95-d7d9577c81da"
+        },
+        "operations": [
+          {
+            "operationId": "0afd26ff-f589-44d0-a5ca-7a465a3e676a",
+            "status": "inFlight",
+            "expectedVersion": 1,
+            "localRevision": 3
+          }
+        ],
+        "writes": [
+          {
+            "revision": 1,
+            "result": "committed"
+          },
+          {
+            "revision": 2,
+            "expectedToken": "4f35e6fe-3cac-48e2-91c1-f0a34349d91c",
+            "observedToken": "4f35e6fe-3cac-48e2-91c1-f0a34349d91c",
+            "observedRevision": 1,
+            "result": "committed"
+          }
+        ]
+      },
+      "serverVersion": 2
+    },
+    {
+      "name": "idempotency-key409-is-not-version-conflict",
+      "noteId": "b38e3873-4f39-45b9-86f4-3ede34184e12",
+      "passed": true,
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 2,
+          "savedRevision": 2,
+          "error": null,
+          "draft": {
+            "noteId": "b38e3873-4f39-45b9-86f4-3ede34184e12",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "d8a602aca0ac9004832d5a828ee13378d30e52f70550e959ea4fe90d867fce7f",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "b38e3873-4f39-45b9-86f4-3ede34184e12",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "d8a602aca0ac9004832d5a828ee13378d30e52f70550e959ea4fe90d867fce7f",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 2,
+          "storageToken": "6a2a1ea5-b74d-428d-80d2-262af9bcc4ae"
+        },
+        "operations": [
+          {
+            "operationId": "bb28b7b3-7fa0-4b0c-b279-c1eed5383291",
+            "status": "conflict",
+            "expectedVersion": 0,
+            "localRevision": 2
+          }
+        ],
+        "writes": [
+          {
+            "revision": 1,
+            "result": "committed"
+          },
+          {
+            "revision": 2,
+            "expectedToken": "eeebc9dd-0795-4c17-bcda-afcdb33f5964",
+            "observedToken": "eeebc9dd-0795-4c17-bcda-afcdb33f5964",
+            "observedRevision": 1,
+            "result": "committed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "deleted-recovery-failure-rolls-back-new-entity-and-create-intent",
+      "noteId": "feb7e7e9-f887-48c4-907d-42489a81843e",
+      "passed": true,
+      "before": {
+        "memory": {
+          "phase": "saved",
+          "revision": 2,
+          "savedRevision": 2,
+          "error": null,
+          "draft": {
+            "noteId": "feb7e7e9-f887-48c4-907d-42489a81843e",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "cec442cbe7394693e28ca1cad040b3aeff16f4330859cd2605f1e21a7e28ad87",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "feb7e7e9-f887-48c4-907d-42489a81843e",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "cec442cbe7394693e28ca1cad040b3aeff16f4330859cd2605f1e21a7e28ad87",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 2,
+          "storageToken": "bcaa4812-fa4a-4e02-8bc5-4f910277ba29"
+        },
+        "operations": [
+          {
+            "operationId": "6195bce1-aa3d-4e3e-bd9a-f077fc6ab701",
+            "status": "conflict",
+            "expectedVersion": 0,
+            "localRevision": 2
+          }
+        ],
+        "writes": [
+          {
+            "revision": 1,
+            "result": "committed"
+          },
+          {
+            "revision": 2,
+            "expectedToken": "0e92c3e7-b2b8-4704-a099-1cced5d32e9e",
+            "observedToken": "0e92c3e7-b2b8-4704-a099-1cced5d32e9e",
+            "observedRevision": 1,
+            "result": "committed"
+          }
+        ]
+      },
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 2,
+          "savedRevision": 2,
+          "error": null,
+          "draft": {
+            "noteId": "feb7e7e9-f887-48c4-907d-42489a81843e",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "cec442cbe7394693e28ca1cad040b3aeff16f4330859cd2605f1e21a7e28ad87",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "feb7e7e9-f887-48c4-907d-42489a81843e",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "cec442cbe7394693e28ca1cad040b3aeff16f4330859cd2605f1e21a7e28ad87",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 2,
+          "storageToken": "bcaa4812-fa4a-4e02-8bc5-4f910277ba29"
+        },
+        "operations": [
+          {
+            "operationId": "6195bce1-aa3d-4e3e-bd9a-f077fc6ab701",
+            "status": "conflict",
+            "expectedVersion": 0,
+            "localRevision": 2
+          }
+        ],
+        "writes": [
+          {
+            "revision": 1,
+            "result": "committed"
+          },
+          {
+            "revision": 2,
+            "expectedToken": "0e92c3e7-b2b8-4704-a099-1cced5d32e9e",
+            "observedToken": "0e92c3e7-b2b8-4704-a099-1cced5d32e9e",
+            "observedRevision": 1,
+            "result": "committed"
+          }
+        ]
+      },
+      "counts": {
+        "entities": 0,
+        "creations": 0
+      }
+    },
+    {
+      "name": "this-tab-new-input-after-preview-aborts-without-losing-input",
+      "noteId": "32a82362-2d87-4938-93e3-08031e0f1f92",
+      "passed": true,
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 4,
+          "savedRevision": 4,
+          "error": null,
+          "draft": {
+            "noteId": "32a82362-2d87-4938-93e3-08031e0f1f92",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "7eae6efe79ab51174df64027c2991fc706bfa69d1d5850846159b49e972d2228",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "32a82362-2d87-4938-93e3-08031e0f1f92",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "7eae6efe79ab51174df64027c2991fc706bfa69d1d5850846159b49e972d2228",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 4,
+          "storageToken": "978b6e90-65df-4bb2-803d-2462c88e9e1d"
+        },
+        "operations": [
+          {
+            "operationId": "f653bb89-f0d1-4ff7-a099-215dbdae8265",
+            "status": "pending",
+            "expectedVersion": 0,
+            "localRevision": 4
+          }
+        ],
+        "writes": [
+          {
+            "revision": 2,
+            "expectedToken": "da661182-3ce1-4925-a3c2-d53b0c97ff57",
+            "observedToken": "d679c4bd-4fb0-4929-b4d1-85a2a4308733",
+            "observedRevision": 2,
+            "result": "LocalDraftConflict",
+            "finalToken": "d679c4bd-4fb0-4929-b4d1-85a2a4308733",
+            "finalRevision": 2
+          }
+        ]
+      }
+    },
+    {
+      "name": "clean-local-copy-server404-can-recover-without-a-failed-PUT",
+      "noteId": "469381ff-fe0b-467b-b8fa-b800a6296ff7",
+      "passed": true,
+      "result": {
+        "revision": 2,
+        "recoveredAs": "f9d61980-5dad-4168-8cf5-37b59c715f9e",
+        "history": 1,
+        "replacementId": "f9d61980-5dad-4168-8cf5-37b59c715f9e"
+      },
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 2,
+          "savedRevision": 2,
+          "error": null,
+          "draft": {
+            "noteId": "469381ff-fe0b-467b-b8fa-b800a6296ff7",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "469381ff-fe0b-467b-b8fa-b800a6296ff7",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 2,
+          "storageToken": "fba0a7a4-c605-4061-8aea-416ad892a653"
+        },
+        "operations": [],
+        "writes": [
+          {
+            "revision": 1,
+            "result": "committed"
+          }
+        ]
+      }
+    }
+  ],
+  "environment": {
+    "origin": "http://127.0.0.1:25175",
+    "dbPort": 25442,
+    "dbName": "seam_note_manual_lab"
+  }
+}

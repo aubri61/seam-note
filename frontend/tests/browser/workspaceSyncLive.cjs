@@ -10,14 +10,29 @@ let server,origin,controls={},caseName='',browserErrors=[]
 async function until(fn,label){for(let i=0;i<900;i++){if(await fn())return;await pause(30)}throw Error('Timeout: '+label)}
 function sql(query){return execFileSync('psql',['-h','127.0.0.1','-p',String(fixture.dbPort),'-U','postgres','-d',fixture.dbName,'-Atc',query],{encoding:'utf8'}).trim()}
 async function api(method,url,body,key){const r=await fetch(fixture.apiOrigin+'/api'+url,{method,headers:{'Content-Type':'application/json',...(key?{'Idempotency-Key':key}:{})},body:body?JSON.stringify(body):undefined});assert.ok(r.ok,'synthetic API '+method+' '+url+' '+r.status);return r.status===204?undefined:r.json()}
-const all=p=>p.getByRole('button',{name:'모든 변경사항 동기화',exact:true}),title=p=>p.getByLabel('문서 제목'),body=p=>p.getByLabel('문서 내용')
+const all=p=>p.locator('[data-workspace-sync]'),title=p=>p.getByLabel('문서 제목'),body=p=>p.getByLabel('문서 내용')
 async function records(p){return p.evaluate(async()=>{const db=await new Promise((ok,no)=>{const r=indexedDB.open('seam-note-local');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});try{return await new Promise((ok,no)=>{const tx=db.transaction([...db.objectStoreNames],'readonly'),out={version:db.version};for(const name of db.objectStoreNames){const r=tx.objectStore(name).getAll();r.onsuccess=()=>out[name]=r.result}tx.oncomplete=()=>ok(out);tx.onerror=()=>no(tx.error)})}finally{db.close()}})}
 async function launch(profile,offline=false){const ctx=await chromium.launchPersistentContext(profile,{channel:'chrome',headless:true,viewport:{width:1360,height:1000}});contexts.add(ctx);ctx.on('page',p=>{p.setDefaultTimeout(15000);p.on('pageerror',e=>browserErrors.push(e.message))});await ctx.setOffline(offline);return ctx}
 async function visit(ctx,id=fixture.noteId){const p=await ctx.newPage();await p.goto(origin+'/notes/'+id);await until(async()=>await title(p).getAttribute('readonly')===null&&await title(p).inputValue()!=='','editor ready');await until(()=>all(p).isEnabled(),'global control ready');return p}
 async function open(p,id){const folder=p.locator(`[data-node-key="folder:${fixture.folderId}"]`);if(await folder.getAttribute('aria-expanded')!=='true')await folder.click();await p.locator(`[data-node-key="note:${id}"]`).click();await until(async()=>new URL(p.url()).pathname==='/notes/'+id&&await p.locator('[aria-label="노트 편집기"]').getAttribute('data-note-id')===id&&await title(p).getAttribute('readonly')===null,'note selection')}
 async function edit(p,id,text,stored=true){assert.equal(await p.locator('[aria-label="노트 편집기"]').getAttribute('data-note-id'),id,'wait for React editor identity before typing');await title(p).fill('title '+text);await body(p).fill(text);if(stored)await until(async()=>(await records(p)).drafts.some(d=>d.noteId===id&&d.content===text),'local commit')}
-async function result(p){await p.getByText(/마지막 실행: ACK 성공/).waitFor({timeout:35000});await until(()=>all(p).isEnabled(),'run finished');return p.getByText(/마지막 실행: ACK 성공/).innerText()}
-async function sync(p){await until(()=>all(p).isEnabled(),'sync enabled');await all(p).click();return result(p)}
+// UI no longer renders diagnostic results. Verify outcomes from real HTTP + IDB.
+async function result(p){
+ await until(async()=>await all(p).getAttribute('aria-busy')==='false','run finished')
+ const r=await records(p),remaining=[...r.outbox,...r.creationOutbox],known=new Set(remaining.map(o=>o.operationId)),batch=events.slice(p.syncCursor??0).filter(e=>e.case===caseName)
+ p.syncCursor=events.length
+ const acked=new Set(batch.filter(e=>typeof e.status==='number'&&e.status>=200&&e.status<300&&!e.responseLost&&!known.has(e.operationId)).map(e=>e.operationId)).size
+ const conflicts=remaining.filter(o=>o.status==='conflict'&&o.failureCode!=='NOTE_NOT_FOUND').length,review=remaining.filter(o=>o.failureCode==='NOTE_NOT_FOUND').length,network=batch.filter(e=>e.responseLost||e.status==='timeout'||typeof e.status==='number'&&e.status>=500).length
+ return `ACK 성공 ${acked}개 · 충돌 ${conflicts}개 · 확인 필요 ${review}개 · 네트워크 오류 ${network}개 · 종료 시 남은 작업 ${remaining.length}개`
+}
+async function sync(p){
+ await until(()=>all(p).isEnabled(),'sync enabled');p.syncCursor=events.length
+ await until(async()=>{
+  if(await p.getByRole('dialog').count()){await p.keyboard.press('Escape');return false}
+  try{await all(p).click({timeout:400});return true}catch(error){if(await p.getByRole('dialog').count())return false;throw error}
+ },'click sync after dismissing unresolved automatic dialog')
+ return result(p)
+}
 async function newFolder(p,name,top=true){await p.getByLabel('폴더 또는 문서 추가',{exact:true}).click();await p.getByRole('button',{name:top?'새 최상위 폴더':'새 폴더',exact:true}).click();await p.getByLabel('새 폴더 이름',{exact:true}).fill(name);await p.getByLabel('새 폴더 이름',{exact:true}).press('Enter');await until(async()=>(await records(p)).localEntities.some(e=>e.folder?.name===name),'local folder');return (await records(p)).localEntities.find(e=>e.folder?.name===name).id}
 async function newNote(p){const before=p.url();await p.getByLabel('폴더 또는 문서 추가',{exact:true}).click();await p.getByLabel('추가할 항목',{exact:true}).getByRole('button',{name:'새 문서',exact:true}).click();await until(()=>p.url()!==before,'new note URL');await until(async()=>await title(p).getAttribute('readonly')===null,'local editor');return new URL(p.url()).pathname.split('/').at(-1)}
 async function seeds(count=1){const notes=[];for(let i=0;i<count;i++)notes.push(await api('POST','/notes',{id:randomUUID(),folderId:fixture.folderId,title:'synthetic '+randomUUID(),content:'synthetic baseline'}));return notes}

@@ -1,0 +1,30 @@
+{
+  "results": [
+    {
+      "name": "server-diff-title-body-close-reopen-Escape-focus-no-write",
+      "passed": true
+    },
+    {
+      "name": "other-adoption-reload-recovery-copy-download",
+      "passed": true,
+      "contentHash": "8af832caa6d238c9e12fb4f1ea4a6edfc9075c71b811cfb068f689cf49d2ccff"
+    },
+    {
+      "name": "local-CAS-modal-late-tab-change-abort-refresh-mine-mobile",
+      "passed": true
+    },
+    {
+      "name": "deleted-note-separate-UI-newUUID-URL-create-ACK",
+      "passed": true,
+      "oldId": "7ed1da76-289d-4e8b-b4a2-ed1fe4e9a375",
+      "newId": "eaa63b12-d706-444e-9d74-d1e8c08c7db7"
+    }
+  ],
+  "artifacts": "/var/folders/j0/4ncpc9m90tg_c7d24lc1kvnr0000gn/T/seam-conflict-ui-GIZTOZ",
+  "environment": {
+    "origin": "http://127.0.0.1:25175",
+    "apiOrigin": "http://127.0.0.1:18766",
+    "db": "seam_note_manual_lab"
+  },
+  "errors": []
+}

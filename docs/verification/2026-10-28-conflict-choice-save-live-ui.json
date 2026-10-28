@@ -1,0 +1,30 @@
+{
+  "results": [
+    {
+      "name": "server-diff-title-body-close-reopen-Escape-focus-no-write",
+      "passed": true
+    },
+    {
+      "name": "other-adoption-reload-internal-recovery-copy",
+      "passed": true,
+      "contentHash": "9db688f52feee33759a95f5cce0ed6f49843d25b21eb98299015ac24185d4920"
+    },
+    {
+      "name": "local-CAS-modal-late-tab-change-abort-refresh-mine-mobile",
+      "passed": true
+    },
+    {
+      "name": "deleted-note-separate-UI-newUUID-URL-create-ACK",
+      "passed": true,
+      "oldId": "ffa730cc-d1e1-49c9-b8a1-46e389b853be",
+      "newId": "b07bc8e9-c273-4761-9625-530c007f59ea"
+    }
+  ],
+  "artifacts": "/var/folders/j0/4ncpc9m90tg_c7d24lc1kvnr0000gn/T/seam-conflict-ui-urnpQ9",
+  "environment": {
+    "origin": "http://127.0.0.1:25175",
+    "apiOrigin": "http://127.0.0.1:18766",
+    "db": "seam_note_manual_lab"
+  },
+  "errors": []
+}

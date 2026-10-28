@@ -1,6 +1,7 @@
 export const theme = {
   colors: {
     background: '#FCFBF8', surface: '#FFFFFF', sidebar: '#FAF9F6',
+    diffRemoved: '#FAF0E8', diffAdded: '#EDF1E8', diffEmphasis: '#F3DE9E',
     border: '#E7E5E0', text: '#242320', secondary: '#827C72',
     accent: '#F3DE9E', selected: '#EEEADD', mutedText: '#6F695F', success: '#59654C',
   },

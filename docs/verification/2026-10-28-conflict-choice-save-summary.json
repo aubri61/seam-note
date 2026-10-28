@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-28",
+  "head": "1bb1993",
+  "results": {
+    "frontendNode": 162,
+    "lint": "passed",
+    "buildTypeScript": "passed",
+    "productionMockUI": 6,
+    "productionPwa": 11,
+    "liveSpringPostgreSqlUiGroups": 4
+  },
+  "sourceHashes": {
+    "frontend/src/features/conflicts/conflictService.ts": "3ae56275f7eab016c521ce967ade963e79c6ac5cc83f5afaea9d8c50cd3e3d46",
+    "frontend/src/features/conflicts/ConflictDialog.tsx": "dadaa383ad6ff43a1a6e66417836598214663c22859aa495068bf87ec09b96a3",
+    "frontend/src/features/conflicts/DiffView.tsx": "301c3d0aec232b6595f0beb4b468ed74d2b1f562a68bd7387caef3167c600d1d",
+    "frontend/src/app/AppLayout.tsx": "88ac1a59defa88df59d98f4bd5f545a6c83ddff162b5cfad994cc4278eae2176"
+  },
+  "preservation": {
+    "developerDataChanged": false,
+    "schemaChanged": false,
+    "backendChanged": false,
+    "committed": false,
+    "pushed": false
+  },
+  "semantics": [
+    "Choice commits title and content locally, then saves only the chosen note via existing create/update/idempotency/ACK paths.",
+    "Already-current server content does not cause redundant PUT/version increment.",
+    "Network retry retains the same frozen operation key and body.",
+    "Reconflict refreshes the comparison; offline keeps local choice and reports server save failure."
+  ],
+  "environment": {
+    "db": "seam_note_manual_lab",
+    "dbPort": 25442,
+    "apiPort": 18766,
+    "uiPort": 25175,
+    "productionMockPort": 25177
+  }
+}

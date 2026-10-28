@@ -1,6 +1,7 @@
-import { Link, Outlet } from 'react-router-dom'
+import { Link, Outlet, useNavigate } from 'react-router-dom'
 import type { ComponentProps } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { useConflictList } from '@/features/conflicts/useConflictList'
 import { useTheme } from '@emotion/react'
 import styled from '@emotion/styled'
 import { AppHeader } from '@/app/AppHeader'
@@ -20,6 +21,8 @@ import { PwaStatus } from '@/features/pwa/PwaStatus'
 import { useWorkspaceSync } from '@/features/manual-sync/useWorkspaceSync'
 import { localDraftStatus } from '@/features/local-drafts/localDraftStatus'
 import type { NoteEditor } from '@/features/notes/NoteEditor'
+
+const ConflictDialog=lazy(()=>import('@/features/conflicts/ConflictDialog'))
 
 const Shell = styled.div(({ theme }) => ({
   display: 'flex',
@@ -41,6 +44,7 @@ const EditorArea = styled.main(({ theme }) => ({
 }))
 
 export function AppLayout() {
+  const navigate=useNavigate()
   const theme = useTheme()
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.tablet})`)
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile)
@@ -56,6 +60,23 @@ export function AppLayout() {
   const editorError = offlineDetail && drafts.draft && !folders.routeError && folders.workspace.data ? null : queryError
   const serverAvailable = online && !folders.workspace.data?.localSnapshot?.cachedAt
   const workspaceSync = useWorkspaceSync(drafts.session, online, folders.workspace.data)
+  const [conflictNoteId,setConflictNoteId]=useState<string|null>(null),[conflictRefresh,setConflictRefresh]=useState(0)
+  const conflicts=useConflictList(drafts.session,workspaceSync.busy,conflictRefresh)
+  const [resolvedConflicts,setResolvedConflicts]=useState<string[]>([])
+  const activeResolved=resolvedConflicts.filter(id=>conflicts.items.some(item=>item.noteId===id))
+  if(activeResolved.length!==resolvedConflicts.length)setResolvedConflicts(activeResolved)
+  const pendingConflicts=conflicts.items.filter(item=>!resolvedConflicts.includes(item.noteId))
+  const conflictSignature=conflicts.items.map(item=>`${item.noteId}:${item.code}`).sort().join('|')
+  const [observedConflicts,setObservedConflicts]=useState({signature:'',selected:folders.selectedNoteId,busy:workspaceSync.busy})
+  // Adjust this component's presentation before committing a new conflict banner.
+  // Closing the dialog alone does not reopen it; a new conflict/selection can.
+  if(observedConflicts.signature!==conflictSignature||observedConflicts.selected!==folders.selectedNoteId||observedConflicts.busy!==workspaceSync.busy){
+    setObservedConflicts({signature:conflictSignature,selected:folders.selectedNoteId,busy:workspaceSync.busy})
+    if(!workspaceSync.busy&&!conflictNoteId&&pendingConflicts.length){
+      const next=pendingConflicts.find(item=>item.noteId===folders.selectedNoteId)??pendingConflicts[0]
+      setConflictNoteId(next.noteId)
+    }
+  }
   const status = folders.localNote && drafts.entry?.phase === 'saved' ? '로컬 저장됨 · 서버 미동기화' : localDraftStatus(drafts.entry, drafts.recovering, editorLoading, editorError)
   const [action, setAction] = useState<WorkspaceAction | null>(null)
   const [creationMessage, setCreationMessage] = useState('')
@@ -195,9 +216,11 @@ export function AppLayout() {
           toggleRef={toggleRef}
           status={status}
           workspaceSync={workspaceSync}
+          hasConflict={conflicts.items.length>0}
           path={folders.ancestors.map(item => item.name)}
         />
         <PwaStatus />
+        {conflicts.error&&<p role="alert">{conflicts.error}</p>}
         {(!online || folders.workspace.data?.localSnapshot && folders.workspace.data.localSnapshot.reason !== 'local-refresh') && <aside role="status" style={{ padding: '8px 24px', fontSize: 12 }}>
           {!online ? '오프라인 편집 · 변경사항은 이 브라우저에 로컬 저장됩니다.' : '저장된 로컬 목록을 표시합니다. 서버 변경사항을 아직 확인하지 못했습니다.'}
           <p>{folders.workspace.data?.localSnapshot?.warning ?? '이 브라우저에 본문이 로컬 저장된 원고만 열 수 있습니다.'}</p>
@@ -205,13 +228,13 @@ export function AppLayout() {
         </aside>}
         {!drafts.recovering && !drafts.draft && offlineDetail && <p role="alert" style={{ padding: '8px 24px' }}>이 원고의 본문은 이 브라우저에 저장되어 있지 않아 오프라인에서 열 수 없습니다. 온라인에서 먼저 열어주세요.</p>}
         {(!isMobile || !sidebarOpen) && creationFeedback}
-        {drafts.backgroundIssues.map(id => <div key={id} role="alert" style={{ padding: '8px 24px', fontSize: 13 }}>
+        {drafts.backgroundIssues.filter(id=>!conflicts.items.some(item=>item.noteId===id)).map(id => <div key={id} role="alert" style={{ padding: '8px 24px', fontSize: 13 }}>
           <p>다른 원고의 로컬 저장을 완료하지 못했습니다. 입력은 메모리에 유지됩니다.</p>
           <Link to={notePath(id)}>저장 실패 원고 확인</Link>
         </div>)}
         <Outlet context={{
           draft: drafts.draft, onEdit: drafts.edit,
-          localEntry: drafts.entry, onRetryLocal: drafts.retryLocal,
+          localEntry: drafts.entry, onRetryLocal: drafts.retryLocal, onCompareConflict:()=>{if(folders.selectedNoteId)setConflictNoteId(folders.selectedNoteId)},
           selectedNoteId: folders.selectedNoteId, titleRef,
           loading: editorLoading || drafts.recovering, error: editorError,
           canRetry: !folders.routeError || !!folders.selectedNoteId,
@@ -221,6 +244,14 @@ export function AppLayout() {
           onRetry: () => { void (folders.routeError || folders.workspace.isError ? folders.workspace.refetch() : folders.noteQuery.refetch()) },
         } satisfies ComponentProps<typeof NoteEditor>} />
       </EditorArea>
+      {conflictNoteId&&<Suspense fallback={<p role="status">원고 비교 화면 준비 중</p>}><ConflictDialog key={conflictNoteId} id={conflictNoteId} session={drafts.session}
+        folders={[...folders.tree.folders.values()].map(node=>node.folder)} initialFolderId={folders.tree.notes.get(conflictNoteId)?.note.folderId??''}
+        onClose={()=>setConflictNoteId(null)} onResolved={newId=>{
+          if(conflictNoteId)setResolvedConflicts(ids=>[...ids,conflictNoteId])
+          setConflictNoteId(null);setConflictRefresh(value=>value+1)
+          void folders.workspace.refetch()
+          if(newId)void navigate(notePath(newId))
+        }}/></Suspense>}
       {folders.busy && <div role="status" style={{ position: 'fixed', bottom: 16, left: 24 }}>요청을 처리하는 중입니다.</div>}
       {action && <WorkspaceActionDialog key={action.kind} action={action} folders={folders} onClose={() => setAction(null)} />}
     </Shell>

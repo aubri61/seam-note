@@ -114,6 +114,16 @@ async function main(){
  const cacheEntries=await page.evaluate(async()=>{const names=await caches.keys(),urls=[];for(const name of names)for(const req of await(await caches.open(name)).keys())urls.push(new URL(req.url).pathname);return urls})
  assert.ok(cacheEntries.length>0);assert.ok(cacheEntries.every(p=>!p.startsWith('/api/')))
  done('waiting-worker-activates-after-close-keeps-draft-outbox',{cacheEntries:cacheEntries.length,apiCacheEntries:0})
+ // Both tabs edit before their pagehide flush. The loser is determined by actual IDB CAS.
+ const otherTab=await context.newPage();await otherTab.goto(origin+'/notes/'+ids[0]);await until(async()=>await body(otherTab).inputValue()===last,'second offline tab')
+ await Promise.all([body(page).fill('offline CAS A synthetic'),body(otherTab).fill('offline CAS B synthetic')]);await Promise.all([page.evaluate(()=>window.dispatchEvent(new Event('pagehide'))),otherTab.evaluate(()=>window.dispatchEvent(new Event('pagehide')))])
+ let losing
+ await until(async()=>{for(const p of [page,otherTab])if(await p.getByRole('dialog').count()){losing=p;return true}return false},'offline local CAS loser')
+ const persisted=(await records(page)).drafts.find(d=>d.noteId===ids[0]).content,memory=await body(losing).inputValue();assert.notEqual(memory,persisted)
+ const modal=losing.getByRole('dialog');await until(()=>modal.getByRole('button',{name:'다른 탭 원고 선택',exact:true}).isEnabled(),'offline lazy dialog and diff Worker ready')
+ await modal.getByRole('button',{name:'다른 탭 원고 선택',exact:true}).click();await modal.getByRole('alert').filter({hasText:'인터넷 연결'}).waitFor();assert.equal(await modal.count(),1,'offline selection stays open until server save can complete');await losing.keyboard.press('Escape');const restored=(await records(page)).drafts.find(d=>d.noteId===ids[0]);assert.equal(restored.content,persisted);assert.equal(restored.conflictHistory.at(-1).mine.content,memory);last=persisted
+ await otherTab.close();assert.equal(puts.length,2,'offline comparison and choice never PUT')
+ done('offline-two-tab-diff-worker-choice-preserves-losing-copy',{contentHash:sha(last),backupHash:sha(memory),apiPuts:0})
  const output={origin,sourceHashes,chrome:context.browser()?.version()||'persistent Chrome',results,puts,final:{contentHash:sha(last),workspaceNotes:(await records(page)).workspace[0].data.notes.length,outboxCount:(await records(page)).outbox.length},scope:'Synthetic HTTP API; no development DB or existing profile used. Installability verified, no OS install dialog automated.'}
  fs.mkdirSync(path.join(root,'docs/verification'),{recursive:true});fs.writeFileSync(process.env.SEAM_NOTE_PWA_REPORT||process.env.SEAM_NOTE_PWA_VERIFICATION_OUTPUT||path.join(root,'docs/verification/2026-10-26-pwa-results.json'),JSON.stringify(output,null,2)+'\n')
  await page.screenshot({path:process.env.SEAM_NOTE_PWA_SCREENSHOT||(process.env.SEAM_NOTE_PWA_SCREENSHOT_DIR?path.join(process.env.SEAM_NOTE_PWA_SCREENSHOT_DIR,'pwa-offline.png'):path.join(root,'docs/verification/2026-10-26-pwa-offline.png'))})

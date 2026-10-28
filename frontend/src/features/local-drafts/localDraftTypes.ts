@@ -1,8 +1,12 @@
+import type { RecoveryCopy } from '@/features/conflicts/conflictModel'
 import type { NoteDraft } from '@/features/notes/noteDrafts'
 
 export const DRAFT_DB_NAME = 'seam-note-local'
 export const DRAFT_CHANNEL = 'seam-note-local-drafts-v1'
 export interface LocalNoteDraft extends NoteDraft {
+  /** Additive unindexed fields in existing drafts records; no schema version change. */
+  conflictHistory?: RecoveryCopy[]
+  recoveredAs?: string
   /** Read projection from Outbox, never a persisted drafts schema field. */
   serverOperationPending?: boolean
   /** Transactional read projection only; never persisted. Unknown means unsafe to rebase edits. */

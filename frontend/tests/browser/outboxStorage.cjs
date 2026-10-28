@@ -9,11 +9,7 @@ async function main() {
     let apiCalls = 0
     page.on('console', message => { if (message.text().startsWith('OUTBOX TEST:')) console.log(message.text()) })
     await page.route(url => url.pathname.startsWith('/api/'), route => { apiCalls++; return route.abort() })
-    await page.route(url => url.pathname === '/outbox-test', async route => {
-      const response = await route.fetch({ url: origin + '/' })
-      const html = (await response.text()).replace(/<script[^>]*src=["']\/src\/main\.tsx["'][^>]*>\s*<\/script>/, '')
-      await route.fulfill({ response, body: html })
-    })
+    await page.route(url => url.pathname === '/outbox-test', route => route.fulfill({contentType:'text/html',body:'<html><body>Isolated IndexedDB contract</body></html>'}))
     await page.goto(origin + '/outbox-test')
     const results = await page.evaluate(async () => {
       try {

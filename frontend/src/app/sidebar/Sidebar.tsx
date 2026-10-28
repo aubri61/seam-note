@@ -1,4 +1,3 @@
-import { FolderCreationSave } from '@/features/manual-sync/FolderCreationSave'
 import { useRef } from 'react'
 import type { ReactNode } from 'react'
 import styled from '@emotion/styled'
@@ -159,7 +158,6 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
             </div>
           </CreatePicker>
         </FolderHeading>
-        <FolderCreationSave id={folders.selectedFolderId} pending={!!folders.selectedFolderId && folders.localIds.includes(folders.selectedFolderId)} />
         {creationFeedback}
         {folders.workspace.isPending && <p role="status">폴더와 원고를 불러오는 중입니다.</p>}
         {folders.workspace.isError && <div role="alert">

@@ -1,0 +1,60 @@
+{
+  "results": [
+    {
+      "mode": "single",
+      "puts": 1,
+      "failure": null,
+      "choice": "현재 원고 선택",
+      "mobile": false,
+      "passed": true,
+      "domRows": 60
+    },
+    {
+      "mode": "title-only",
+      "puts": 1,
+      "failure": null,
+      "choice": "현재 원고 선택",
+      "mobile": false,
+      "passed": true,
+      "domRows": 60
+    },
+    {
+      "mode": "single",
+      "puts": 0,
+      "failure": null,
+      "choice": "서버 원고 선택",
+      "mobile": false,
+      "passed": true,
+      "domRows": 60
+    },
+    {
+      "mode": "single",
+      "puts": 0,
+      "failure": null,
+      "choice": "close",
+      "mobile": true,
+      "passed": true,
+      "domRows": 60
+    },
+    {
+      "mode": "single",
+      "puts": 2,
+      "failure": "network",
+      "choice": "현재 원고 선택",
+      "mobile": false,
+      "passed": true,
+      "domRows": 60
+    },
+    {
+      "mode": "single",
+      "puts": 2,
+      "failure": "version",
+      "choice": "현재 원고 선택",
+      "mobile": false,
+      "passed": true,
+      "domRows": 60
+    }
+  ],
+  "chrome": "156.0.8078.49",
+  "note": "Mock GET/PUT, isolated native IndexedDB; no developer backend writes."
+}

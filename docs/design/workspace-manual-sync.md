@@ -94,3 +94,13 @@ ACK callback 이후의 operationId만 성공 Set에 넣는다. final DB에 실�
 합성 원고를 사용한다. 온라인/오프라인에서 + 메뉴로 폴더·원고 여러 개를 만들고 여러 원고를 편집한다. 로컬 저장 상태를 확인한 뒤 온라인에서 `모든 변경사항 동기화`를 누른다. Network의 `/api/folders` POST → `/api/notes` POST → `/api/notes/{id}` PUT과 Idempotency-Key/expectedVersion을 확인한다. IndexedDB 두 Outbox에서 성공 작업만 제거되는지, 서버 GET과 Ledger에서 같은 operationId가 한 번만 적용됐는지 확인한다. 온라인 복귀/새로고침만으로 POST/PUT하지 않는다.
 
 격리 전체 검증은 `python3 scripts/manual-sync-lab.py --workspace`다. 개발15439/18765/5173을 거부하고 임시 PostgreSQL DB·Spring18766·Vite25175·별도 production origin/Chrome persistent profiles를 사용한다. 결과는 별도 docs/verification 파일에 기록하며 과거 검증 결과를 덮어쓰지 않는다.
+
+## 후속 원고 버전 선택
+
+2026-10-28 실제 로컬/서버 내용 충돌의 읽기 전용 Diff와 안전한 한 버전 선택, 선택 전 사본, 서버 부재 시 새 UUID 복구를 연결했다. 과거 문서의 ‘별도 해결 필요/복제 workflow 미구현’은 당시 범위의 이력이다. 현재 계약·테스트·한계는 [원고 충돌 해결 설계](manuscript-conflict-resolution.md)를 따른다. 자동 병합과 자동 서버 전송은 여전히 없다.
+
+## 2026-10-28: 명시적 동기화 후 상세 재조회
+
+전체 동기화는 전송 pass 뒤 활성 Note 상세 Query도 갱신한다. Outbox가 없어도 서버 제목/본문의 최신화를 수행한다. 서버 응답은 DraftSession.receive를 거치며 dirty/미확정 로컬 원고를 덮어쓰지 않는다. UI는 마지막 실행의 기술 진단/항목 목록/선택 성공 장문을 표시하지 않는다. 실제 오류·작업 중 상태와 충돌 비교는 유지한다.
+
+inFlight 입력·강제 종료/ACK 후속 작업의 원자성 실증은 [별도 검증](inflight-crash-recovery.md) 참조.

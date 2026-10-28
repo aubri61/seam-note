@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "mode": "before",
+  "detailGetsBefore": 1,
+  "detailGetsAfter": 1,
+  "editorUpdated": false,
+  "titleUpdated": false,
+  "requests": "GET only",
+  "chrome": "156.0.8078.49"
+}

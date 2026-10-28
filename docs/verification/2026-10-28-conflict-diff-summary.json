@@ -1,0 +1,91 @@
+{
+  "startedOn": "2026-10-27",
+  "completedOn": "2026-10-28",
+  "head": "1bb199360d4d6756426d3290c5f8f3bef50d8b73",
+  "environment": {
+    "system": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "processor": "not collected (sandbox sysctl access unavailable)",
+    "chrome": "156.0.8078.48",
+    "lab": {
+      "dbName": "seam_note_manual_lab",
+      "postgres": "14.20 (Homebrew)",
+      "dbPort": 25442,
+      "apiPort": 18766,
+      "uiPort": 25175,
+      "mockUiPort": 25176,
+      "performancePreviewPort": 25177
+    }
+  },
+  "results": {
+    "frontendNode": {
+      "tests": 162,
+      "passed": 162
+    },
+    "lint": "passed",
+    "typescriptAndBuild": "passed",
+    "backend": {
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "beforeActualReproductions": 2,
+    "liveConflictAfter": 14,
+    "browserUiGroups": 4,
+    "automaticReconciliationRegression": 9,
+    "workspaceProductionRegression": 18,
+    "pwaProduction": 11,
+    "performanceCases": 5,
+    "existingMockBrowserSuites": [
+      "noteDrafts",
+      "noteRouting",
+      "workspaceCreateDelete",
+      "workspaceReadonly",
+      "sidebarDraftTitles",
+      "manualSaveUx",
+      "inlineFolderCreation",
+      "folderExpansion",
+      "folderMenu",
+      "folderRenameFocus",
+      "localDraftStorage",
+      "outboxStorage"
+    ]
+  },
+  "sourceHashes": {
+    "frontend/src/features/conflicts/ConflictDialog.tsx": "4ee21a3615490e5b44e8929bbac6a15b267868b88d3a230ee782645bd520e312",
+    "frontend/src/features/conflicts/DiffView.tsx": "3e96453ba7bbd86ab628b365360f341d06bce170caf421db32ce6e0a15ae6c9c",
+    "frontend/src/features/conflicts/conflictModel.ts": "a95696eebe4f89c5c5f040898f595130a2b5a7ca05c6e694ac93d0864379ac5c",
+    "frontend/src/features/conflicts/conflictService.ts": "449e60a4bd9e300fc56a72d71c3a7f53bab0fa598ad4e17f6bd587f91a0ee139",
+    "frontend/src/features/conflicts/diffWorker.ts": "2c138cfac0e0db7d3b2773328cd93dab4e8fcc315d529eebe359841a08d2473e",
+    "frontend/src/features/conflicts/lineDiff.ts": "76e650c0567fded0f5f0bfb63e3c13de507af41bb83b456988bf36a63ba3c91f",
+    "frontend/src/features/conflicts/useConflictList.ts": "b1349bda77a6f86dcbac6ee4fa50059e7c074cb30f5e75ec8a1e57cfdc5f3eb3"
+  },
+  "mockSuiteLogHashes": {
+    "noteDrafts": "1d903f24ce315f207a9128a2c2a62c59ccdc29881ddb42f780ac392d898975ff",
+    "noteRouting": "3ef39dc810b6060c9114a85c6d73934ea16378ab5bf8bbbd75e117421e3d63b6",
+    "workspaceCreateDelete": "c0fe8cff6ea417d3d66c210cf04f16da33c5fc0762a082b7fc73eb5abe8314be",
+    "workspaceReadonly": "a8117b5b335de7580f5f5c7f9e4cf7e9781a125136f6d25aafb289f081031329",
+    "sidebarDraftTitles": "9188aefe819d094e189e0e7dd8ddd338348c9e4393fbbadbaf61189c53316eb0",
+    "manualSaveUx": "833b86a2d62e1a833b97ab9de26f88a32a3e7c65fd860d1cc74f9835f7c0bae3",
+    "inlineFolderCreation": "b067c45d4ea0644cfc2673143644d90d73edd04ebd0e4ceca56da153fae09ba3",
+    "folderExpansion": "957e8fa9b58c7d97c45e5b7f7b82ba6bbf91965a8ac5e76b3c8a3197c57d4930",
+    "folderMenu": "34131b53f40390e8affe4c8829cb8a4b248226233377461121185ea1e816d5eb",
+    "folderRenameFocus": "d1970dd0071277820d66c11a58f2525a7fd118d693ab9f4d41954665c70bdd2c",
+    "localDraftStorage": "628c8083297c7cfb869c2285b1e6bf9ac63d9a6a0918a53cc4f93d1630ca8098",
+    "outboxStorage": "a31fa33829c074a9325e6ed534f2609b30d52e5a1ad038f967bd449536f2192f"
+  },
+  "preservation": {
+    "dexieV1ThroughV4ConstructorUnchanged": true,
+    "backendAndFlywayUnchanged": true,
+    "developerDatabaseOrManuscriptsUsed": false,
+    "committed": false,
+    "pushed": false
+  },
+  "limits": [
+    "Counts identify separate suites; do not sum overlapping regression scenarios as independent coverage.",
+    "Performance is one sample per size, not p95 or a before/after improvement rate.",
+    "Mobile is desktop Chrome viewport emulation; Safari, physical mobile, and screen readers unverified.",
+    "Combined --conflicts lab entry point not rerun as a whole; constituent suites run separately.",
+    "Existing verification files named 2026-10-27 use feature start date; final verification completed 2026-10-28."
+  ]
+}

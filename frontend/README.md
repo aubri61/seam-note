@@ -129,3 +129,11 @@ production 빌드는 앱 셸을 precache하고 Dexie v3에 마지막 성공 Work
 폴더 `… → 이름 변경`은 사이드바 인라인 입력으로 확정한다. 미전송 로컬 폴더는 생성 대기의 이름까지 원자 변경하고, 서버 폴더는 온라인 PATCH로 변경한다. 생성 결과가 불확실한 폴더는 먼저 서버 반영 상태를 확인한다. 새 문서를 만들면 데스크톱에서는 제목 입력에 키보드 focus를 옮기며, 모바일에서는 Drawer를 닫지 않는다. 입력란의 기본·focus 테두리는 제거했다.
 
 로컬 생성 직후의 내부 Workspace 재구성은 `local-refresh`로 구분해 온라인에서 불필요한 캐시 안내/재조회 버튼을 표시하지 않는다. 실제 초기 로딩·조회 오류·저장소 오류·오프라인 안내는 유지한다.
+
+## 원고 충돌 비교·버전 선택
+
+헤더 `원고 버전 비교`, 로컬 충돌 안내 또는 `충돌 원고 목록`에서 읽기 전용 Diff를 연다. 로컬 CAS/서버 VERSION_CONFLICT/서버 NOTE_NOT_FOUND를 구분한다. 비교 후 기준이 바뀌면 재비교하며, 미확정 inFlight 작업은 교체하지 않는다.
+
+`내 원고 사용` 또는 `상대 원고 사용`은 선택 이전 원고·작업의 복구 사본과 선택 결과를 같은 IDB transaction으로 보관한다. 선택 자체가 서버 저장 성공은 아니다. 필요한 전송은 기존 `모든 변경사항 동기화`로 수행한다. 서버에서 찾지 못한 원고는 폴더를 선택해 새 UUID로 복구한다. 보관본은 비교 화면에서 txt로 내려받을 수 있다.
+
+같은 origin/profile에서만 로컬 사본을 복구하며 브라우저 저장소 삭제·회수의 한계는 그대로다. [충돌 유형·선택 경계·Diff 성능·재현 방법](../docs/design/manuscript-conflict-resolution.md)을 참고한다. 격리 실증은 `python3 scripts/manual-sync-lab.py --conflicts`로 실행한다. 길이별 production 측정은 별도의 preview origin에 `conflictDiffPerformance.cjs`를 실행하며 API는 mock GET만 허용한다.

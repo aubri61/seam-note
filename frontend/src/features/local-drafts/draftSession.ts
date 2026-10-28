@@ -278,6 +278,28 @@ export class DraftSession {
       if (entry.revision > entry.savedRevision) this.schedule(id)
     }
   }
+  async applyConflictChoice(id: string, revision: number,
+    commit: (writerId: string, isCurrent:()=>boolean) => Promise<LocalNoteDraft>) {
+    const entry=this.entry(id)
+    if(!entry.ready||!entry.draft||entry.acknowledging)throw new LocalDraftConflict()
+    if(entry.writing)await entry.writing
+    if(entry.revision!==revision)throw new LocalDraftConflict()
+    entry.acknowledging=true;this.stopTimer(entry)
+    try {
+      const record=await commit(this.writerId,()=>entry.revision===revision)
+      const stored=fromRecord(record),memory=entry.draft!
+      entry.draft=entry.revision===revision?stored:{...stored,title:memory.title,content:memory.content}
+      entry.checkpoint=stored;entry.token=record.storageToken;entry.savedRevision=record.localRevision
+      entry.revision=record.localRevision+(sameDraft(entry.draft,stored)?0:1)
+      entry.savedAt=record.localSavedAt;entry.serverProtected=false;entry.error=null
+      entry.phase=entry.revision===entry.savedRevision?'saved':'waiting'
+      this.channel?.postMessage({noteId:id,writerId:this.writerId});this.publish(id)
+    } finally {
+      entry.acknowledging=false
+      if(entry.headCheckRequested){entry.headCheckRequested=false;void this.checkHead(id)}
+      if(entry.phase==='waiting')this.schedule(id)
+    }
+  }
   async retry(id: string) {
     const entry = this.entry(id)
     if (entry.reading || entry.writing) return

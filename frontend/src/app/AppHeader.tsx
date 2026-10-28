@@ -1,5 +1,6 @@
 import type { Ref } from 'react'
 import styled from '@emotion/styled'
+import { SyncButton as SaveButton } from '@/components/SyncButton'
 import { Icon } from '@/components/Icon'
 import { IconButton } from '@/components/primitives'
 import type { DraftStatus } from '@/features/notes/noteDrafts'
@@ -30,14 +31,9 @@ const Header = styled.header(({ theme }) => ({
   },
 }))
 
-const SaveButton = styled.button(({ theme }) => ({
-  border: `1px solid ${theme.colors.border}`, borderRadius: theme.radii.pill,
-  padding: `${theme.spacing.sm} ${theme.spacing.md}`, background: theme.colors.surface,
-  color: theme.colors.text, font: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap',
-  '&:disabled': { opacity: .5, cursor: 'not-allowed' },
-}))
 
 interface AppHeaderProps {
+  hasConflict: boolean
   workspaceSync: ReturnType<typeof useWorkspaceSync>
   sidebarOpen: boolean
   isMobile: boolean
@@ -48,7 +44,7 @@ interface AppHeaderProps {
   status: DraftStatus
 }
 
-export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, toggleRef, path, status, workspaceSync }: AppHeaderProps) {
+export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, toggleRef, path, status, workspaceSync, hasConflict }: AppHeaderProps) {
   return (
     <Header>
       <div>
@@ -67,22 +63,21 @@ export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, t
         <p>Personal{path.map((name, index) => <span key={index} style={{ display: 'contents' }}><Icon name="chevron" size={12} />{name}</span>)}</p>
       </div>
       <div>
-        <SyncStatus status={status} />
+        {!hasConflict && <SyncStatus status={status} />}
+
         <IconButton type="button" disabled aria-label="More note options (coming later)" title="Note options are not connected">
           <Icon name="more" />
         </IconButton>
       </div>
       <section aria-label="Workspace 동기화" style={{flexBasis:'100%',minWidth:0}}>
         <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
-          <SaveButton type="button" disabled={workspaceSync.disabled} onClick={workspaceSync.onSync} aria-describedby="workspace-sync-feedback">
+          <SaveButton data-workspace-sync aria-busy={workspaceSync.busy} type="button" disabled={workspaceSync.disabled} onClick={workspaceSync.onSync} aria-describedby="workspace-sync-feedback">
             {workspaceSync.busy ? '전체 동기화 중…' : '모든 변경사항 동기화'}
           </SaveButton>
           <span>{workspaceSync.summary}</span>
         </div>
         <div id="workspace-sync-feedback" aria-live="polite" style={{overflowWrap:'anywhere',lineHeight:1.7}}>
-          {workspaceSync.message&&<p>{workspaceSync.message}</p>}
-          {workspaceSync.error&&<p role="alert">{workspaceSync.error}</p>}
-          {!!workspaceSync.details.length&&<details><summary>확인이 필요한 항목</summary><ul>{workspaceSync.details.map(item=><li key={item.id}>{item.label}: {item.message}</li>)}</ul></details>}
+          {!hasConflict&&workspaceSync.error&&<p role="alert">{workspaceSync.error}</p>}
         </div>
       </section>
     </Header>

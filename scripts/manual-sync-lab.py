@@ -10,10 +10,12 @@ p = argparse.ArgumentParser()
 p.add_argument('--serve', action='store_true')
 p.add_argument('--creation', action='store_true', help='Compatibility flag; runs the current Workspace-wide flow')
 p.add_argument('--workspace', action='store_true')
+p.add_argument('--conflicts', action='store_true', help='Also run manuscript conflict selection and UI regressions')
 p.add_argument('--db-port', type=int, default=25442)
 p.add_argument('--api-port', type=int, default=18766)
 p.add_argument('--ui-port', type=int, default=25175)
 a = p.parse_args()
+if a.conflicts: a.workspace = True
 if len({a.db_port,a.api_port,a.ui_port}) != 3 or {a.db_port,a.api_port,a.ui_port} & {15439,18765,5173}:
     raise SystemExit('Use three distinct research ports, never development ports.')
 for port in [a.db_port,a.api_port,a.ui_port]:
@@ -75,7 +77,7 @@ try:
         while True: time.sleep(1)
     else:
         playwright=base.get('SEAM_NOTE_PLAYWRIGHT_MODULE','/Users/jueon/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright')
-        test_env={**base,'SEAM_NOTE_PLAYWRIGHT_MODULE':playwright,'SEAM_NOTE_LAB_FIXTURE':str(work/'fixture.json')}
+        test_env={**base,'SEAM_NOTE_PLAYWRIGHT_BASE':base.get('SEAM_NOTE_PLAYWRIGHT_BASE',playwright),'SEAM_NOTE_PLAYWRIGHT_MODULE':str(ROOT/'frontend/tests/browser/helpers/onlineChrome.cjs'),'SEAM_NOTE_LAB_FIXTURE':str(work/'fixture.json')}
         with open(work/'browser.log','w') as log:
             run(['node',ROOT/'frontend/tests/browser/workspaceSyncLive.cjs'],cwd=ROOT,env=test_env,stdout=log,stderr=subprocess.STDOUT)
         result=json.loads((work/'browser-results.json').read_text())
@@ -83,6 +85,12 @@ try:
         output.parent.mkdir(parents=True,exist_ok=True)
         output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
         print('Workspace real production/Spring/PostgreSQL verification passed. Result:',output,flush=True)
+        if a.conflicts:
+            for name in ['conflictResolutionLive','conflictResolutionUi','multiTabConflictAfter']:
+                with open(work/(name+'.log'),'w') as log:
+                    run(['node',ROOT/f'frontend/tests/browser/{name}.cjs'],cwd=ROOT,
+                        env={**test_env,'SEAM_NOTE_MULTITAB_REPORT':str(ROOT/'docs/verification/2026-10-27-conflict-auto-reconcile.json')},stdout=log,stderr=subprocess.STDOUT)
+            print('Manuscript conflict selection and real UI verification passed.',flush=True)
         # Existing UI regressions use mock APIs on the dedicated origin.
         for name in (['outboxStorage','localDraftStorage','noteDrafts','noteRouting','workspaceCreateDelete','workspaceReadonly','sidebarDraftTitles','manualSaveUx'] + (['inlineFolderCreation','folderExpansion','folderMenu','folderRenameFocus'] if a.workspace else [])):
             env={**test_env,'SEAM_NOTE_UI_URL':fixture['origin']}

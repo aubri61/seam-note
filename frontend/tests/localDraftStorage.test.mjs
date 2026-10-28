@@ -371,3 +371,26 @@ test('input during head read is compared at resolution and is not replaced by an
   external(repo, { content: 'other text' }); repo.readGate.resolve(); await checking
   assert.equal(get().phase, 'conflict'); assert.equal(get().draft.content, 'during read')
 })
+
+test('explicit conflict choice adopts only a committed record and resets the local write fence',async t=>{
+ const {repo,session,get}=setup(t,stored());await ready(session);session.edit('A',{content:'memory'})
+ external(repo,{content:'other'});await session.checkHead('A');const revision=get().revision
+ const chosen=external(repo,{content:'selected'})
+ await session.applyConflictChoice('A',revision,async(_writer,current)=>{assert.equal(current(),true);return chosen})
+ assert.equal(get().draft.content,'selected');assert.equal(get().phase,'saved');assert.equal(session.savedHead('A').token,chosen.storageToken)
+})
+test('choice cannot apply after this tab has changed since preview',async t=>{
+ const {session,get}=setup(t,stored());await ready(session);const revision=get().revision;session.edit('A',{content:'new memory'});let calls=0
+ await assert.rejects(session.applyConflictChoice('A',revision,async()=>{calls++}));assert.equal(calls,0);assert.equal(get().draft.content,'new memory')
+})
+test('failed choice commit leaves the original conflict and memory intact',async t=>{
+ const {repo,session,get}=setup(t,stored());await ready(session);session.edit('A',{content:'memory'});external(repo,{content:'other'});await session.checkHead('A')
+ const before=get();await assert.rejects(session.applyConflictChoice('A',get().revision,async()=>{throw Error('quota')}))
+ assert.deepEqual(get(),before);assert.equal(repo.records.get('A').content,'other')
+})
+test('input arriving after choice transaction commit remains in memory and needs its own CAS commit',async t=>{
+ const {repo,session,get}=setup(t,stored());await ready(session);const revision=get().revision,record=external(repo,{content:'chosen'})
+ await session.applyConflictChoice('A',revision,async()=>{session.edit('A',{content:'newer input'});return record})
+ assert.equal(get().draft.content,'newer input');assert.equal(get().phase,'waiting');assert.equal(hasUnprotectedChanges(session.getSnapshot()),true)
+ await session.flushLatest('A');assert.equal(repo.records.get('A').content,'newer input')
+})

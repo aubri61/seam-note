@@ -25,6 +25,10 @@ export function useWorkspaceSync(session: DraftSession, online: boolean, workspa
       const {syncWorkspace}=await import('./SyncCoordinator')
       const outcome=await syncWorkspace(session,{
         onNote:note=>client.setQueryData<Note>(noteKeys.detail(note.id),current=>current&&current.version>note.version?current:note)})
+      // A manual sync is also an explicit pull. Workspace summaries do not
+      // contain the body, so an empty Outbox must still refresh active details.
+      // DraftSession.receive retains dirty/uncertain drafts via its existing barrier.
+      await client.invalidateQueries({queryKey:noteKeys.all})
       setResult(outcome)
     }catch(cause){setError(cause instanceof Error?cause.message:'전체 동기화 상태를 확인하지 못했습니다. 작업을 보존했습니다.')}
     finally{
