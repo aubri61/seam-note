@@ -13,3 +13,5 @@ export const localDraftRepository: DraftRepository = {
   read: async id => (await repository()).read(id),
   write: async (draft, revision, token, writerId) => (await repository()).write(draft, revision, token, writerId),
 }
+
+export const readLocalDraftTitles = async () => (await import('./draftDatabase')).draftRepository.readTitles()

@@ -1,4 +1,5 @@
 const paths = {
+  sync: 'M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 11.5-2L20 8M4 16l2.5 3A7 7 0 0 0 18 17',
   trash: 'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7',
   pencil: 'M16 3l5 5M3 21l5-1L21 7a2 2 0 0 0-4-4L4 16l-1 5z',
   sidebar: 'M3 4h18v16H3zM9 4v16',

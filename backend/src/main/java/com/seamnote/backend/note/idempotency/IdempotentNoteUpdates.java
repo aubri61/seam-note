@@ -16,11 +16,12 @@ import java.util.UUID;
 
 @Service
 public class IdempotentNoteUpdates {
+    private final com.seamnote.backend.creation.CreationLedger creations;
     private final NoteService notes;
     private final NoteUpdateLedger ledger;
     private final JsonMapper json;
-    public IdempotentNoteUpdates(NoteService notes, NoteUpdateLedger ledger, JsonMapper json) {
-        this.notes = notes; this.ledger = ledger; this.json = json;
+    public IdempotentNoteUpdates(NoteService notes, NoteUpdateLedger ledger, JsonMapper json, com.seamnote.backend.creation.CreationLedger creations) {
+        this.creations=creations; this.notes = notes; this.ledger = ledger; this.json = json;
     }
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public String update(UUID noteId, UpdateNoteRequest request, String key) {
@@ -30,6 +31,7 @@ public class IdempotentNoteUpdates {
         if (!operationId.toString().equalsIgnoreCase(key)) throw new IllegalArgumentException("Non-canonical idempotency key");
         String fingerprint = fingerprint(noteId, request);
         ledger.lock(operationId);
+        if(creations.find(operationId).isPresent())throw new BusinessException(ErrorCode.IDEMPOTENCY_KEY_REUSED);
         var existing = ledger.find(operationId);
         if (existing.isPresent()) {
             var success = existing.get();

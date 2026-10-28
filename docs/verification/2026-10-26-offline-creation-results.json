@@ -1,0 +1,143 @@
+{
+  "chrome": "155.0.8059.86",
+  "origin": "http://127.0.0.1:65517",
+  "work": "/var/folders/j0/4ncpc9m90tg_c7d24lc1kvnr0000gn/T/seam-note-create-JsFX1b",
+  "cases": [
+    {
+      "name": "v3-to-v4-preserves-existing-draft-outbox",
+      "passed": true
+    },
+    {
+      "name": "local-entity-and-create-intent-roll-back-together",
+      "passed": true
+    },
+    {
+      "name": "offline-folder-child-note-atomic-create-edit-without-update",
+      "passed": true,
+      "folderA": "1fb6ab5d-d27a-4ae1-a31c-3321481d29b0",
+      "folderB": "5acdb1b6-40ae-448d-95df-9e8e64a79fcd",
+      "noteC": "c696277d-9b6e-4250-aa5f-041999d46a5e"
+    },
+    {
+      "name": "pwa-offline-new-process-keeps-generated-tree-route-body",
+      "passed": true
+    },
+    {
+      "name": "parent-failure-blocks-all-children-keeps-local",
+      "passed": true
+    },
+    {
+      "name": "partial-parent-success-lost-response-keeps-same-key",
+      "passed": true
+    },
+    {
+      "name": "same-key-parent-replay-two-tabs-and-edit-during-create-ack",
+      "passed": true,
+      "serverVersion": 1,
+      "contentHash": "19c94eb7151c2a8a61750f988d8346d20bfaf900f6e8bc338c1ded8823d9def1"
+    },
+    {
+      "name": "creation-ack-rollback-and-exact-replay",
+      "passed": true
+    },
+    {
+      "name": "explicit-folder-only-save-without-a-new-note",
+      "passed": true
+    },
+    {
+      "name": "server-get-confirms-new-tree-existing-draft-not-sent",
+      "passed": true
+    }
+  ],
+  "events": [
+    {
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "1fb6ab5d-d27a-4ae1-a31c-3321481d29b0",
+      "key": "74a116c6-5f01-484e-be4d-1b493bfc6bbf"
+    },
+    {
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "1fb6ab5d-d27a-4ae1-a31c-3321481d29b0",
+      "key": "74a116c6-5f01-484e-be4d-1b493bfc6bbf"
+    },
+    {
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "5acdb1b6-40ae-448d-95df-9e8e64a79fcd",
+      "key": "aa009dd7-38b0-4b67-aa5f-bc077bc83921"
+    },
+    {
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "5acdb1b6-40ae-448d-95df-9e8e64a79fcd",
+      "key": "aa009dd7-38b0-4b67-aa5f-bc077bc83921"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notes",
+      "entityId": "c696277d-9b6e-4250-aa5f-041999d46a5e",
+      "key": "b0a01305-56e1-446f-9025-16bcedc2d4a6",
+      "contentHash": "754f4f06a44c2ff70e74faa3c6da15bd9673d5f519924a68a1a3e64d6f4b6d7b"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/c696277d-9b6e-4250-aa5f-041999d46a5e",
+      "entityId": "c696277d-9b6e-4250-aa5f-041999d46a5e",
+      "key": "c92968d8-b9ce-45b3-aab1-ccb196cc61bb",
+      "expectedVersion": 0,
+      "contentHash": "19c94eb7151c2a8a61750f988d8346d20bfaf900f6e8bc338c1ded8823d9def1"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notes",
+      "entityId": "b4116988-3ad6-43e8-8572-232f4139074f",
+      "key": "365990c4-e8fa-4920-91cf-399a41385f8e",
+      "contentHash": "5bffad9fd2b6b7c140dd2ee5e16715d63103cb3869b232a275ec856abed317c5"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notes",
+      "entityId": "b4116988-3ad6-43e8-8572-232f4139074f",
+      "key": "365990c4-e8fa-4920-91cf-399a41385f8e",
+      "contentHash": "5bffad9fd2b6b7c140dd2ee5e16715d63103cb3869b232a275ec856abed317c5"
+    },
+    {
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "0eef210a-9d94-43b6-9ce4-6c62dbaed7a4",
+      "key": "b145b811-5594-4b3c-b7ca-1651a9540c58"
+    }
+  ],
+  "sql": {
+    "creationLedgerCount": 5,
+    "noteCVersion": 1
+  },
+  "existingDraftPreserved": true,
+  "coreSourceHashes": {
+    "frontend/src/features/local-drafts/draftDatabase.ts": "6f040fa821238516fd9cb19d88e51f77d6e2b071aaa22f8685706249369c998a",
+    "frontend/src/features/manual-sync/creationSync.ts": "3483be61636f2efd462d40e8532b91137a2ea9fb4d4b93889a156e2f1d5bcec0",
+    "frontend/src/features/offline/workspaceCache.ts": "41cf37485fffe3dd754d7fb03997c34ea7eb0277c1fb93238d81a3029dfc9f49",
+    "backend/src/main/java/com/seamnote/backend/creation/IdempotentCreations.java": "0984c3c8d5719afeeea1eed7d0d86e2dd79002705199b7967fbbf831a650c3ec",
+    "backend/src/main/java/com/seamnote/backend/creation/CreationLedger.java": "1811f0f4cf953a55927816eb542926f6fae87c2149704af31bce78815576d8f3"
+  },
+  "verification": {
+    "backendTests": 35,
+    "frontendUnitTests": 112,
+    "creationScenarios": 10,
+    "existingManualUpdateScenarios": 10,
+    "browserRegressions": [
+      "outboxStorage",
+      "localDraftStorage",
+      "noteDrafts",
+      "noteRouting",
+      "workspaceCreateDelete",
+      "workspaceReadonly",
+      "sidebarDraftTitles",
+      "manualSaveUx"
+    ],
+    "actualPostgres": "14.20 UTF8",
+    "developmentDataUsed": false
+  }
+}

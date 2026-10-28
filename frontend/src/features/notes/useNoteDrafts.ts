@@ -2,17 +2,25 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import type { Note, UUID } from '@/lib/api/types'
 import type { DraftPatch } from './noteDrafts'
 import { protectUnsavedDrafts } from './draftNavigation'
-import { localDraftRepository } from '@/features/local-drafts/localDraftRepository'
+import { localDraftRepository, readLocalDraftTitles } from '@/features/local-drafts/localDraftRepository'
 import { DraftSession, hasUnprotectedChanges } from '@/features/local-drafts/draftSession'
 
 /** The session is owned by AppLayout; URL changes never replace it. */
 export function useNoteDrafts(selectedId: UUID | null, serverNote: Note | null) {
   const [session] = useState(() => new DraftSession(localDraftRepository, crypto.randomUUID()))
   const entries = useSyncExternalStore(session.subscribe, session.getSnapshot)
+  const [restoredTitles, setRestoredTitles] = useState<Record<string, string>>({})
+  useEffect(() => {
+    let active = true
+    void readLocalDraftTitles().then(titles => { if (active) setRestoredTitles(titles) }).catch(() => {
+      // Per-note recovery reports storage errors; do not log manuscript data.
+    })
+    return () => { active = false }
+  }, [])
   // Presentation only: never write edited titles into the server Query cache.
-  const draftTitles = useMemo(() => Object.fromEntries(
+  const draftTitles = useMemo(() => ({ ...restoredTitles, ...Object.fromEntries(
     Object.entries(entries).flatMap(([id, value]) => value.draft ? [[id, value.draft.title]] : []),
-  ), [entries])
+  ) }), [entries, restoredTitles])
   useEffect(() => session.connect(), [session])
   useEffect(() => {
     if (!selectedId) return

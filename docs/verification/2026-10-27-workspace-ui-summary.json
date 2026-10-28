@@ -1,0 +1,100 @@
+{
+  "date": "2026-10-27",
+  "frontendTests": {
+    "passed": 143,
+    "failed": 0
+  },
+  "build": "passed; initial index492.84kB; no500kB warning",
+  "lint": "passed",
+  "backendTests": {
+    "tests": 35,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "workspaceRealScenarios": 18,
+  "browserSuites": [
+    "outboxStorage",
+    "localDraftStorage",
+    "noteDrafts",
+    "noteRouting",
+    "workspaceCreateDelete",
+    "workspaceReadonly",
+    "sidebarDraftTitles",
+    "manualSaveUx",
+    "inlineFolderCreation",
+    "folderExpansion",
+    "folderMenu",
+    "folderRenameFocus"
+  ],
+  "browserSequenceExitCode": 0,
+  "pwaScenarios": 10,
+  "environment": {
+    "spring": 18766,
+    "postgres": 25442,
+    "db": "seam_note_manual_lab",
+    "mockVite": 25176
+  },
+  "sourceHashes": {
+    "frontend/src/app/AppHeader.tsx": "8919b4d59f01d957ef09e0a7f5c13b1acdcd34574b2f404fb9552d845dd3433f",
+    "frontend/src/app/AppLayout.tsx": "1ccad1cf465b122f81bb8ab160c5d2bb29573bfe07b3398ca5a384b5aa701a53",
+    "frontend/src/features/offline/workspaceCache.ts": "66eb23ff3ae6eee72eb455b9ac346b87883f835eb2129ea04a51935ba75d606c",
+    "frontend/src/features/workspace/localCreations.ts": "b217119460a81a8a8137955c41e4b47a20d2c2d272fc4bb508a78b44fa646519",
+    "frontend/src/features/workspace/workspaceMutations.ts": "c6eef1f8c35f351d6b6e26b7e6e95a06788fe2b67952a598892f7c5c9b2f830c",
+    "frontend/src/features/local-drafts/draftDatabase.ts": "8b7e3ba4dff68aeb2cef9f92b8a6120a3560a43217bf198593714a703db7fee1",
+    "frontend/src/features/local-drafts/draftSession.ts": "fe7a8fb0df718aa268c5c66d308628abe9d9456029ec12024664ffd7763f1203",
+    "frontend/src/features/manual-sync/SyncCoordinator.ts": "8852b68e480dd5d5368e73a641909012ee101058189cc665ccbf21a9f148f692"
+  },
+  "browserLogs": {
+    "outboxStorage": {
+      "path": "/private/tmp/seam-note-ui-cleanup-outboxStorage.log",
+      "sha256": "a31fa33829c074a9325e6ed534f2609b30d52e5a1ad038f967bd449536f2192f"
+    },
+    "localDraftStorage": {
+      "path": "/private/tmp/seam-note-ui-cleanup-localDraftStorage.log",
+      "sha256": "628c8083297c7cfb869c2285b1e6bf9ac63d9a6a0918a53cc4f93d1630ca8098"
+    },
+    "noteDrafts": {
+      "path": "/private/tmp/seam-note-ui-cleanup-noteDrafts.log",
+      "sha256": "1d903f24ce315f207a9128a2c2a62c59ccdc29881ddb42f780ac392d898975ff"
+    },
+    "noteRouting": {
+      "path": "/private/tmp/seam-note-ui-cleanup-noteRouting.log",
+      "sha256": "3ef39dc810b6060c9114a85c6d73934ea16378ab5bf8bbbd75e117421e3d63b6"
+    },
+    "workspaceCreateDelete": {
+      "path": "/private/tmp/seam-note-ui-cleanup-workspaceCreateDelete.log",
+      "sha256": "c0fe8cff6ea417d3d66c210cf04f16da33c5fc0762a082b7fc73eb5abe8314be"
+    },
+    "workspaceReadonly": {
+      "path": "/private/tmp/seam-note-ui-cleanup-workspaceReadonly.log",
+      "sha256": "a8117b5b335de7580f5f5c7f9e4cf7e9781a125136f6d25aafb289f081031329"
+    },
+    "sidebarDraftTitles": {
+      "path": "/private/tmp/seam-note-ui-cleanup-sidebarDraftTitles.log",
+      "sha256": "9188aefe819d094e189e0e7dd8ddd338348c9e4393fbbadbaf61189c53316eb0"
+    },
+    "manualSaveUx": {
+      "path": "/private/tmp/seam-note-ui-cleanup-manualSaveUx.log",
+      "sha256": "833b86a2d62e1a833b97ab9de26f88a32a3e7c65fd860d1cc74f9835f7c0bae3"
+    },
+    "inlineFolderCreation": {
+      "path": "/private/tmp/seam-note-ui-cleanup-inlineFolderCreation.log",
+      "sha256": "b067c45d4ea0644cfc2673143644d90d73edd04ebd0e4ceca56da153fae09ba3"
+    },
+    "folderExpansion": {
+      "path": "/private/tmp/seam-note-ui-cleanup-folderExpansion.log",
+      "sha256": "957e8fa9b58c7d97c45e5b7f7b82ba6bbf91965a8ac5e76b3c8a3197c57d4930"
+    },
+    "folderMenu": {
+      "path": "/private/tmp/seam-note-ui-cleanup-folderMenu.log",
+      "sha256": "34131b53f40390e8affe4c8829cb8a4b248226233377461121185ea1e816d5eb"
+    },
+    "folderRenameFocus": {
+      "path": "/private/tmp/seam-note-ui-cleanup-folderRenameFocus.log",
+      "sha256": "d1970dd0071277820d66c11a58f2525a7fd118d693ab9f4d41954665c70bdd2c"
+    }
+  },
+  "knownTestCorrection": "legacy record equality now checks physical persisted IDB record separately from read-only compatibility projection",
+  "dataSafety": "Synthetic API/DB records and isolated Chrome contexts only; existing development manuscripts/storage not used"
+}

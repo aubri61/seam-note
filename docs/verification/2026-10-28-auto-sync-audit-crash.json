@@ -1,0 +1,485 @@
+{
+  "results": [
+    {
+      "config": {
+        "mode": "before-server",
+        "missing": false
+      },
+      "noteId": "3ccfb762-95c6-41fe-872f-de07f6b4addf",
+      "passed": true,
+      "killSignal": "SIGKILL",
+      "committedNormal": {
+        "phase": "saved",
+        "baseVersion": 2,
+        "revision": 3,
+        "token": "45778b6d-489e-488a-b094-8efe39c496fc",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "000a46f9-b3a7-4703-83fc-8bd2223fcd59",
+            "status": "pending",
+            "expectedVersion": 2,
+            "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+            "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6"
+          },
+          {
+            "id": "95020e08-d6c9-4aed-9d5f-f43d7e5fe373",
+            "status": "inFlight",
+            "expectedVersion": 2,
+            "titleHash": "095dd560a8e1602cdad0f5e0c315b85a63004b5963e24cf111a25a000448173d",
+            "contentHash": "01bbbc97835e2d829c1e56405f3c15ff1b2d5340958228d90295138f24023a25"
+          }
+        ]
+      },
+      "beforeCrash": {
+        "phase": "saved",
+        "baseVersion": 2,
+        "revision": 3,
+        "token": "45778b6d-489e-488a-b094-8efe39c496fc",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "000a46f9-b3a7-4703-83fc-8bd2223fcd59",
+            "status": "pending",
+            "expectedVersion": 2,
+            "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+            "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6"
+          },
+          {
+            "id": "95020e08-d6c9-4aed-9d5f-f43d7e5fe373",
+            "status": "inFlight",
+            "expectedVersion": 2,
+            "titleHash": "095dd560a8e1602cdad0f5e0c315b85a63004b5963e24cf111a25a000448173d",
+            "contentHash": "01bbbc97835e2d829c1e56405f3c15ff1b2d5340958228d90295138f24023a25"
+          }
+        ]
+      },
+      "recovered": {
+        "phase": "saved",
+        "baseVersion": 2,
+        "revision": 3,
+        "token": "45778b6d-489e-488a-b094-8efe39c496fc",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "000a46f9-b3a7-4703-83fc-8bd2223fcd59",
+            "status": "pending",
+            "expectedVersion": 2,
+            "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+            "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6"
+          },
+          {
+            "id": "95020e08-d6c9-4aed-9d5f-f43d7e5fe373",
+            "status": "inFlight",
+            "expectedVersion": 2,
+            "titleHash": "095dd560a8e1602cdad0f5e0c315b85a63004b5963e24cf111a25a000448173d",
+            "contentHash": "01bbbc97835e2d829c1e56405f3c15ff1b2d5340958228d90295138f24023a25"
+          }
+        ]
+      },
+      "afterAck": {
+        "phase": "saved",
+        "baseVersion": 3,
+        "revision": 4,
+        "token": "15a59c48-16e0-4e40-aeaa-fad969622a11",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "f52b9d27-c0ed-42de-bb62-4d1e11a37604",
+            "status": "pending",
+            "expectedVersion": 3,
+            "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+            "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6"
+          }
+        ]
+      },
+      "final": {
+        "phase": "saved",
+        "baseVersion": 4,
+        "revision": 5,
+        "token": "3322ec2e-8ef5-4e1f-a529-40ef9b104848",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": false,
+        "ops": []
+      },
+      "serverVersionAfterCrash": 2,
+      "serverVersionAfterA": 3,
+      "finalServerVersion": 4,
+      "requestsForA": 2,
+      "ledgerA": 1,
+      "ledgerB": 1,
+      "noDirtyEmptyOutbox": true
+    },
+    {
+      "config": {
+        "mode": "after-server-response-held",
+        "missing": false
+      },
+      "noteId": "d62a7cef-b967-4942-bdd5-da9b7adfb432",
+      "passed": true,
+      "killSignal": "SIGKILL",
+      "committedNormal": {
+        "phase": "saved",
+        "baseVersion": 2,
+        "revision": 3,
+        "token": "75b0a4cd-6e70-43eb-8996-ff1e8cfae916",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "068be018-3b12-4dfd-a287-be9460fef2ef",
+            "status": "pending",
+            "expectedVersion": 2,
+            "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+            "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6"
+          },
+          {
+            "id": "1e2a7836-95dc-4c17-a5d3-d60d80c508c6",
+            "status": "inFlight",
+            "expectedVersion": 2,
+            "titleHash": "095dd560a8e1602cdad0f5e0c315b85a63004b5963e24cf111a25a000448173d",
+            "contentHash": "01bbbc97835e2d829c1e56405f3c15ff1b2d5340958228d90295138f24023a25"
+          }
+        ]
+      },
+      "beforeCrash": {
+        "phase": "saved",
+        "baseVersion": 2,
+        "revision": 3,
+        "token": "75b0a4cd-6e70-43eb-8996-ff1e8cfae916",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "068be018-3b12-4dfd-a287-be9460fef2ef",
+            "status": "pending",
+            "expectedVersion": 2,
+            "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+            "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6"
+          },
+          {
+            "id": "1e2a7836-95dc-4c17-a5d3-d60d80c508c6",
+            "status": "inFlight",
+            "expectedVersion": 2,
+            "titleHash": "095dd560a8e1602cdad0f5e0c315b85a63004b5963e24cf111a25a000448173d",
+            "contentHash": "01bbbc97835e2d829c1e56405f3c15ff1b2d5340958228d90295138f24023a25"
+          }
+        ]
+      },
+      "recovered": {
+        "phase": "saved",
+        "baseVersion": 2,
+        "revision": 3,
+        "token": "75b0a4cd-6e70-43eb-8996-ff1e8cfae916",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "068be018-3b12-4dfd-a287-be9460fef2ef",
+            "status": "pending",
+            "expectedVersion": 2,
+            "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+            "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6"
+          },
+          {
+            "id": "1e2a7836-95dc-4c17-a5d3-d60d80c508c6",
+            "status": "inFlight",
+            "expectedVersion": 2,
+            "titleHash": "095dd560a8e1602cdad0f5e0c315b85a63004b5963e24cf111a25a000448173d",
+            "contentHash": "01bbbc97835e2d829c1e56405f3c15ff1b2d5340958228d90295138f24023a25"
+          }
+        ]
+      },
+      "afterAck": {
+        "phase": "saved",
+        "baseVersion": 3,
+        "revision": 4,
+        "token": "0041460e-29a4-44a3-bc51-6d6f63720c53",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "b7d05d72-568e-4144-a4f5-477a68defc76",
+            "status": "pending",
+            "expectedVersion": 3,
+            "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+            "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6"
+          }
+        ]
+      },
+      "final": {
+        "phase": "saved",
+        "baseVersion": 4,
+        "revision": 5,
+        "token": "6393bcfe-8b9f-41cb-92ae-d62b02ae7521",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": false,
+        "ops": []
+      },
+      "serverVersionAfterCrash": 3,
+      "serverVersionAfterA": 3,
+      "finalServerVersion": 4,
+      "requestsForA": 2,
+      "ledgerA": 1,
+      "ledgerB": 1,
+      "noDirtyEmptyOutbox": true
+    },
+    {
+      "config": {
+        "mode": "before-server",
+        "missing": true
+      },
+      "noteId": "746574ad-e61b-4f46-9705-604f5fa4cc0b",
+      "passed": true,
+      "killSignal": "SIGKILL",
+      "committedNormal": {
+        "phase": "saved",
+        "baseVersion": 2,
+        "revision": 3,
+        "token": "2b6c03b3-b8de-488f-8adc-6847e8119a38",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "0c889715-31c1-45d8-b1c7-7df77b8b961e",
+            "status": "inFlight",
+            "expectedVersion": 2,
+            "titleHash": "095dd560a8e1602cdad0f5e0c315b85a63004b5963e24cf111a25a000448173d",
+            "contentHash": "01bbbc97835e2d829c1e56405f3c15ff1b2d5340958228d90295138f24023a25"
+          },
+          {
+            "id": "7f74616f-f32c-4ebd-b73f-e5efa5b83ae1",
+            "status": "pending",
+            "expectedVersion": 2,
+            "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+            "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6"
+          }
+        ]
+      },
+      "beforeCrash": {
+        "phase": "saved",
+        "baseVersion": 2,
+        "revision": 3,
+        "token": "2b6c03b3-b8de-488f-8adc-6847e8119a38",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "0c889715-31c1-45d8-b1c7-7df77b8b961e",
+            "status": "inFlight",
+            "expectedVersion": 2,
+            "titleHash": "095dd560a8e1602cdad0f5e0c315b85a63004b5963e24cf111a25a000448173d",
+            "contentHash": "01bbbc97835e2d829c1e56405f3c15ff1b2d5340958228d90295138f24023a25"
+          }
+        ]
+      },
+      "recovered": {
+        "phase": "saved",
+        "baseVersion": 2,
+        "revision": 3,
+        "token": "2b6c03b3-b8de-488f-8adc-6847e8119a38",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "0c889715-31c1-45d8-b1c7-7df77b8b961e",
+            "status": "inFlight",
+            "expectedVersion": 2,
+            "titleHash": "095dd560a8e1602cdad0f5e0c315b85a63004b5963e24cf111a25a000448173d",
+            "contentHash": "01bbbc97835e2d829c1e56405f3c15ff1b2d5340958228d90295138f24023a25"
+          }
+        ]
+      },
+      "afterAck": {
+        "phase": "saved",
+        "baseVersion": 3,
+        "revision": 4,
+        "token": "fbefe671-f2b9-41b4-bf4d-630539cfb954",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "f85a94aa-d602-44d3-8afd-7ce2ef5d6c3b",
+            "status": "pending",
+            "expectedVersion": 3,
+            "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+            "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6"
+          }
+        ]
+      },
+      "final": {
+        "phase": "saved",
+        "baseVersion": 4,
+        "revision": 5,
+        "token": "765d10f8-0f8f-44c4-8bc7-73d48cf4a815",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": false,
+        "ops": []
+      },
+      "serverVersionAfterCrash": 2,
+      "serverVersionAfterA": 3,
+      "finalServerVersion": 4,
+      "requestsForA": 2,
+      "ledgerA": 1,
+      "ledgerB": 1,
+      "noDirtyEmptyOutbox": true
+    },
+    {
+      "config": {
+        "mode": "after-server-response-held",
+        "missing": true,
+        "abortAck": true
+      },
+      "noteId": "fb6687e3-a45b-486a-a4f2-e1b8da039c88",
+      "passed": true,
+      "killSignal": "SIGKILL",
+      "committedNormal": {
+        "phase": "saved",
+        "baseVersion": 2,
+        "revision": 3,
+        "token": "4411b767-bfc6-4a41-a360-03939264a483",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "33f5d31a-9e9f-4060-a854-0f22f19d48c5",
+            "status": "inFlight",
+            "expectedVersion": 2,
+            "titleHash": "095dd560a8e1602cdad0f5e0c315b85a63004b5963e24cf111a25a000448173d",
+            "contentHash": "01bbbc97835e2d829c1e56405f3c15ff1b2d5340958228d90295138f24023a25"
+          },
+          {
+            "id": "8c97b677-d324-402e-b235-f4a3d6a8bc60",
+            "status": "pending",
+            "expectedVersion": 2,
+            "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+            "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6"
+          }
+        ]
+      },
+      "beforeCrash": {
+        "phase": "saved",
+        "baseVersion": 2,
+        "revision": 3,
+        "token": "4411b767-bfc6-4a41-a360-03939264a483",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "33f5d31a-9e9f-4060-a854-0f22f19d48c5",
+            "status": "inFlight",
+            "expectedVersion": 2,
+            "titleHash": "095dd560a8e1602cdad0f5e0c315b85a63004b5963e24cf111a25a000448173d",
+            "contentHash": "01bbbc97835e2d829c1e56405f3c15ff1b2d5340958228d90295138f24023a25"
+          }
+        ]
+      },
+      "recovered": {
+        "phase": "saved",
+        "baseVersion": 2,
+        "revision": 3,
+        "token": "4411b767-bfc6-4a41-a360-03939264a483",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "33f5d31a-9e9f-4060-a854-0f22f19d48c5",
+            "status": "inFlight",
+            "expectedVersion": 2,
+            "titleHash": "095dd560a8e1602cdad0f5e0c315b85a63004b5963e24cf111a25a000448173d",
+            "contentHash": "01bbbc97835e2d829c1e56405f3c15ff1b2d5340958228d90295138f24023a25"
+          }
+        ]
+      },
+      "rollback": {
+        "phase": "failed",
+        "baseVersion": 2,
+        "revision": 3,
+        "token": "4411b767-bfc6-4a41-a360-03939264a483",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "33f5d31a-9e9f-4060-a854-0f22f19d48c5",
+            "status": "inFlight",
+            "expectedVersion": 2,
+            "titleHash": "095dd560a8e1602cdad0f5e0c315b85a63004b5963e24cf111a25a000448173d",
+            "contentHash": "01bbbc97835e2d829c1e56405f3c15ff1b2d5340958228d90295138f24023a25"
+          }
+        ]
+      },
+      "afterAck": {
+        "phase": "saved",
+        "baseVersion": 3,
+        "revision": 4,
+        "token": "477f245d-c229-4f85-a8bd-719724074dd5",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": true,
+        "ops": [
+          {
+            "id": "f19e5de8-944b-4912-a59c-327e4ca54e5e",
+            "status": "pending",
+            "expectedVersion": 3,
+            "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+            "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6"
+          }
+        ]
+      },
+      "final": {
+        "phase": "saved",
+        "baseVersion": 4,
+        "revision": 5,
+        "token": "dedaf71c-f91c-4f62-9cf1-0859d73f12f2",
+        "titleHash": "d99c35fb5ae76e18d2f02cf3f15127d09fa0884b6926ac972df5b0f6ecb4bf53",
+        "contentHash": "5746d261d1b3697b4b61ff3d81871dcbfb6d60d5def6520170f248b1cf2c0ea6",
+        "dirty": false,
+        "ops": []
+      },
+      "serverVersionAfterCrash": 3,
+      "serverVersionAfterA": 3,
+      "finalServerVersion": 4,
+      "requestsForA": 3,
+      "ledgerA": 1,
+      "ledgerB": 1,
+      "noDirtyEmptyOutbox": true
+    }
+  ],
+  "environment": {
+    "origin": "http://127.0.0.1:25175",
+    "apiOrigin": "http://127.0.0.1:18766",
+    "dbName": "seam_note_manual_lab",
+    "dbPort": 25442,
+    "profiles": "/var/folders/j0/4ncpc9m90tg_c7d24lc1kvnr0000gn/T/seam-inflight-crash-vLPd6P"
+  },
+  "method": "Each normal additional-input write already creates B atomically. missing=true explicitly deletes only the synthetic pending successor to test ACK repair; not a naturally observed product bug. Chrome root process SIGKILL; no close/pagehide flush at crash boundary. Not a power-loss durability guarantee.",
+  "sourceHashes": {
+    "frontend/src/features/local-drafts/draftDatabase.ts": "0c8b507375a59576db9845ee3b62fc51e0d136c8977f8268a5ad483c393c5d44",
+    "frontend/src/features/local-drafts/draftSession.ts": "4d3f4057913cd651ff958354dad23b61992ca8083efdcf2f5d7e3de1ba94b187",
+    "frontend/src/features/outbox/outboxModel.ts": "38e21ce6bbcd46ddcdd9d198eb6ae14fa870ab9cdad22bddcc648686b81fd473",
+    "frontend/src/features/manual-sync/SyncCoordinator.ts": "8852b68e480dd5d5368e73a641909012ee101058189cc665ccbf21a9f148f692"
+  }
+}

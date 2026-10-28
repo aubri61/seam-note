@@ -9,11 +9,7 @@ async function main() {
     let apiCalls = 0
     page.on('console', message => { if (message.text().startsWith('OUTBOX TEST:')) console.log(message.text()) })
     await page.route(url => url.pathname.startsWith('/api/'), route => { apiCalls++; return route.abort() })
-    await page.route(url => url.pathname === '/outbox-test', async route => {
-      const response = await route.fetch({ url: origin + '/' })
-      const html = (await response.text()).replace(/<script[^>]*src=["']\/src\/main\.tsx["'][^>]*>\s*<\/script>/, '')
-      await route.fulfill({ response, body: html })
-    })
+    await page.route(url => url.pathname === '/outbox-test', route => route.fulfill({contentType:'text/html',body:'<html><body>Isolated IndexedDB contract</body></html>'}))
     await page.goto(origin + '/outbox-test')
     const results = await page.evaluate(async () => {
       try {
@@ -38,9 +34,12 @@ async function main() {
       const legacy = new Dexie(legacyName);legacy.version(1).stores({drafts:'&noteId'})
       await legacy.table('drafts').bulkPut([dirty,clean]);legacy.close()
       const migrated = new DraftDatabase(legacyName), repo = new DexieDraftRepository(migrated)
-      check(same(await repo.read(dirty.noteId),dirty),'v1 dirty record unchanged')
-      check(same(await repo.read(clean.noteId),clean),'v1 clean record unchanged')
-      check(migrated.verno===2,'upgraded to v2')
+      const dirtyView=await repo.read(dirty.noteId),cleanView=await repo.read(clean.noteId)
+      check(same(await migrated.drafts.get(dirty.noteId),dirty),'v1 persisted dirty record unchanged')
+      check(same(await migrated.drafts.get(clean.noteId),clean),'v1 persisted clean record unchanged')
+      check(dirtyView.canRebaseLocalEdits===true&&cleanView.canRebaseLocalEdits===true,'read-only compatibility projections are available')
+      check(!('canRebaseLocalEdits' in await migrated.drafts.get(dirty.noteId)),'read projection is never persisted')
+      check(migrated.verno===4,'upgraded through unchanged v2/v3 to additive v4')
       let operations = await repo.listOperations(dirty.noteId)
       check(operations.length===1&&operations[0].expectedVersion===2&&operations[0].localRevision===7,'dirty backfill')
       check((await repo.listOperations(clean.noteId)).length===0,'clean is not queued')

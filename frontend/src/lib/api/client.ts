@@ -70,7 +70,7 @@ export async function postJson<T>(path: string, data: unknown, options: RequestO
 }
 
 export async function deleteResource(path: string, options: RequestOptions = {}): Promise<void> {
-  // DELETE /api/notes/{id} returns 204, so there is no JSON body to parse.
+  // DELETE endpoints return 204, so there is no JSON body to parse.
   await request<void>('delete', path, undefined, options)
 }
 
@@ -82,4 +82,10 @@ export async function putJsonWithOperation<T>(path: string, data: unknown, opera
   const response = await request<T>('put', path, data, { idempotencyKey: operationId })
   if (response.status !== 200) throw new ApiError(response.status, { code: 'INVALID_RESPONSE', message: '수정 성공 응답 상태를 확인해주세요.', errors: [] }, undefined)
   return { body: jsonBody(response), operationId: response.operationId }
+}
+
+export async function postJsonWithOperation<T>(path: string, data: unknown, operationId: string) {
+  const response = await request<T>('post', path, data, { idempotencyKey: operationId })
+  if(response.status!==201)throw new ApiError(response.status,{code:'INVALID_RESPONSE',message:'생성 응답 상태를 확인하지 못했습니다.',errors:[]})
+  return {body:jsonBody(response),operationId:response.operationId}
 }

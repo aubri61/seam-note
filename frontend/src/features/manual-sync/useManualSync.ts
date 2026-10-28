@@ -1,3 +1,4 @@
+import { withSyncLock } from './syncLock'
 import { useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import type { Note } from '@/lib/api/types'
@@ -7,12 +8,14 @@ import type { NoteUpdateOperation } from '@/features/outbox/outboxModel'
 import { noteKeys, workspaceKeys } from '@/lib/query/queryKeys'
 import { sendNoteSnapshot, syncOneNote } from './manualSync'
 import { outboxRepository } from '@/features/outbox/outboxRepository'
+import { creationStorage } from '@/features/outbox/creationStorage'
+import { syncLocalNote, manualOperations } from './creationSync'
 import { isManualSyncNote, manualSaveState } from './syncContract'
 
 export function useManualSync(noteId: string | null, session: DraftSession, entry: DraftEntry | undefined, available: boolean) {
   const running = useRef(false)
   const [state, setState] = useState({ noteId: '', busy: false, message: '', error: false, revision: -1, missing: false })
-  const [outbox, setOutbox] = useState<{ noteId: string | null; entry?: DraftEntry; busy: boolean; operations?: NoteUpdateOperation[]; error: boolean }>({ noteId: null, busy: false, error: false })
+  const [outbox, setOutbox] = useState<{ noteId: string | null; entry?: DraftEntry; busy: boolean; operations?: {status:NoteUpdateOperation['status']}[]; error: boolean }>({ noteId: null, busy: false, error: false })
   const client = useQueryClient()
   const context = useRef({ noteId, available })
   useEffect(() => { context.current = { noteId, available } }, [noteId, available])
@@ -21,7 +24,7 @@ export function useManualSync(noteId: string | null, session: DraftSession, entr
     let disposed = false, sequence = 0
     const read = () => {
       const request = ++sequence
-      void outboxRepository.listForNote(noteId!).then(operations => {
+      void manualOperations(noteId!).then(operations => {
         if (!disposed && request === sequence) setOutbox({ noteId, entry, busy: state.busy, operations, error: false })
       }).catch(() => {
         if (!disposed && request === sequence) setOutbox({ noteId, entry, busy: state.busy, error: true })
@@ -39,22 +42,31 @@ export function useManualSync(noteId: string | null, session: DraftSession, entr
     if (view.disabled || !noteId || running.current) return
     const id = noteId
     running.current = true; setState({ noteId: id, busy: true, message: '최신 로컬 저장을 확인하고 있습니다.', error: false, revision: -1, missing: false })
+    let creationUnconfirmed=false
     try {
-      const result = await syncOneNote(id, session, {
-        storage: outboxRepository, send: sendNoteSnapshot, locks: navigator.locks,
+      await withSyncLock(async () => {
+      const local=await creationStorage.local(id)
+      creationUnconfirmed=!!local&&!local.confirmed
+      const created = await syncLocalNote(id, session, () => context.current.noteId === id && context.current.available, {lockHeld:true})
+      creationUnconfirmed=false
+      const updated = await syncOneNote(id, session, {
+        lockHeld: true, storage: outboxRepository, send: sendNoteSnapshot, locks: navigator.locks,
         canSend: () => context.current.noteId === id && context.current.available,
       })
+      const result = updated.kind === 'unchanged' && created ? {kind:'synced' as const,note:created,hasNewerChanges:false} : updated
       if (result.kind === 'synced') {
         client.setQueryData<Note>(noteKeys.detail(id), current => current && current.version > result.note.version ? current : result.note)
         void client.invalidateQueries({ queryKey: workspaceKeys.tree() })
       }
       setState({ noteId: id, busy: false, error: false, missing: false, revision: session.getSnapshot()[id]?.revision ?? -1,
         message: result.kind === 'unchanged' ? '서버에 전송할 변경사항이 없습니다.' : `전송한 원고의 서버 저장과 로컬 확인이 완료됐습니다.${result.hasNewerChanges ? ' 새 입력은 아직 서버에 저장되지 않았습니다.' : ''}` })
+      })
     } catch (error) {
       let cause: unknown = error, notFound = false
       for (let depth = 0; cause instanceof Error && depth < 5; depth++, cause = cause.cause) {
-        if (cause instanceof ApiError && cause.status === 404) notFound = true
+        if (cause instanceof ApiError && cause.status === 404 && cause.code === 'NOTE_NOT_FOUND') notFound = true
       }
+      if(creationUnconfirmed)notFound=false
       if (notFound) {
         void client.invalidateQueries({ queryKey: workspaceKeys.tree() })
         void client.invalidateQueries({ queryKey: noteKeys.detail(id) })

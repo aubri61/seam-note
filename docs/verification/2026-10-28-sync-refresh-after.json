@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "mode": "after",
+  "detailGetsBefore": 1,
+  "detailGetsAfter": 4,
+  "editorUpdated": true,
+  "titleUpdated": true,
+  "dirtyPreserved": true,
+  "requests": "GET only for clean pull; mock 409 PUT for dirty regression",
+  "chrome": "156.0.8078.49"
+}

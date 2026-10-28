@@ -19,7 +19,7 @@ export function isManualSyncNote(noteId: string | null) {
 }
 
 export function manualSaveState(noteId: string | null, entry: import('@/features/local-drafts/draftSession').DraftEntry | undefined,
-  available: boolean, operations: readonly NoteUpdateOperation[] | undefined, storageError: boolean, busy: boolean) {
+  available: boolean, operations: readonly Pick<NoteUpdateOperation,'status'>[] | undefined, storageError: boolean, busy: boolean) {
   const result = (disabled: boolean, summary: string) => ({ disabled, summary, remaining: operations?.length })
   if (busy) return result(true, '서버 저장 중 · 추가 입력은 별도로 보존됩니다.')
   if (!isManualSyncNote(noteId) || !available) return result(true, '원고를 정상적으로 조회한 뒤 서버에 저장할 수 있습니다.')

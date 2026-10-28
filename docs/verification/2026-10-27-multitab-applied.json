@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-27",
+  "status": "applied",
+  "candidateManifest": "2026-10-27-multitab-candidate-manifest.json",
+  "filesMatchCandidate": true,
+  "nodeTests": {
+    "passed": 141,
+    "failed": 0
+  },
+  "build": "passed; 500kB chunk warning remains",
+  "lint": "passed",
+  "browserSuites": {
+    "localDraftStorage": "passed; real IndexedDB/two tabs/copy/download/beforeunload and recovery regression",
+    "manualSaveUx": "passed; mock APIs only"
+  },
+  "logs": {
+    "test": {
+      "path": "/private/tmp/seam-note-multitab-applied-test.log",
+      "sha256": "1d452696795f9a1dcc37d5f1cd8f4806108778199c6ee8d0993aea07a784fb5e"
+    },
+    "build": {
+      "path": "/private/tmp/seam-note-multitab-applied-build.log",
+      "sha256": "819d752d340c602e333b08a9e441e9277fe130ec8db7be7f1965a9fb9cd198c7"
+    },
+    "lint": {
+      "path": "/private/tmp/seam-note-multitab-applied-lint.log",
+      "sha256": "026d8e99d33c081b5f28175669af23066db75894bba579c284f1a85d0a3d5227"
+    },
+    "browser-local": {
+      "path": "/private/tmp/seam-note-multitab-applied-browser-local.log",
+      "sha256": "628c8083297c7cfb869c2285b1e6bf9ac63d9a6a0918a53cc4f93d1630ca8098"
+    },
+    "browser-manual": {
+      "path": "/private/tmp/seam-note-multitab-applied-browser-manual.log",
+      "sha256": "21d2f47d2dbae52858b118ceb8dd548cc39e9f69ec63e4b6e88ea77fd1abd4c7"
+    }
+  },
+  "dataProtection": "No requests to development DB; isolated mock browser contexts; no schema migration or DB cleanup",
+  "commitPush": "not performed"
+}

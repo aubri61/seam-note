@@ -1,0 +1,24 @@
+{
+  "results": [
+    {
+      "name": "desktop-menus-delete-selected-and-unselected-failure-preservation-sync-icon-effects-reduced-motion",
+      "passed": true
+    },
+    {
+      "name": "mobile-note-menu-confirm-cancel-no-navigation",
+      "passed": true
+    }
+  ],
+  "chrome": "156.0.8078.49",
+  "transport": "Synthetic GET/DELETE mocks only. No developer DB access.",
+  "sourceHashes": {
+    "frontend/src/app/AppHeader.tsx": "93820ed826bc52aeb2039b73628801597b40df52a3730b98bfa26259e6a9fd60",
+    "frontend/src/app/AppLayout.tsx": "35410d94f909f69973df44a59fd0a1e6bdb75d0e8abe02c98e53ae7d7f52b3a5",
+    "frontend/src/features/folders/FolderTree.tsx": "486c4ffd14f295ae01933f2306458746039cb59035fa633f53f75eca870b4ca4",
+    "frontend/src/features/folders/FolderMenu.tsx": "4a3e55a946b8d23d72d602764d22b00e5e8cca444d39fde2c51bc476eb6d411c",
+    "frontend/src/styles/GlobalStyles.tsx": "516e3e7aa4eceb77eece4131a2ae7de189e541ddbc257b44ca93dbf345f6bf86"
+  },
+  "unitTests": 169,
+  "buildTypeScript": "passed",
+  "lint": "passed"
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+  <!-- Existing Icon.tsx note path and the app's dark/ivory palette, inside maskable safe area. -->
+  <path fill="#262520" d="M0 0h96v96H0z"/>
+  <g transform="translate(18 18) scale(2.5)" fill="none" stroke="#FCFBF8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2M8 2h8v4H8zM8 11h8M8 15h5"/>
+  </g>
+</svg>

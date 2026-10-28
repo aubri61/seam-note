@@ -1,0 +1,84 @@
+{
+  "sourceHashes": {
+    "lineDiff.ts": "76e650c0567fded0f5f0bfb63e3c13de507af41bb83b456988bf36a63ba3c91f",
+    "diffWorker.ts": "2c138cfac0e0db7d3b2773328cd93dab4e8fcc315d529eebe359841a08d2473e",
+    "DiffView.tsx": "3e96453ba7bbd86ab628b365360f341d06bce170caf421db32ce6e0a15ae6c9c",
+    "ConflictDialog.tsx": "4ee21a3615490e5b44e8929bbac6a15b267868b88d3a230ee782645bd520e312"
+  },
+  "environment": {
+    "build": "production-preview",
+    "chrome": "156.0.8078.48",
+    "origin": "http://127.0.0.1:25177",
+    "viewport": "1440x1000; mobile390x844",
+    "cases": "1 sample per size; cold modal/Worker load; not a production latency SLA"
+  },
+  "results": [
+    {
+      "lines": 1000,
+      "mode": "single",
+      "characters": 36889,
+      "utf8Bytes": 59889,
+      "modalReadyMs": 934,
+      "workerMs": 0.5999999046325684,
+      "workerWallMs": 6.900000095367432,
+      "rows": 1000,
+      "coarse": false,
+      "domRows": 180,
+      "contentHash": "c1321e85bac41fe87fde67e2d453a3f4e344641c543a1f218763c91a82d4330e"
+    },
+    {
+      "lines": 10000,
+      "mode": "single",
+      "characters": 378889,
+      "utf8Bytes": 608889,
+      "modalReadyMs": 607,
+      "workerMs": 3.1000001430511475,
+      "workerWallMs": 13.700000047683716,
+      "rows": 10000,
+      "coarse": false,
+      "domRows": 180,
+      "contentHash": "af1b59f937e1b3e7689aa6b813dac48f7947a5d3974273b23b04c69146061dd6"
+    },
+    {
+      "lines": 50000,
+      "mode": "single",
+      "characters": 1938889,
+      "utf8Bytes": 3088889,
+      "modalReadyMs": 899,
+      "workerMs": 11.700000047683716,
+      "workerWallMs": 46.10000014305115,
+      "rows": 50000,
+      "coarse": false,
+      "domRows": 180,
+      "contentHash": "4d60e2ca96a5b00d37c59aaeff9feb76b844688ea523da41c5f302e532c00fc2"
+    },
+    {
+      "lines": 10000,
+      "mode": "all",
+      "characters": 378889,
+      "utf8Bytes": 608889,
+      "modalReadyMs": 568,
+      "workerMs": 2.799999952316284,
+      "workerWallMs": 19,
+      "rows": 10000,
+      "coarse": true,
+      "domRows": 180,
+      "contentHash": "af1b59f937e1b3e7689aa6b813dac48f7947a5d3974273b23b04c69146061dd6"
+    },
+    {
+      "lines": 1,
+      "mode": "long",
+      "characters": 200000,
+      "utf8Bytes": 550000,
+      "modalReadyMs": 1068,
+      "workerMs": 0.19999980926513672,
+      "workerWallMs": 5.900000095367432,
+      "rows": 1,
+      "coarse": false,
+      "domRows": 2,
+      "contentHash": "c25635f0550b505d7ccafccac99e3eacb391e0c7efa641f77dc8f906e73b22f8"
+    }
+  ],
+  "artifacts": "/var/folders/j0/4ncpc9m90tg_c7d24lc1kvnr0000gn/T/seam-diff-performance-vTluKN",
+  "method": "Worker duration uses performance.now inside worker; wall includes worker startup/serialization; modal includes IDB/API mock/lazy module/DOM and navigation to first change; actual virtual DOM row count<=180"
+}

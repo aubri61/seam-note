@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-28",
+  "head": "1bb199360d4d6756426d3290c5f8f3bef50d8b73",
+  "results": {
+    "frontendNode": 162,
+    "lint": "passed",
+    "buildTypeScript": "passed",
+    "backend": {
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "refreshCleanAndDirty": "passed; original missing-detail-GET reproduced before modification",
+    "actualChromeCrashConditions": 4,
+    "actualSigkillBoundaries": 5,
+    "workspaceProduction": 18,
+    "pwaProduction": 11,
+    "existingMockSuites": [
+      "noteDrafts",
+      "manualSaveUx"
+    ]
+  },
+  "sourceHashes": {
+    "frontend/src/app/AppHeader.tsx": "5aa9d068609b4f97c1d101c1a35beec0ff08c367fc9515dcbc37184abf14e7aa",
+    "frontend/src/app/AppLayout.tsx": "9014afd4bffc753b64b9110dc7ff564bb639d76c05f54199b3a780549ebcbef2",
+    "frontend/src/features/notes/NoteEditor.tsx": "e86cfbb3bd710c538b33b5d2ee2fa3b829397396b749f1add00f165a879649df",
+    "frontend/src/features/manual-sync/useWorkspaceSync.ts": "debe0b216f8a58a67021680e8a60307128aa1920e3d6be4a03bec4ff496e16ab"
+  },
+  "preservation": {
+    "acknowledgeUnchangedFromHead": true,
+    "dexieV1ThroughV4ConstructorUnchanged": true,
+    "backendChanged": false,
+    "developerDataUsed": false,
+    "committed": false,
+    "pushed": false
+  },
+  "limits": [
+    "Normal extra-input write already creates successor atomically. Missing-B cases explicitly injected only into synthetic data.",
+    "ACK/Outbox source not changed because actual crash/rollback tests passed.",
+    "Browser main-process SIGKILL is not a power-loss or storage-eviction guarantee.",
+    "Detailed GET refresh applies to active Note queries; inactive queries marked stale, not all manuscripts bulk downloaded."
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "origin": "http://127.0.0.1:62207",
+  "sourceHashes": {
+    "frontend/vite.config.ts": "774d3245b38f08a7724e8b6ae36d97d67749c5273a9290c76f259673965aba49",
+    "frontend/src/main.tsx": "bd2c1c24674270e5ea127763fbbaf0dd77d91aba7970ce3ede584d2ba541e762",
+    "frontend/src/app/AppLayout.tsx": "a9e2fe5eaa90d70fdcfcfbd42322a72a2eaf3e33633f8a1d7c3b44b2c4c333b9",
+    "frontend/src/features/folders/useFolders.ts": "55ff89346899b392630795fd3fe9990d2f7f3bd3c77542d0c0ec3f1f30883449",
+    "frontend/src/features/local-drafts/draftDatabase.ts": "a095d3ff8e6e6455cc2bdc060b9d1817639d05656f14d9b78e1ea1ba14c2124e",
+    "frontend/src/features/offline/workspaceCache.ts": "66eb23ff3ae6eee72eb455b9ac346b87883f835eb2129ea04a51935ba75d606c",
+    "frontend/src/features/pwa/PwaStatus.tsx": "4a23dc923f607a6d5295754a0f47be2ca4cbbc3e90b0db60ad7d080ec5b1ad3c"
+  },
+  "chrome": "156.0.8078.49",
+  "results": [
+    {
+      "name": "v2-through-v3-to-v4-preserves-drafts-outbox-and-sidebar-titles",
+      "passed": true
+    },
+    {
+      "name": "manifest-installability-and-production-precache",
+      "passed": true,
+      "installabilityErrors": []
+    },
+    {
+      "name": "offline-new-browser-process-direct-note-and-tree",
+      "passed": true,
+      "apiNavigationFallback": false
+    },
+    {
+      "name": "stale-local-list-does-not-hide-an-existing-url-draft",
+      "passed": true
+    },
+    {
+      "name": "offline-edit-refresh-and-unvisited-note-unavailable",
+      "passed": true,
+      "contentHash": "39bb163e4a71a951e6fca66d0f4f954d1aee697e1724e1752a1e8b5edd41b15f"
+    },
+    {
+      "name": "second-offline-cold-launch-keeps-input",
+      "passed": true
+    },
+    {
+      "name": "online-return-keeps-outbox-no-auto-put-then-manual-ack",
+      "passed": true,
+      "serverVersion": 1,
+      "putCount": 2
+    },
+    {
+      "name": "server-503-preserves-workspace-and-manuscript",
+      "passed": true
+    },
+    {
+      "name": "new-worker-waits-no-editor-reload",
+      "passed": true,
+      "contentHash": "100a9288328b21b86202feddc5809caa61a388dc2d7a7432b6d736a3d4afd690"
+    },
+    {
+      "name": "waiting-worker-activates-after-close-keeps-draft-outbox",
+      "passed": true,
+      "cacheEntries": 16,
+      "apiCacheEntries": 0
+    },
+    {
+      "name": "offline-two-tab-diff-worker-choice-preserves-losing-copy",
+      "passed": true,
+      "contentHash": "cb28e17942771827914866bc79a76a080ff9ff185d37a5b407e10d21de0e444a",
+      "backupHash": "d0c64bf504d5eee84132ba27e812e09d352d32fb29a2eb384681fa0a0611516a",
+      "apiPuts": 0
+    }
+  ],
+  "puts": [
+    {
+      "operationId": "2f54ca5f-f402-4a7e-b0e7-bd7fdfba7fae",
+      "expectedVersion": 0,
+      "contentHash": "39bb163e4a71a951e6fca66d0f4f954d1aee697e1724e1752a1e8b5edd41b15f"
+    },
+    {
+      "operationId": "e304e4dc-a1ce-4507-9507-cfae5f2ed2e7",
+      "expectedVersion": 0,
+      "contentHash": "902fc6b8bd01d459429ebdaf90796cc9aa49f4a52d5a8566501792fda661b742"
+    }
+  ],
+  "final": {
+    "contentHash": "cb28e17942771827914866bc79a76a080ff9ff185d37a5b407e10d21de0e444a",
+    "workspaceNotes": 3,
+    "outboxCount": 1
+  },
+  "scope": "Synthetic HTTP API; no development DB or existing profile used. Installability verified, no OS install dialog automated."
+}

@@ -1,0 +1,1185 @@
+{
+  "cases": [
+    {
+      "name": "folder-only-workspace-wide",
+      "passed": true,
+      "requests": [
+        {
+          "case": "folder-only-workspace-wide",
+          "method": "POST",
+          "path": "/api/folders",
+          "entityId": "b8f9f6c2-a63d-4e99-9354-cd4f2c8351ff",
+          "operationId": "7b4a4e59-941c-4273-b393-fa670b8098d0",
+          "status": 201,
+          "upstream": true
+        },
+        {
+          "case": "folder-only-workspace-wide",
+          "method": "POST",
+          "path": "/api/folders",
+          "entityId": "4162e55d-b903-40c7-a2ca-c8fd59f5e33f",
+          "operationId": "c788a16b-4700-481c-a94c-7a40549fa812",
+          "status": 201,
+          "upstream": true
+        }
+      ],
+      "acked": 2,
+      "remaining": 0
+    },
+    {
+      "name": "hierarchy-parent-child-note",
+      "passed": true,
+      "requests": [
+        {
+          "case": "hierarchy-parent-child-note",
+          "method": "POST",
+          "path": "/api/folders",
+          "entityId": "e7b77db4-8f0d-46c7-9ba0-97855e444c44",
+          "operationId": "9682e066-a2f1-47f7-878d-deea23f630cb",
+          "status": 201,
+          "upstream": true
+        },
+        {
+          "case": "hierarchy-parent-child-note",
+          "method": "POST",
+          "path": "/api/folders",
+          "entityId": "b8211e85-ad28-4fae-9114-1ad12fa2d045",
+          "operationId": "ca3ba0d5-7f88-43f2-bad0-2304a233bc1f",
+          "status": 201,
+          "upstream": true
+        },
+        {
+          "case": "hierarchy-parent-child-note",
+          "method": "POST",
+          "path": "/api/notes",
+          "entityId": "d621b3ec-461e-4dec-ba5d-c71e31770ec0",
+          "operationId": "b729ff14-0c67-49db-9afe-b646a12a2ced",
+          "titleHash": "4212626f4c9c3516723a5a85f8e1b7233838f62b35be0fba0bf69e5c5e5cd52e",
+          "contentHash": "2c1490c64ec2bbd3c4bd99aded79c85670970260e326daa68755f1a525beffd8",
+          "status": 201,
+          "upstream": true
+        }
+      ],
+      "acked": 3,
+      "ledgerRecords": 3
+    },
+    {
+      "name": "three-existing-notes-and-unselected-memory",
+      "passed": true,
+      "requests": [
+        {
+          "case": "three-existing-notes-and-unselected-memory",
+          "method": "PUT",
+          "path": "/api/notes/fa81740b-779c-44e6-931b-facb5148c028",
+          "entityId": "fa81740b-779c-44e6-931b-facb5148c028",
+          "operationId": "4ea1b355-c497-46e4-a8e3-b31238ec6ec7",
+          "expectedVersion": 0,
+          "titleHash": "f0ab1cee94b0051e4cf9f33374a47e9abae3202ce19c6590d28697fdd8a8c504",
+          "contentHash": "0dcc3f422cd35687b26ee1a72b6703b859bf791b81fe014f38434b2a19256b27",
+          "status": 200,
+          "upstream": true
+        },
+        {
+          "case": "three-existing-notes-and-unselected-memory",
+          "method": "PUT",
+          "path": "/api/notes/77e906fd-77bf-4476-a863-78123651f26f",
+          "entityId": "77e906fd-77bf-4476-a863-78123651f26f",
+          "operationId": "a9870a57-ffc7-4f99-8946-eba3ecc668b2",
+          "expectedVersion": 0,
+          "titleHash": "788af58d6b874a4b06049e8a6ca0244f8b346c32311f2236830a97801f5c2027",
+          "contentHash": "dd1bad245599ecb59592dce9b6436776fe90ba60a032a8735fd5741efe8f381c",
+          "status": 200,
+          "upstream": true
+        },
+        {
+          "case": "three-existing-notes-and-unselected-memory",
+          "method": "PUT",
+          "path": "/api/notes/a3b4da5c-c1dc-4c79-a9a1-3826a0155446",
+          "entityId": "a3b4da5c-c1dc-4c79-a9a1-3826a0155446",
+          "operationId": "f768830e-8f7e-4201-b74d-d6b921d586f6",
+          "expectedVersion": 0,
+          "titleHash": "44fb02999136019d4643244bf83b89923e4b4e249887818fcc65f715e60568f8",
+          "contentHash": "16313ceda2274b3c39ef85bdb1837cf4e38a2b198022ae2caf9d5f46e3605cd3",
+          "status": 200,
+          "upstream": true
+        }
+      ],
+      "acked": 3,
+      "finalVersions": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "mixed-create-and-update",
+      "passed": true,
+      "requests": [
+        {
+          "case": "mixed-create-and-update",
+          "method": "POST",
+          "path": "/api/folders",
+          "entityId": "a8097bd5-2bb5-4783-8044-67943ed354e5",
+          "operationId": "68b5cc14-3ab1-430c-ba30-e556d7915cf6",
+          "status": 201,
+          "upstream": true
+        },
+        {
+          "case": "mixed-create-and-update",
+          "method": "POST",
+          "path": "/api/notes",
+          "entityId": "8845f01b-01f2-4251-b364-33f3750c1c51",
+          "operationId": "5e6d05fa-ae23-4077-8194-d119081441ac",
+          "titleHash": "875efddb84f2a24915e08eee3c1f637c7a0d852e777e999980afe1f451ecde7f",
+          "contentHash": "ff2dcb792b0c665dd29d9e78f3b8f6ff7770c3dbc2eb76643fa065f34d6040a4",
+          "status": 201,
+          "upstream": true
+        },
+        {
+          "case": "mixed-create-and-update",
+          "method": "PUT",
+          "path": "/api/notes/0456d676-fdea-4e40-8f36-c49dd3a7ffde",
+          "entityId": "0456d676-fdea-4e40-8f36-c49dd3a7ffde",
+          "operationId": "c366f41c-92e0-4e47-b046-825b65ff047d",
+          "expectedVersion": 0,
+          "titleHash": "6ec8686b2eff87b987f009e6f92174bfc82d51dd293fd01b27125170cfc8e839",
+          "contentHash": "94bb4a69b5476dba7a722dc07a260ae350e6e01322d973cfa86285fa5523a0eb",
+          "status": 200,
+          "upstream": true
+        }
+      ],
+      "acked": 3
+    },
+    {
+      "name": "parent-success-child-failure-independent-success-and-retry",
+      "passed": true,
+      "requests": [
+        {
+          "case": "parent-success-child-failure-independent-success-and-retry",
+          "method": "POST",
+          "path": "/api/folders",
+          "entityId": "9029ca60-4348-4f9c-af52-8e76288a1012",
+          "operationId": "9dd7e91a-cf6d-465a-bc48-7b4cc3043f86",
+          "status": 201,
+          "upstream": true
+        },
+        {
+          "case": "parent-success-child-failure-independent-success-and-retry",
+          "method": "POST",
+          "path": "/api/folders",
+          "entityId": "da54c2f1-f7f5-41d1-910f-75020fb9218a",
+          "operationId": "61382351-afaf-4345-811b-bdc2e71520cb",
+          "upstream": false,
+          "status": 503
+        },
+        {
+          "case": "parent-success-child-failure-independent-success-and-retry",
+          "method": "POST",
+          "path": "/api/folders",
+          "entityId": "70c0051a-374d-463f-a101-3c70886944ae",
+          "operationId": "93e29e4e-dc37-4c5c-90a2-65d480730fc6",
+          "status": 201,
+          "upstream": true
+        },
+        {
+          "case": "parent-success-child-failure-independent-success-and-retry",
+          "method": "POST",
+          "path": "/api/folders",
+          "entityId": "da54c2f1-f7f5-41d1-910f-75020fb9218a",
+          "operationId": "61382351-afaf-4345-811b-bdc2e71520cb",
+          "status": 201,
+          "upstream": true
+        },
+        {
+          "case": "parent-success-child-failure-independent-success-and-retry",
+          "method": "POST",
+          "path": "/api/notes",
+          "entityId": "f3d1e25e-95e9-481b-80b9-5dfd04097f8a",
+          "operationId": "710e0e0f-3a34-4c50-aade-55f628ce9ac5",
+          "titleHash": "2a80963ad67526940fed55b70c64e00157aefc4e2796a7c819cf37d11bfed591",
+          "contentHash": "3dfbad8439eb3b2e401a58afb428dcf1e53bbef96d514526bd800e28ff15bf17",
+          "status": 201,
+          "upstream": true
+        }
+      ],
+      "firstAcked": 2,
+      "firstRemaining": 2,
+      "finalRemaining": 0
+    },
+    {
+      "name": "lost-POST-response-replays-same-key",
+      "passed": true,
+      "requests": [
+        {
+          "case": "lost-POST-response-replays-same-key",
+          "method": "POST",
+          "path": "/api/folders",
+          "entityId": "7db37e5f-c008-4c11-9a50-b6f036693b6e",
+          "operationId": "863609ef-564c-4e76-849b-b495b51071d4",
+          "status": 201,
+          "upstream": true,
+          "responseLost": true
+        },
+        {
+          "case": "lost-POST-response-replays-same-key",
+          "method": "POST",
+          "path": "/api/folders",
+          "entityId": "7db37e5f-c008-4c11-9a50-b6f036693b6e",
+          "operationId": "863609ef-564c-4e76-849b-b495b51071d4",
+          "status": 201,
+          "upstream": true
+        }
+      ],
+      "ledgerRecords": 1
+    },
+    {
+      "name": "lost-PUT-response-reload-replays-same-key",
+      "passed": true,
+      "requests": [
+        {
+          "case": "lost-PUT-response-reload-replays-same-key",
+          "method": "PUT",
+          "path": "/api/notes/9aaad175-7837-4d6e-bdaa-90d5068faa0a",
+          "entityId": "9aaad175-7837-4d6e-bdaa-90d5068faa0a",
+          "operationId": "a1ef5232-2d7b-4bc7-98aa-3978de2187fd",
+          "expectedVersion": 0,
+          "titleHash": "0eab0c614d5a5a84547363af06b9c6c18673c2c7a4cdfbf1ffe86cbaa5439c45",
+          "contentHash": "c1beda432bc2ea5356d3b5b2857111df8362ff88d5b6a9c93ab7aec835973d28",
+          "status": 200,
+          "upstream": true,
+          "responseLost": true
+        },
+        {
+          "case": "lost-PUT-response-reload-replays-same-key",
+          "method": "PUT",
+          "path": "/api/notes/9aaad175-7837-4d6e-bdaa-90d5068faa0a",
+          "entityId": "9aaad175-7837-4d6e-bdaa-90d5068faa0a",
+          "operationId": "a1ef5232-2d7b-4bc7-98aa-3978de2187fd",
+          "expectedVersion": 0,
+          "titleHash": "0eab0c614d5a5a84547363af06b9c6c18673c2c7a4cdfbf1ffe86cbaa5439c45",
+          "contentHash": "c1beda432bc2ea5356d3b5b2857111df8362ff88d5b6a9c93ab7aec835973d28",
+          "status": 200,
+          "upstream": true
+        }
+      ],
+      "ledgerRecords": 1,
+      "serverVersion": 1
+    },
+    {
+      "name": "two-profiles-version-conflict-independent-note-success",
+      "passed": true,
+      "requests": [
+        {
+          "case": "two-profiles-version-conflict-independent-note-success",
+          "method": "PUT",
+          "path": "/api/notes/3477e31f-6053-44cd-a0ac-5212f3670468",
+          "entityId": "3477e31f-6053-44cd-a0ac-5212f3670468",
+          "operationId": "60fe2bce-7807-4dc4-90a1-9e2b180f16ca",
+          "expectedVersion": 0,
+          "titleHash": "c896f4ae8d00e824a81aa04d3e50cab8169dba80ca65d6642058109b45aacc98",
+          "contentHash": "6d7b7cdc4605288f97393a95247c5fd2ee7b6d946dd4f0d48649f2b9266d7ce9",
+          "status": 200,
+          "upstream": true
+        },
+        {
+          "case": "two-profiles-version-conflict-independent-note-success",
+          "method": "PUT",
+          "path": "/api/notes/3477e31f-6053-44cd-a0ac-5212f3670468",
+          "entityId": "3477e31f-6053-44cd-a0ac-5212f3670468",
+          "operationId": "3b4578bc-e189-4f6e-ab14-9561dd4a1e4d",
+          "expectedVersion": 0,
+          "titleHash": "f404e06c68073fae1ea591b5d58eb414fd152aa89b0000c7d81ff76dbd276000",
+          "contentHash": "7970f2907ef61e12538d6057c1a487d57db89111c02ae2a85fc5cb97cd45af3a",
+          "status": 409,
+          "upstream": true
+        },
+        {
+          "case": "two-profiles-version-conflict-independent-note-success",
+          "method": "PUT",
+          "path": "/api/notes/e6369b32-94ad-488a-92f7-a56eb9b9a2c0",
+          "entityId": "e6369b32-94ad-488a-92f7-a56eb9b9a2c0",
+          "operationId": "4f81e44d-6f33-4647-8380-8b02027462cf",
+          "expectedVersion": 0,
+          "titleHash": "04155904ef82f0618c03a67330d625ec6830e18aa1367d691195fa3f83cfd3c9",
+          "contentHash": "9721e9a85d72419b8fffbc5db92c880a09f8f543f5174cea51fb2744e489b60c",
+          "status": 200,
+          "upstream": true
+        }
+      ],
+      "conflicts": 1,
+      "independentAcked": 1
+    },
+    {
+      "name": "other-profile-deletion-quarantines-without-recreate",
+      "passed": true,
+      "requests": [
+        {
+          "case": "other-profile-deletion-quarantines-without-recreate",
+          "method": "DELETE",
+          "path": "/api/notes/a57b4c65-bc59-4e93-a775-ed2d9948f6e5",
+          "entityId": "a57b4c65-bc59-4e93-a775-ed2d9948f6e5",
+          "status": 204,
+          "upstream": true
+        },
+        {
+          "case": "other-profile-deletion-quarantines-without-recreate",
+          "method": "PUT",
+          "path": "/api/notes/a57b4c65-bc59-4e93-a775-ed2d9948f6e5",
+          "entityId": "a57b4c65-bc59-4e93-a775-ed2d9948f6e5",
+          "operationId": "9e5262ce-3123-4c56-8e3f-90714768dbc6",
+          "expectedVersion": 0,
+          "titleHash": "ee23aab8c81480e3a138e1ed67f4842b0a773f03eeab6e46991bedf651a86b10",
+          "contentHash": "bdf55f676d235bb1e7d51ae5a9b90e038f093d74da45ffff5ca8f59b48bb6bad",
+          "status": 404,
+          "upstream": true
+        },
+        {
+          "case": "other-profile-deletion-quarantines-without-recreate",
+          "method": "PUT",
+          "path": "/api/notes/cbbaf9fb-eef7-48cf-a7fb-f62ea4d38cbc",
+          "entityId": "cbbaf9fb-eef7-48cf-a7fb-f62ea4d38cbc",
+          "operationId": "a80c7939-d384-44a9-9ff5-2af578010fae",
+          "expectedVersion": 0,
+          "titleHash": "1191c9d125633ea4c9646be4aaabf26f9471d1570189804142e6ad0d0334c3ca",
+          "contentHash": "af91992384eda6df25a30ee56d88474fa23eb177c3166dc5133452acb6a9173b",
+          "status": 200,
+          "upstream": true
+        }
+      ],
+      "review": 1,
+      "automaticRecreate": 0,
+      "repeatedMissingPUT": 0
+    },
+    {
+      "name": "persistent-500-502-stops-fan-out",
+      "passed": true,
+      "requests": [
+        {
+          "case": "persistent-500-502-stops-fan-out",
+          "method": "PUT",
+          "path": "/api/notes/569224a5-5afb-4aa0-a8c8-fbcaf4177301",
+          "entityId": "569224a5-5afb-4aa0-a8c8-fbcaf4177301",
+          "operationId": "4a7e29e1-2af8-4626-ab04-92cc6a685519",
+          "expectedVersion": 0,
+          "titleHash": "3098f27876eb8d519bf62bb1308570fb492bd3f4e67a10843cee3f58c0d2b8e4",
+          "contentHash": "6139eeb0b5260e7d3c959c778dfcef4ffd2339a3ca22e262989b0fc889277faa",
+          "upstream": false,
+          "status": 502
+        },
+        {
+          "case": "persistent-500-502-stops-fan-out",
+          "method": "PUT",
+          "path": "/api/notes/2b9bec3c-aedb-421c-873f-0c7baab54fc3",
+          "entityId": "2b9bec3c-aedb-421c-873f-0c7baab54fc3",
+          "operationId": "68812367-a1df-4a72-98a1-7c8b6578fcba",
+          "expectedVersion": 0,
+          "titleHash": "3b7684187535a3069a4a4f2c04ffc28e2ce4d8f5d80999a654315a64a92ead69",
+          "contentHash": "17ee2b51695ceaa9acb83559dbd3afe6fdc6f3afdc8895bc746d3bee8d58db9e",
+          "upstream": false,
+          "status": 502
+        },
+        {
+          "case": "persistent-500-502-stops-fan-out",
+          "method": "PUT",
+          "path": "/api/notes/569224a5-5afb-4aa0-a8c8-fbcaf4177301",
+          "entityId": "569224a5-5afb-4aa0-a8c8-fbcaf4177301",
+          "operationId": "4a7e29e1-2af8-4626-ab04-92cc6a685519",
+          "expectedVersion": 0,
+          "titleHash": "3098f27876eb8d519bf62bb1308570fb492bd3f4e67a10843cee3f58c0d2b8e4",
+          "contentHash": "6139eeb0b5260e7d3c959c778dfcef4ffd2339a3ca22e262989b0fc889277faa",
+          "status": 200,
+          "upstream": true
+        },
+        {
+          "case": "persistent-500-502-stops-fan-out",
+          "method": "PUT",
+          "path": "/api/notes/2b9bec3c-aedb-421c-873f-0c7baab54fc3",
+          "entityId": "2b9bec3c-aedb-421c-873f-0c7baab54fc3",
+          "operationId": "68812367-a1df-4a72-98a1-7c8b6578fcba",
+          "expectedVersion": 0,
+          "titleHash": "3b7684187535a3069a4a4f2c04ffc28e2ce4d8f5d80999a654315a64a92ead69",
+          "contentHash": "17ee2b51695ceaa9acb83559dbd3afe6fdc6f3afdc8895bc746d3bee8d58db9e",
+          "status": 200,
+          "upstream": true
+        },
+        {
+          "case": "persistent-500-502-stops-fan-out",
+          "method": "PUT",
+          "path": "/api/notes/812ed9fa-5784-4c0c-93a2-b77de7e880f3",
+          "entityId": "812ed9fa-5784-4c0c-93a2-b77de7e880f3",
+          "operationId": "83fbfd76-66b5-4030-98aa-34388b096be6",
+          "expectedVersion": 0,
+          "titleHash": "314660cfd4070b8398566df6a7c7abb9885f82bf8f1015f5eb9eaa95ad835286",
+          "contentHash": "544f2f5c683ff827fb0e4b87c3a276f5dcd71b776da750c4d557d1d4e0362688",
+          "status": 200,
+          "upstream": true
+        },
+        {
+          "case": "persistent-500-502-stops-fan-out",
+          "method": "PUT",
+          "path": "/api/notes/53e5feb9-4d42-4d13-b148-cee3567704d3",
+          "entityId": "53e5feb9-4d42-4d13-b148-cee3567704d3",
+          "operationId": "b53514b7-e27b-4155-801a-c1f5be64796e",
+          "expectedVersion": 0,
+          "titleHash": "41074603db14829b21fd8682dc5ce6e8bae5d7f2de0561f6b978717c2bf81a2e",
+          "contentHash": "c2fda4d2580bb9f021c90c3b2603f0be3a3063988e2125a662c4bf373e68f6b0",
+          "status": 200,
+          "upstream": true
+        }
+      ],
+      "initialAttempts": 2,
+      "preserved": 4,
+      "retryAcked": 4
+    },
+    {
+      "name": "timeout-keeps-original-operation",
+      "passed": true,
+      "requests": [
+        {
+          "case": "timeout-keeps-original-operation",
+          "method": "PUT",
+          "path": "/api/notes/cca83723-4ba7-4576-b6b3-725f676073f5",
+          "entityId": "cca83723-4ba7-4576-b6b3-725f676073f5",
+          "operationId": "4ffb07e8-785f-4f81-8e56-11a57811bb96",
+          "expectedVersion": 0,
+          "titleHash": "85926930580fae85cdb588e04c679bbe24008546be83025c8fa34673d01a020e",
+          "contentHash": "ff075d6f371c23d4c7c2fb811bbe890dfc362624e16821d0b05bf287e0100bbd",
+          "status": "timeout"
+        },
+        {
+          "case": "timeout-keeps-original-operation",
+          "method": "PUT",
+          "path": "/api/notes/cca83723-4ba7-4576-b6b3-725f676073f5",
+          "entityId": "cca83723-4ba7-4576-b6b3-725f676073f5",
+          "operationId": "4ffb07e8-785f-4f81-8e56-11a57811bb96",
+          "expectedVersion": 0,
+          "titleHash": "85926930580fae85cdb588e04c679bbe24008546be83025c8fa34673d01a020e",
+          "contentHash": "ff075d6f371c23d4c7c2fb811bbe890dfc362624e16821d0b05bf287e0100bbd",
+          "status": 200,
+          "upstream": true
+        }
+      ],
+      "sameKey": "4ffb07e8-785f-4f81-8e56-11a57811bb96",
+      "ledgerRecords": 1
+    },
+    {
+      "name": "ACK-rollback-and-manual-retry",
+      "passed": true,
+      "requests": [
+        {
+          "case": "ACK-rollback-and-manual-retry",
+          "method": "PUT",
+          "path": "/api/notes/f1b55ec4-a5ab-41e2-8a65-9cd67f992fef",
+          "entityId": "f1b55ec4-a5ab-41e2-8a65-9cd67f992fef",
+          "operationId": "476f83ea-e9a9-4bb0-b820-6048edd2e91f",
+          "expectedVersion": 0,
+          "titleHash": "1e89838be538ca957df0d78014e47a8f5ec9324e064728053ab65d2d299b3bbc",
+          "contentHash": "c1f777412ff8f5af849cd1706e0e87d3a36d1a9199064d32f1a9da5556fd804f",
+          "status": 200,
+          "upstream": true
+        },
+        {
+          "case": "ACK-rollback-and-manual-retry",
+          "method": "PUT",
+          "path": "/api/notes/f1b55ec4-a5ab-41e2-8a65-9cd67f992fef",
+          "entityId": "f1b55ec4-a5ab-41e2-8a65-9cd67f992fef",
+          "operationId": "476f83ea-e9a9-4bb0-b820-6048edd2e91f",
+          "expectedVersion": 0,
+          "titleHash": "1e89838be538ca957df0d78014e47a8f5ec9324e064728053ab65d2d299b3bbc",
+          "contentHash": "c1f777412ff8f5af849cd1706e0e87d3a36d1a9199064d32f1a9da5556fd804f",
+          "status": 200,
+          "upstream": true
+        }
+      ],
+      "ledgerRecords": 1,
+      "rollbackPreserved": true
+    },
+    {
+      "name": "two-tabs-and-individual-global-exclusion",
+      "passed": true,
+      "requests": [
+        {
+          "case": "two-tabs-and-individual-global-exclusion",
+          "method": "PUT",
+          "path": "/api/notes/6909e7aa-46d5-455d-a632-355b878f98df",
+          "entityId": "6909e7aa-46d5-455d-a632-355b878f98df",
+          "operationId": "525e69b4-fe8a-45f9-b438-07ca69ae7966",
+          "expectedVersion": 0,
+          "titleHash": "ef39d85a0e0ddf2116e84953d80ecf03007cb6aef2bc62fab5d887a36ac3ec66",
+          "contentHash": "14493f5f5470ed48c3f103d917ec52ae9005fa3913128031d0fac2a49ac3cc41",
+          "status": 200,
+          "upstream": true
+        }
+      ],
+      "actualPUTs": 1,
+      "competingSends": 0
+    },
+    {
+      "name": "extra-input-during-PUT-is-not-drained",
+      "passed": true,
+      "requests": [
+        {
+          "case": "extra-input-during-PUT-is-not-drained",
+          "method": "PUT",
+          "path": "/api/notes/24cfe461-876b-477e-b5e0-d488549a196e",
+          "entityId": "24cfe461-876b-477e-b5e0-d488549a196e",
+          "operationId": "fe71c756-974d-41f7-9a85-5253df0dc891",
+          "expectedVersion": 0,
+          "titleHash": "4b046738a14bfd7748f54e391576a3cd118c5e9863f45c2f323841130bf8c107",
+          "contentHash": "faf3347a878c107d1de16ee5a60c520f1597ce1ac8111ebda82531a1c5fbd929",
+          "status": 200,
+          "upstream": true
+        },
+        {
+          "case": "extra-input-during-PUT-is-not-drained",
+          "method": "PUT",
+          "path": "/api/notes/24cfe461-876b-477e-b5e0-d488549a196e",
+          "entityId": "24cfe461-876b-477e-b5e0-d488549a196e",
+          "operationId": "ebc32a38-a650-410a-9ee5-5b313494851d",
+          "expectedVersion": 1,
+          "titleHash": "4b046738a14bfd7748f54e391576a3cd118c5e9863f45c2f323841130bf8c107",
+          "contentHash": "3f9c8f0fdf661b68be12eadc2bcbd102bbb32e04044e89ce8c3b83238c26430d",
+          "status": 200,
+          "upstream": true
+        }
+      ],
+      "firstPassRequests": 1,
+      "firstRemaining": 1
+    },
+    {
+      "name": "CREATE-ACK-bounded-successor-and-new-input",
+      "passed": true,
+      "requests": [
+        {
+          "case": "CREATE-ACK-bounded-successor-and-new-input",
+          "method": "POST",
+          "path": "/api/folders",
+          "entityId": "ff457314-74f1-45d1-ab37-8346bb2c39d2",
+          "operationId": "05dc765f-ecfc-4b45-8303-e914d505b1f5",
+          "status": 201,
+          "upstream": true
+        },
+        {
+          "case": "CREATE-ACK-bounded-successor-and-new-input",
+          "method": "POST",
+          "path": "/api/notes",
+          "entityId": "c007e610-9ce4-4274-8129-4b3e904d4756",
+          "operationId": "2df1a725-59c9-43df-a204-e371e35fbb0b",
+          "titleHash": "4bd9be6a2655ceea3f0ef508e1c426d86f493bab1986fedb997038265634b749",
+          "contentHash": "9463f024fe12889962130624088a4ab0f53b4ff3ac157d6519c6e94bc13c3861",
+          "status": 201,
+          "upstream": true
+        },
+        {
+          "case": "CREATE-ACK-bounded-successor-and-new-input",
+          "method": "PUT",
+          "path": "/api/notes/c007e610-9ce4-4274-8129-4b3e904d4756",
+          "entityId": "c007e610-9ce4-4274-8129-4b3e904d4756",
+          "operationId": "135ba1c2-e48c-469d-8765-7f7280fba6bd",
+          "expectedVersion": 0,
+          "titleHash": "4bd9be6a2655ceea3f0ef508e1c426d86f493bab1986fedb997038265634b749",
+          "contentHash": "713b1fbda81e25b44536b77df68b83d99910c361fc1c7678c0d53a85fb20f17b",
+          "status": 200,
+          "upstream": true
+        }
+      ],
+      "notePOST": 1,
+      "notePUT": 1,
+      "remaining": 1
+    },
+    {
+      "name": "already-complete-click-and-read-failure",
+      "passed": true,
+      "requests": [],
+      "emptyRequests": 0,
+      "readFailureNoSend": true
+    },
+    {
+      "name": "local-write-failure-isolated-from-other-note",
+      "passed": true,
+      "requests": [
+        {
+          "case": "local-write-failure-isolated-from-other-note",
+          "method": "PUT",
+          "path": "/api/notes/ac126d86-6c70-4441-a28f-ca3b983bca9b",
+          "entityId": "ac126d86-6c70-4441-a28f-ca3b983bca9b",
+          "operationId": "aac94146-18ee-409e-9428-b0b4daaee170",
+          "expectedVersion": 0,
+          "titleHash": "2cb69570ffb7131c87a7ba518a208ee7bb97b58bbe5b891e79eea8c1de6f4140",
+          "contentHash": "6535f96bd152ec56b3ccde1f5e69881e5ffb2b54b14fab3c117a230fa0e251b2",
+          "status": 200,
+          "upstream": true
+        },
+        {
+          "case": "local-write-failure-isolated-from-other-note",
+          "method": "PUT",
+          "path": "/api/notes/c7666cf4-96f1-42f8-9c42-078734738be0",
+          "entityId": "c7666cf4-96f1-42f8-9c42-078734738be0",
+          "operationId": "9053ab66-4c40-44e8-8e4d-df506c511a83",
+          "expectedVersion": 0,
+          "titleHash": "793cfc38da992acfcad111368c990f4c93732f9ea6deb7cbd30a9f56a39e960b",
+          "contentHash": "a768e81be1d1495d3b62646c6c2e10d76ae7df84f36682dd221296c3396e32ee",
+          "status": 200,
+          "upstream": true
+        }
+      ],
+      "localFailurePreserved": true,
+      "independentAcked": 1
+    },
+    {
+      "name": "production-PWA-offline-restart-and-workspace-sync",
+      "passed": true,
+      "requests": [
+        {
+          "case": "production-PWA-offline-restart-and-workspace-sync",
+          "method": "POST",
+          "path": "/api/folders",
+          "entityId": "b8bf52b4-fd97-4652-8cd8-89e875d2211a",
+          "operationId": "85b1ee29-85c3-4ef0-9aa6-69a93756fe20",
+          "status": 201,
+          "upstream": true
+        },
+        {
+          "case": "production-PWA-offline-restart-and-workspace-sync",
+          "method": "POST",
+          "path": "/api/notes",
+          "entityId": "d1f11190-a3f5-43a5-a289-05b753b29fb3",
+          "operationId": "b04d6234-43f5-4a4c-88c3-4cdce697bd6e",
+          "titleHash": "edef344c8fe3a2358d6d874053d1a94e0048b3a87f9b29664376f06a2ebb7b3d",
+          "contentHash": "c90214f20bba21c3cbcd6f1cec490b47471e4d66d954d285ecdaa6c492f2b035",
+          "status": 201,
+          "upstream": true
+        }
+      ],
+      "offlineRestored": true,
+      "acked": 2,
+      "schema": 40
+    }
+  ],
+  "events": [
+    {
+      "case": "folder-only-workspace-wide",
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "b8f9f6c2-a63d-4e99-9354-cd4f2c8351ff",
+      "operationId": "7b4a4e59-941c-4273-b393-fa670b8098d0",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "folder-only-workspace-wide",
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "4162e55d-b903-40c7-a2ca-c8fd59f5e33f",
+      "operationId": "c788a16b-4700-481c-a94c-7a40549fa812",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "hierarchy-parent-child-note",
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "e7b77db4-8f0d-46c7-9ba0-97855e444c44",
+      "operationId": "9682e066-a2f1-47f7-878d-deea23f630cb",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "hierarchy-parent-child-note",
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "b8211e85-ad28-4fae-9114-1ad12fa2d045",
+      "operationId": "ca3ba0d5-7f88-43f2-bad0-2304a233bc1f",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "hierarchy-parent-child-note",
+      "method": "POST",
+      "path": "/api/notes",
+      "entityId": "d621b3ec-461e-4dec-ba5d-c71e31770ec0",
+      "operationId": "b729ff14-0c67-49db-9afe-b646a12a2ced",
+      "titleHash": "4212626f4c9c3516723a5a85f8e1b7233838f62b35be0fba0bf69e5c5e5cd52e",
+      "contentHash": "2c1490c64ec2bbd3c4bd99aded79c85670970260e326daa68755f1a525beffd8",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "three-existing-notes-and-unselected-memory",
+      "method": "PUT",
+      "path": "/api/notes/fa81740b-779c-44e6-931b-facb5148c028",
+      "entityId": "fa81740b-779c-44e6-931b-facb5148c028",
+      "operationId": "4ea1b355-c497-46e4-a8e3-b31238ec6ec7",
+      "expectedVersion": 0,
+      "titleHash": "f0ab1cee94b0051e4cf9f33374a47e9abae3202ce19c6590d28697fdd8a8c504",
+      "contentHash": "0dcc3f422cd35687b26ee1a72b6703b859bf791b81fe014f38434b2a19256b27",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "three-existing-notes-and-unselected-memory",
+      "method": "PUT",
+      "path": "/api/notes/77e906fd-77bf-4476-a863-78123651f26f",
+      "entityId": "77e906fd-77bf-4476-a863-78123651f26f",
+      "operationId": "a9870a57-ffc7-4f99-8946-eba3ecc668b2",
+      "expectedVersion": 0,
+      "titleHash": "788af58d6b874a4b06049e8a6ca0244f8b346c32311f2236830a97801f5c2027",
+      "contentHash": "dd1bad245599ecb59592dce9b6436776fe90ba60a032a8735fd5741efe8f381c",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "three-existing-notes-and-unselected-memory",
+      "method": "PUT",
+      "path": "/api/notes/a3b4da5c-c1dc-4c79-a9a1-3826a0155446",
+      "entityId": "a3b4da5c-c1dc-4c79-a9a1-3826a0155446",
+      "operationId": "f768830e-8f7e-4201-b74d-d6b921d586f6",
+      "expectedVersion": 0,
+      "titleHash": "44fb02999136019d4643244bf83b89923e4b4e249887818fcc65f715e60568f8",
+      "contentHash": "16313ceda2274b3c39ef85bdb1837cf4e38a2b198022ae2caf9d5f46e3605cd3",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "mixed-create-and-update",
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "a8097bd5-2bb5-4783-8044-67943ed354e5",
+      "operationId": "68b5cc14-3ab1-430c-ba30-e556d7915cf6",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "mixed-create-and-update",
+      "method": "POST",
+      "path": "/api/notes",
+      "entityId": "8845f01b-01f2-4251-b364-33f3750c1c51",
+      "operationId": "5e6d05fa-ae23-4077-8194-d119081441ac",
+      "titleHash": "875efddb84f2a24915e08eee3c1f637c7a0d852e777e999980afe1f451ecde7f",
+      "contentHash": "ff2dcb792b0c665dd29d9e78f3b8f6ff7770c3dbc2eb76643fa065f34d6040a4",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "mixed-create-and-update",
+      "method": "PUT",
+      "path": "/api/notes/0456d676-fdea-4e40-8f36-c49dd3a7ffde",
+      "entityId": "0456d676-fdea-4e40-8f36-c49dd3a7ffde",
+      "operationId": "c366f41c-92e0-4e47-b046-825b65ff047d",
+      "expectedVersion": 0,
+      "titleHash": "6ec8686b2eff87b987f009e6f92174bfc82d51dd293fd01b27125170cfc8e839",
+      "contentHash": "94bb4a69b5476dba7a722dc07a260ae350e6e01322d973cfa86285fa5523a0eb",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "parent-success-child-failure-independent-success-and-retry",
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "9029ca60-4348-4f9c-af52-8e76288a1012",
+      "operationId": "9dd7e91a-cf6d-465a-bc48-7b4cc3043f86",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "parent-success-child-failure-independent-success-and-retry",
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "da54c2f1-f7f5-41d1-910f-75020fb9218a",
+      "operationId": "61382351-afaf-4345-811b-bdc2e71520cb",
+      "upstream": false,
+      "status": 503
+    },
+    {
+      "case": "parent-success-child-failure-independent-success-and-retry",
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "70c0051a-374d-463f-a101-3c70886944ae",
+      "operationId": "93e29e4e-dc37-4c5c-90a2-65d480730fc6",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "parent-success-child-failure-independent-success-and-retry",
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "da54c2f1-f7f5-41d1-910f-75020fb9218a",
+      "operationId": "61382351-afaf-4345-811b-bdc2e71520cb",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "parent-success-child-failure-independent-success-and-retry",
+      "method": "POST",
+      "path": "/api/notes",
+      "entityId": "f3d1e25e-95e9-481b-80b9-5dfd04097f8a",
+      "operationId": "710e0e0f-3a34-4c50-aade-55f628ce9ac5",
+      "titleHash": "2a80963ad67526940fed55b70c64e00157aefc4e2796a7c819cf37d11bfed591",
+      "contentHash": "3dfbad8439eb3b2e401a58afb428dcf1e53bbef96d514526bd800e28ff15bf17",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "lost-POST-response-replays-same-key",
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "7db37e5f-c008-4c11-9a50-b6f036693b6e",
+      "operationId": "863609ef-564c-4e76-849b-b495b51071d4",
+      "status": 201,
+      "upstream": true,
+      "responseLost": true
+    },
+    {
+      "case": "lost-POST-response-replays-same-key",
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "7db37e5f-c008-4c11-9a50-b6f036693b6e",
+      "operationId": "863609ef-564c-4e76-849b-b495b51071d4",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "lost-PUT-response-reload-replays-same-key",
+      "method": "PUT",
+      "path": "/api/notes/9aaad175-7837-4d6e-bdaa-90d5068faa0a",
+      "entityId": "9aaad175-7837-4d6e-bdaa-90d5068faa0a",
+      "operationId": "a1ef5232-2d7b-4bc7-98aa-3978de2187fd",
+      "expectedVersion": 0,
+      "titleHash": "0eab0c614d5a5a84547363af06b9c6c18673c2c7a4cdfbf1ffe86cbaa5439c45",
+      "contentHash": "c1beda432bc2ea5356d3b5b2857111df8362ff88d5b6a9c93ab7aec835973d28",
+      "status": 200,
+      "upstream": true,
+      "responseLost": true
+    },
+    {
+      "case": "lost-PUT-response-reload-replays-same-key",
+      "method": "PUT",
+      "path": "/api/notes/9aaad175-7837-4d6e-bdaa-90d5068faa0a",
+      "entityId": "9aaad175-7837-4d6e-bdaa-90d5068faa0a",
+      "operationId": "a1ef5232-2d7b-4bc7-98aa-3978de2187fd",
+      "expectedVersion": 0,
+      "titleHash": "0eab0c614d5a5a84547363af06b9c6c18673c2c7a4cdfbf1ffe86cbaa5439c45",
+      "contentHash": "c1beda432bc2ea5356d3b5b2857111df8362ff88d5b6a9c93ab7aec835973d28",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "two-profiles-version-conflict-independent-note-success",
+      "method": "PUT",
+      "path": "/api/notes/3477e31f-6053-44cd-a0ac-5212f3670468",
+      "entityId": "3477e31f-6053-44cd-a0ac-5212f3670468",
+      "operationId": "60fe2bce-7807-4dc4-90a1-9e2b180f16ca",
+      "expectedVersion": 0,
+      "titleHash": "c896f4ae8d00e824a81aa04d3e50cab8169dba80ca65d6642058109b45aacc98",
+      "contentHash": "6d7b7cdc4605288f97393a95247c5fd2ee7b6d946dd4f0d48649f2b9266d7ce9",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "two-profiles-version-conflict-independent-note-success",
+      "method": "PUT",
+      "path": "/api/notes/3477e31f-6053-44cd-a0ac-5212f3670468",
+      "entityId": "3477e31f-6053-44cd-a0ac-5212f3670468",
+      "operationId": "3b4578bc-e189-4f6e-ab14-9561dd4a1e4d",
+      "expectedVersion": 0,
+      "titleHash": "f404e06c68073fae1ea591b5d58eb414fd152aa89b0000c7d81ff76dbd276000",
+      "contentHash": "7970f2907ef61e12538d6057c1a487d57db89111c02ae2a85fc5cb97cd45af3a",
+      "status": 409,
+      "upstream": true
+    },
+    {
+      "case": "two-profiles-version-conflict-independent-note-success",
+      "method": "PUT",
+      "path": "/api/notes/e6369b32-94ad-488a-92f7-a56eb9b9a2c0",
+      "entityId": "e6369b32-94ad-488a-92f7-a56eb9b9a2c0",
+      "operationId": "4f81e44d-6f33-4647-8380-8b02027462cf",
+      "expectedVersion": 0,
+      "titleHash": "04155904ef82f0618c03a67330d625ec6830e18aa1367d691195fa3f83cfd3c9",
+      "contentHash": "9721e9a85d72419b8fffbc5db92c880a09f8f543f5174cea51fb2744e489b60c",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "other-profile-deletion-quarantines-without-recreate",
+      "method": "DELETE",
+      "path": "/api/notes/a57b4c65-bc59-4e93-a775-ed2d9948f6e5",
+      "entityId": "a57b4c65-bc59-4e93-a775-ed2d9948f6e5",
+      "status": 204,
+      "upstream": true
+    },
+    {
+      "case": "other-profile-deletion-quarantines-without-recreate",
+      "method": "PUT",
+      "path": "/api/notes/a57b4c65-bc59-4e93-a775-ed2d9948f6e5",
+      "entityId": "a57b4c65-bc59-4e93-a775-ed2d9948f6e5",
+      "operationId": "9e5262ce-3123-4c56-8e3f-90714768dbc6",
+      "expectedVersion": 0,
+      "titleHash": "ee23aab8c81480e3a138e1ed67f4842b0a773f03eeab6e46991bedf651a86b10",
+      "contentHash": "bdf55f676d235bb1e7d51ae5a9b90e038f093d74da45ffff5ca8f59b48bb6bad",
+      "status": 404,
+      "upstream": true
+    },
+    {
+      "case": "other-profile-deletion-quarantines-without-recreate",
+      "method": "PUT",
+      "path": "/api/notes/cbbaf9fb-eef7-48cf-a7fb-f62ea4d38cbc",
+      "entityId": "cbbaf9fb-eef7-48cf-a7fb-f62ea4d38cbc",
+      "operationId": "a80c7939-d384-44a9-9ff5-2af578010fae",
+      "expectedVersion": 0,
+      "titleHash": "1191c9d125633ea4c9646be4aaabf26f9471d1570189804142e6ad0d0334c3ca",
+      "contentHash": "af91992384eda6df25a30ee56d88474fa23eb177c3166dc5133452acb6a9173b",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "persistent-500-502-stops-fan-out",
+      "method": "PUT",
+      "path": "/api/notes/569224a5-5afb-4aa0-a8c8-fbcaf4177301",
+      "entityId": "569224a5-5afb-4aa0-a8c8-fbcaf4177301",
+      "operationId": "4a7e29e1-2af8-4626-ab04-92cc6a685519",
+      "expectedVersion": 0,
+      "titleHash": "3098f27876eb8d519bf62bb1308570fb492bd3f4e67a10843cee3f58c0d2b8e4",
+      "contentHash": "6139eeb0b5260e7d3c959c778dfcef4ffd2339a3ca22e262989b0fc889277faa",
+      "upstream": false,
+      "status": 502
+    },
+    {
+      "case": "persistent-500-502-stops-fan-out",
+      "method": "PUT",
+      "path": "/api/notes/2b9bec3c-aedb-421c-873f-0c7baab54fc3",
+      "entityId": "2b9bec3c-aedb-421c-873f-0c7baab54fc3",
+      "operationId": "68812367-a1df-4a72-98a1-7c8b6578fcba",
+      "expectedVersion": 0,
+      "titleHash": "3b7684187535a3069a4a4f2c04ffc28e2ce4d8f5d80999a654315a64a92ead69",
+      "contentHash": "17ee2b51695ceaa9acb83559dbd3afe6fdc6f3afdc8895bc746d3bee8d58db9e",
+      "upstream": false,
+      "status": 502
+    },
+    {
+      "case": "persistent-500-502-stops-fan-out",
+      "method": "PUT",
+      "path": "/api/notes/569224a5-5afb-4aa0-a8c8-fbcaf4177301",
+      "entityId": "569224a5-5afb-4aa0-a8c8-fbcaf4177301",
+      "operationId": "4a7e29e1-2af8-4626-ab04-92cc6a685519",
+      "expectedVersion": 0,
+      "titleHash": "3098f27876eb8d519bf62bb1308570fb492bd3f4e67a10843cee3f58c0d2b8e4",
+      "contentHash": "6139eeb0b5260e7d3c959c778dfcef4ffd2339a3ca22e262989b0fc889277faa",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "persistent-500-502-stops-fan-out",
+      "method": "PUT",
+      "path": "/api/notes/2b9bec3c-aedb-421c-873f-0c7baab54fc3",
+      "entityId": "2b9bec3c-aedb-421c-873f-0c7baab54fc3",
+      "operationId": "68812367-a1df-4a72-98a1-7c8b6578fcba",
+      "expectedVersion": 0,
+      "titleHash": "3b7684187535a3069a4a4f2c04ffc28e2ce4d8f5d80999a654315a64a92ead69",
+      "contentHash": "17ee2b51695ceaa9acb83559dbd3afe6fdc6f3afdc8895bc746d3bee8d58db9e",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "persistent-500-502-stops-fan-out",
+      "method": "PUT",
+      "path": "/api/notes/812ed9fa-5784-4c0c-93a2-b77de7e880f3",
+      "entityId": "812ed9fa-5784-4c0c-93a2-b77de7e880f3",
+      "operationId": "83fbfd76-66b5-4030-98aa-34388b096be6",
+      "expectedVersion": 0,
+      "titleHash": "314660cfd4070b8398566df6a7c7abb9885f82bf8f1015f5eb9eaa95ad835286",
+      "contentHash": "544f2f5c683ff827fb0e4b87c3a276f5dcd71b776da750c4d557d1d4e0362688",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "persistent-500-502-stops-fan-out",
+      "method": "PUT",
+      "path": "/api/notes/53e5feb9-4d42-4d13-b148-cee3567704d3",
+      "entityId": "53e5feb9-4d42-4d13-b148-cee3567704d3",
+      "operationId": "b53514b7-e27b-4155-801a-c1f5be64796e",
+      "expectedVersion": 0,
+      "titleHash": "41074603db14829b21fd8682dc5ce6e8bae5d7f2de0561f6b978717c2bf81a2e",
+      "contentHash": "c2fda4d2580bb9f021c90c3b2603f0be3a3063988e2125a662c4bf373e68f6b0",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "timeout-keeps-original-operation",
+      "method": "PUT",
+      "path": "/api/notes/cca83723-4ba7-4576-b6b3-725f676073f5",
+      "entityId": "cca83723-4ba7-4576-b6b3-725f676073f5",
+      "operationId": "4ffb07e8-785f-4f81-8e56-11a57811bb96",
+      "expectedVersion": 0,
+      "titleHash": "85926930580fae85cdb588e04c679bbe24008546be83025c8fa34673d01a020e",
+      "contentHash": "ff075d6f371c23d4c7c2fb811bbe890dfc362624e16821d0b05bf287e0100bbd",
+      "status": "timeout"
+    },
+    {
+      "case": "timeout-keeps-original-operation",
+      "method": "PUT",
+      "path": "/api/notes/cca83723-4ba7-4576-b6b3-725f676073f5",
+      "entityId": "cca83723-4ba7-4576-b6b3-725f676073f5",
+      "operationId": "4ffb07e8-785f-4f81-8e56-11a57811bb96",
+      "expectedVersion": 0,
+      "titleHash": "85926930580fae85cdb588e04c679bbe24008546be83025c8fa34673d01a020e",
+      "contentHash": "ff075d6f371c23d4c7c2fb811bbe890dfc362624e16821d0b05bf287e0100bbd",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "ACK-rollback-and-manual-retry",
+      "method": "PUT",
+      "path": "/api/notes/f1b55ec4-a5ab-41e2-8a65-9cd67f992fef",
+      "entityId": "f1b55ec4-a5ab-41e2-8a65-9cd67f992fef",
+      "operationId": "476f83ea-e9a9-4bb0-b820-6048edd2e91f",
+      "expectedVersion": 0,
+      "titleHash": "1e89838be538ca957df0d78014e47a8f5ec9324e064728053ab65d2d299b3bbc",
+      "contentHash": "c1f777412ff8f5af849cd1706e0e87d3a36d1a9199064d32f1a9da5556fd804f",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "ACK-rollback-and-manual-retry",
+      "method": "PUT",
+      "path": "/api/notes/f1b55ec4-a5ab-41e2-8a65-9cd67f992fef",
+      "entityId": "f1b55ec4-a5ab-41e2-8a65-9cd67f992fef",
+      "operationId": "476f83ea-e9a9-4bb0-b820-6048edd2e91f",
+      "expectedVersion": 0,
+      "titleHash": "1e89838be538ca957df0d78014e47a8f5ec9324e064728053ab65d2d299b3bbc",
+      "contentHash": "c1f777412ff8f5af849cd1706e0e87d3a36d1a9199064d32f1a9da5556fd804f",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "two-tabs-and-individual-global-exclusion",
+      "method": "PUT",
+      "path": "/api/notes/6909e7aa-46d5-455d-a632-355b878f98df",
+      "entityId": "6909e7aa-46d5-455d-a632-355b878f98df",
+      "operationId": "525e69b4-fe8a-45f9-b438-07ca69ae7966",
+      "expectedVersion": 0,
+      "titleHash": "ef39d85a0e0ddf2116e84953d80ecf03007cb6aef2bc62fab5d887a36ac3ec66",
+      "contentHash": "14493f5f5470ed48c3f103d917ec52ae9005fa3913128031d0fac2a49ac3cc41",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "extra-input-during-PUT-is-not-drained",
+      "method": "PUT",
+      "path": "/api/notes/24cfe461-876b-477e-b5e0-d488549a196e",
+      "entityId": "24cfe461-876b-477e-b5e0-d488549a196e",
+      "operationId": "fe71c756-974d-41f7-9a85-5253df0dc891",
+      "expectedVersion": 0,
+      "titleHash": "4b046738a14bfd7748f54e391576a3cd118c5e9863f45c2f323841130bf8c107",
+      "contentHash": "faf3347a878c107d1de16ee5a60c520f1597ce1ac8111ebda82531a1c5fbd929",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "extra-input-during-PUT-is-not-drained",
+      "method": "PUT",
+      "path": "/api/notes/24cfe461-876b-477e-b5e0-d488549a196e",
+      "entityId": "24cfe461-876b-477e-b5e0-d488549a196e",
+      "operationId": "ebc32a38-a650-410a-9ee5-5b313494851d",
+      "expectedVersion": 1,
+      "titleHash": "4b046738a14bfd7748f54e391576a3cd118c5e9863f45c2f323841130bf8c107",
+      "contentHash": "3f9c8f0fdf661b68be12eadc2bcbd102bbb32e04044e89ce8c3b83238c26430d",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "CREATE-ACK-bounded-successor-and-new-input",
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "ff457314-74f1-45d1-ab37-8346bb2c39d2",
+      "operationId": "05dc765f-ecfc-4b45-8303-e914d505b1f5",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "CREATE-ACK-bounded-successor-and-new-input",
+      "method": "POST",
+      "path": "/api/notes",
+      "entityId": "c007e610-9ce4-4274-8129-4b3e904d4756",
+      "operationId": "2df1a725-59c9-43df-a204-e371e35fbb0b",
+      "titleHash": "4bd9be6a2655ceea3f0ef508e1c426d86f493bab1986fedb997038265634b749",
+      "contentHash": "9463f024fe12889962130624088a4ab0f53b4ff3ac157d6519c6e94bc13c3861",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "CREATE-ACK-bounded-successor-and-new-input",
+      "method": "PUT",
+      "path": "/api/notes/c007e610-9ce4-4274-8129-4b3e904d4756",
+      "entityId": "c007e610-9ce4-4274-8129-4b3e904d4756",
+      "operationId": "135ba1c2-e48c-469d-8765-7f7280fba6bd",
+      "expectedVersion": 0,
+      "titleHash": "4bd9be6a2655ceea3f0ef508e1c426d86f493bab1986fedb997038265634b749",
+      "contentHash": "713b1fbda81e25b44536b77df68b83d99910c361fc1c7678c0d53a85fb20f17b",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "local-write-failure-isolated-from-other-note",
+      "method": "PUT",
+      "path": "/api/notes/ac126d86-6c70-4441-a28f-ca3b983bca9b",
+      "entityId": "ac126d86-6c70-4441-a28f-ca3b983bca9b",
+      "operationId": "aac94146-18ee-409e-9428-b0b4daaee170",
+      "expectedVersion": 0,
+      "titleHash": "2cb69570ffb7131c87a7ba518a208ee7bb97b58bbe5b891e79eea8c1de6f4140",
+      "contentHash": "6535f96bd152ec56b3ccde1f5e69881e5ffb2b54b14fab3c117a230fa0e251b2",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "local-write-failure-isolated-from-other-note",
+      "method": "PUT",
+      "path": "/api/notes/c7666cf4-96f1-42f8-9c42-078734738be0",
+      "entityId": "c7666cf4-96f1-42f8-9c42-078734738be0",
+      "operationId": "9053ab66-4c40-44e8-8e4d-df506c511a83",
+      "expectedVersion": 0,
+      "titleHash": "793cfc38da992acfcad111368c990f4c93732f9ea6deb7cbd30a9f56a39e960b",
+      "contentHash": "a768e81be1d1495d3b62646c6c2e10d76ae7df84f36682dd221296c3396e32ee",
+      "status": 200,
+      "upstream": true
+    },
+    {
+      "case": "production-PWA-offline-restart-and-workspace-sync",
+      "method": "POST",
+      "path": "/api/folders",
+      "entityId": "b8bf52b4-fd97-4652-8cd8-89e875d2211a",
+      "operationId": "85b1ee29-85c3-4ef0-9aa6-69a93756fe20",
+      "status": 201,
+      "upstream": true
+    },
+    {
+      "case": "production-PWA-offline-restart-and-workspace-sync",
+      "method": "POST",
+      "path": "/api/notes",
+      "entityId": "d1f11190-a3f5-43a5-a289-05b753b29fb3",
+      "operationId": "b04d6234-43f5-4a4c-88c3-4cdce697bd6e",
+      "titleHash": "edef344c8fe3a2358d6d874053d1a94e0048b3a87f9b29664376f06a2ebb7b3d",
+      "contentHash": "c90214f20bba21c3cbcd6f1cec490b47471e4d66d954d285ecdaa6c492f2b035",
+      "status": 201,
+      "upstream": true
+    }
+  ],
+  "productionOrigin": "http://127.0.0.1:61156",
+  "artifacts": "/var/folders/j0/4ncpc9m90tg_c7d24lc1kvnr0000gn/T/seam-workspace-sync-Gx5ISy",
+  "environment": {
+    "postgres": "14.20 (Homebrew)",
+    "dbName": "seam_note_manual_lab",
+    "dbPort": 25442,
+    "apiPort": "18766"
+  },
+  "postgres": {
+    "creationLedger": 33,
+    "updateLedger": 39
+  },
+  "sourceHashes": {
+    "frontend/src/features/manual-sync/SyncCoordinator.ts": "58ef73be4a65df55204e428c7917ea306c06ed3d9d0ca97f943899b61f896869",
+    "frontend/src/features/manual-sync/creationSync.ts": "0a7a70de63dea5da996da192231e7ef9c4c2188c315e170126f0cffedb612d5b",
+    "frontend/src/features/manual-sync/manualSync.ts": "907ea1eb745a4e77f085a5c237ec1d77a25811d0862b082f6195801ff1790e1a",
+    "frontend/src/features/local-drafts/draftDatabase.ts": "8b7e3ba4dff68aeb2cef9f92b8a6120a3560a43217bf198593714a703db7fee1",
+    "frontend/src/features/local-drafts/draftSession.ts": "fe7a8fb0df718aa268c5c66d308628abe9d9456029ec12024664ffd7763f1203"
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "results": [
+    {
+      "name": "online-folder-note-immediate-POST-ACK-no-auto-PUT",
+      "passed": true
+    },
+    {
+      "name": "offline-hierarchy-PWA-restart-two-tabs-reconnect-parent-order",
+      "passed": true,
+      "postAttempts": 3
+    },
+    {
+      "name": "lost-POST-response-bounded-retry-same-key-ledger-one",
+      "passed": true
+    },
+    {
+      "name": "failed-parent-preserves-child-independent-root-and-reconnect",
+      "passed": true
+    }
+  ],
+  "events": [
+    {
+      "entityId": "afd2e599-91c8-4e16-9fca-30d840b9d231",
+      "key": "cad78d97-40e9-45be-8dd6-ab20915c594a",
+      "path": "/api/folders",
+      "payloadHash": "e2c9de30118e92cc05bb29603571a33b2eb4209a3c458c7caaa118dc17d77c41",
+      "name": "auto online root",
+      "status": 201
+    },
+    {
+      "entityId": "f519c7a6-3b0f-47e7-8a38-2716334da169",
+      "key": "f69ac2ae-2844-4e03-acdf-0f360775ba6b",
+      "path": "/api/notes",
+      "payloadHash": "f7ebcd7ccadad1ebbd48d27c7aea3a5a2c37710ab430d0886c26c60026ae6b9f",
+      "status": 201
+    },
+    {
+      "entityId": "6b19c72b-1d34-4abf-8df8-4bb6853b559c",
+      "key": "d9ccf273-c1f5-471a-842a-014fba8fc595",
+      "path": "/api/folders",
+      "payloadHash": "8634eba5b30e4a97ca5115444dadade734560692d0a40c3825d728abe7d1f182",
+      "name": "offline A",
+      "status": 201
+    },
+    {
+      "entityId": "1b9d78a1-37ef-4825-b53f-f8df722e255f",
+      "key": "855e465c-87ff-4d86-904a-2056e86c23cf",
+      "path": "/api/folders",
+      "payloadHash": "f4cea34e1195007b54b604eddcdbaf6af89f6de46d45528c4dd1406c0ae7efbb",
+      "name": "offline B",
+      "status": 201
+    },
+    {
+      "entityId": "1e48f93c-8b74-43a7-ba25-eea9cd092d35",
+      "key": "ccd54cf0-3be0-4ffa-9b25-14d14f56d6b9",
+      "path": "/api/notes",
+      "payloadHash": "9ef5b25007240062caf119d1e0027b5f8677d65a5d8e2e73af07dd89b14dfa8f",
+      "status": 201
+    },
+    {
+      "entityId": "6b727a21-50d7-475f-ab2d-206ab67703d3",
+      "key": "c3f93e99-b34b-44a0-8b66-c6066b9189b8",
+      "path": "/api/folders",
+      "payloadHash": "c40a7e69d757c77e52427740cd9d8e1a74ea0751c206fc481b801c87740bf8b5",
+      "name": "lost response root",
+      "status": 201,
+      "responseLost": true
+    },
+    {
+      "entityId": "6b727a21-50d7-475f-ab2d-206ab67703d3",
+      "key": "c3f93e99-b34b-44a0-8b66-c6066b9189b8",
+      "path": "/api/folders",
+      "payloadHash": "c40a7e69d757c77e52427740cd9d8e1a74ea0751c206fc481b801c87740bf8b5",
+      "name": "lost response root",
+      "status": 201
+    },
+    {
+      "entityId": "1c6e842b-60e4-4f65-98d0-8c7a7a38ae44",
+      "key": "e4277b98-3034-4086-9776-ae092676e80b",
+      "path": "/api/folders",
+      "payloadHash": "b7b0cd0c4c64197357fd34e1138b618bee1c84cb57bcbcddd1746b48f6d461aa",
+      "name": "blocked parent",
+      "status": 503
+    },
+    {
+      "entityId": "ad71b580-f837-4c1c-b665-190c3cab9e45",
+      "key": "290e07c2-49dc-4661-8a05-97bc954667f2",
+      "path": "/api/folders",
+      "payloadHash": "ad84525d91b5d5fd1a6dbd08942e17fd0cd8965657621e0166a52f6dc067078a",
+      "name": "independent root",
+      "status": 201
+    },
+    {
+      "entityId": "1c6e842b-60e4-4f65-98d0-8c7a7a38ae44",
+      "key": "e4277b98-3034-4086-9776-ae092676e80b",
+      "path": "/api/folders",
+      "payloadHash": "b7b0cd0c4c64197357fd34e1138b618bee1c84cb57bcbcddd1746b48f6d461aa",
+      "name": "blocked parent",
+      "status": 201
+    },
+    {
+      "entityId": "3fdee129-d73a-49ad-acc5-43d0ab251cc8",
+      "key": "691fb584-9193-4df4-a991-7265072c2c88",
+      "path": "/api/folders",
+      "payloadHash": "c738776271b86e363209da5671e78546cdfc2d78d0519f87a45a635f0e62507f",
+      "name": "blocked child",
+      "status": 201
+    }
+  ],
+  "environment": {
+    "origin": "http://127.0.0.1:25177",
+    "api": "http://127.0.0.1:18766",
+    "db": "seam_note_manual_lab",
+    "chrome": "actual Chrome channel",
+    "profiles": "/var/folders/j0/4ncpc9m90tg_c7d24lc1kvnr0000gn/T/seam-auto-creation-rS2KFY"
+  },
+  "note": "POST-only automatic creation. Existing NOTE_UPDATE explicitly remained queued. Synthetic data only.",
+  "sourceHashes": {
+    "frontend/src/features/manual-sync/autoCreationSync.ts": "3900ab7c99ed2d0dcc15c69aa9a0d4ad6ac5b58fb79196245a2c743819bc68f9",
+    "frontend/src/features/manual-sync/useAutoCreationSync.ts": "f9154589f3995d7adbf8573c27b2a244b4070d5be4e74b51bcf63dd90435711b",
+    "frontend/src/features/outbox/creationStorage.ts": "3f1afed4fa0a0d3466ce830356e6d3cb573e82b5d25a8bcf547bbcf74522b491",
+    "frontend/src/features/local-drafts/draftDatabase.ts": "0c8b507375a59576db9845ee3b62fc51e0d136c8977f8268a5ad483c393c5d44",
+    "frontend/src/app/AppLayout.tsx": "8dc33e7fc1c5403917b691e718ef24d6e5a212ae88de012fed281ec3b607da52"
+  },
+  "baselineCommit": "14d6759a53ea198d227c9383a675939a9b8999f3",
+  "unitTests": 169,
+  "lint": "passed",
+  "buildTypeScript": "passed"
+}

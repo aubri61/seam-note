@@ -4,6 +4,7 @@ import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
 import { WorkspacePicker } from '@/features/workspaces/WorkspacePicker'
 import { Eyebrow, IconButton } from '@/components/primitives'
+import type { FolderAction } from '@/features/folders/FolderMenu'
 import { FolderTree } from '@/features/folders/FolderTree'
 import type { useFolders } from '@/features/folders/useFolders'
 
@@ -57,11 +58,11 @@ const Search = styled.label(({ theme }) => ({
   gap: theme.spacing.sm,
   padding: `${theme.spacing.sm} ${theme.spacing.md}`,
   marginBottom: theme.spacing.lg,
-  border: '1px solid transparent',
+  border: 0,
   borderRadius: theme.radii.pill,
   transition: `border-color ${theme.motion.duration[100]} ${theme.motion.easing.standard}, background ${theme.motion.duration[100]} ${theme.motion.easing.standard}`,
-  '&:hover, &:focus-within': { borderColor: theme.colors.border, background: theme.colors.surface },
-  '&:focus-within': { outline: `2px solid ${theme.colors.mutedText}`, outlineOffset: theme.spacing.xxs },
+  '&:hover, &:focus-within': { background: theme.colors.surface },
+  '&:focus-within': { outline: 'none' },
   color: theme.colors.mutedText,
   input: {
     width: '100%',
@@ -112,12 +113,15 @@ const Footnote = styled.p(({ theme }) => ({
   color: theme.colors.mutedText,
 }))
 
-export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate, creationFeedback }: {
+export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate, onFolderAction, onDeleteNote, canDeleteNote, creationFeedback }: {
   onClose: () => void
   folders: ReturnType<typeof useFolders>
   draftTitles: Readonly<Partial<Record<string, string>>>
   onSelectNote: (id: string) => void
-  onCreate: (kind: 'folder' | 'document') => void
+  onCreate: (kind: 'folder' | 'root-folder' | 'document') => void
+  onFolderAction: (id: string, action: FolderAction) => void
+  onDeleteNote:(id:string)=>void
+  canDeleteNote:(id:string)=>boolean
   creationFeedback?: ReactNode
 }) {
   const createRef = useRef<HTMLDetailsElement>(null)
@@ -150,8 +154,8 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
             onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus() } }}>
             <summary aria-label="폴더 또는 문서 추가"><Icon name="plus" size={17} /></summary>
             <div aria-label="추가할 항목">
-              <button type="button" disabled={folders.busy || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('folder') }}><Icon name="folder" size={17} />새 폴더</button>
-              <button type="button" disabled={folders.busy || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('document') }}><Icon name="note" size={17} />새 문서</button>
+              <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('folder') }}><Icon name="folder" size={17} />새 폴더</button>
+              <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('document') }}><Icon name="note" size={17} />새 문서</button>
             </div>
           </CreatePicker>
         </FolderHeading>
@@ -162,9 +166,10 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
           <button type="button" onClick={() => void folders.workspace.refetch()}>다시 시도</button>
         </div>}
         {folders.workspace.data && <FolderTree
-          tree={folders.tree} draftTitles={draftTitles} selectedNoteId={folders.selectedNoteId}
-          editingFolderId={folders.editingFolderId} onFolderName={folders.renameCreatedFolder}
-          onCancelFolderName={folders.cancelFolderName} namingBusy={folders.busy} namingError={folders.renameFolderMutation.error?.message}
+          actionsBusy={folders.busy || !!folders.pendingFolder} onFolderAction={onFolderAction} onDeleteNote={onDeleteNote} canDeleteNote={canDeleteNote}
+          tree={folders.tree} localIds={folders.localIds} draftTitles={draftTitles} selectedNoteId={folders.selectedNoteId}
+          creatingFolderId={folders.pendingFolder?.id ?? null} editingFolderId={folders.editingFolderId} onFolderName={folders.renameCreatedFolder}
+          onCancelFolderName={folders.cancelFolderName} namingBusy={folders.busy} namingError={(folders.pendingFolder ? folders.createFolderMutation.error : folders.renameFolderMutation.error)?.message}
           selectedFolderId={folders.selectedFolderId} onFolderSelect={folders.selectFolder} search={folders.search}
           openFolders={folders.openFolders} onFolderOpen={folders.setFolderOpen} onSelect={onSelectNote}
         />}

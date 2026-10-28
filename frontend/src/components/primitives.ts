@@ -11,7 +11,7 @@ export const IconButton = styled.button(({ theme }) => ({
   background: 'transparent',
   color: theme.colors.mutedText,
   transition: `background ${theme.motion.duration[100]} ${theme.motion.easing.standard}`,
-  '&:hover': {
+  '&:not(:disabled):hover': {
     background: theme.colors.selected,
   },
 }))

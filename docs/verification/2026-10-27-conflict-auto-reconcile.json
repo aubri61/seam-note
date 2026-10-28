@@ -1,0 +1,633 @@
+{
+  "mode": "current-project-regression",
+  "results": [
+    {
+      "name": "ACK-only-identical-body-followed",
+      "noteId": "a5ae0e4d-ceb9-4e90-8466-1c03829e13e8",
+      "passed": true,
+      "before": {
+        "memory": {
+          "phase": "saved",
+          "revision": 2,
+          "savedRevision": 2,
+          "error": null,
+          "draft": {
+            "noteId": "a5ae0e4d-ceb9-4e90-8466-1c03829e13e8",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "cce6cbacbfb0a632581508d48e19e5286a0149348724cf8dd62313f4164c3306",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "a5ae0e4d-ceb9-4e90-8466-1c03829e13e8",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "cce6cbacbfb0a632581508d48e19e5286a0149348724cf8dd62313f4164c3306",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 2,
+          "storageToken": "059c2c50-da38-4046-9f28-da8dcacfbb66"
+        },
+        "operations": [
+          {
+            "operationId": "3c64aef8-0837-45da-8e09-830877d771ca",
+            "status": "pending",
+            "expectedVersion": 0,
+            "localRevision": 2
+          }
+        ],
+        "writes": []
+      },
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 3,
+          "savedRevision": 3,
+          "error": null,
+          "draft": {
+            "noteId": "a5ae0e4d-ceb9-4e90-8466-1c03829e13e8",
+            "baseVersion": 1,
+            "latestServerVersion": 1,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "cce6cbacbfb0a632581508d48e19e5286a0149348724cf8dd62313f4164c3306",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "cce6cbacbfb0a632581508d48e19e5286a0149348724cf8dd62313f4164c3306"
+          }
+        },
+        "disk": {
+          "noteId": "a5ae0e4d-ceb9-4e90-8466-1c03829e13e8",
+          "baseVersion": 1,
+          "latestServerVersion": 1,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "cce6cbacbfb0a632581508d48e19e5286a0149348724cf8dd62313f4164c3306",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "cce6cbacbfb0a632581508d48e19e5286a0149348724cf8dd62313f4164c3306",
+          "localRevision": 3,
+          "storageToken": "c9007a9b-5c45-4f92-a05d-42274bae361e"
+        },
+        "operations": [],
+        "writes": []
+      },
+      "afterEdit": {
+        "memory": {
+          "phase": "saved",
+          "revision": 4,
+          "savedRevision": 4,
+          "error": null,
+          "draft": {
+            "noteId": "a5ae0e4d-ceb9-4e90-8466-1c03829e13e8",
+            "baseVersion": 1,
+            "latestServerVersion": 1,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "dc447c8c971e201c1ec628b524787962b435b53d5646fbc49fd489af518239ab",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "cce6cbacbfb0a632581508d48e19e5286a0149348724cf8dd62313f4164c3306"
+          }
+        },
+        "disk": {
+          "noteId": "a5ae0e4d-ceb9-4e90-8466-1c03829e13e8",
+          "baseVersion": 1,
+          "latestServerVersion": 1,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "dc447c8c971e201c1ec628b524787962b435b53d5646fbc49fd489af518239ab",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "cce6cbacbfb0a632581508d48e19e5286a0149348724cf8dd62313f4164c3306",
+          "localRevision": 4,
+          "storageToken": "16c74754-8125-4a55-8607-742830baf47d"
+        },
+        "operations": [
+          {
+            "operationId": "10731939-74c7-456f-bd3e-581d500cf397",
+            "status": "pending",
+            "expectedVersion": 1,
+            "localRevision": 4
+          }
+        ],
+        "writes": [
+          {
+            "revision": 4,
+            "expectedToken": "c9007a9b-5c45-4f92-a05d-42274bae361e",
+            "observedToken": "c9007a9b-5c45-4f92-a05d-42274bae361e",
+            "observedRevision": 3,
+            "result": "committed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "clean-observer-follows-other-tabs-body",
+      "noteId": "c1080ad8-d9f4-40bb-bfc6-3550565ab40e",
+      "passed": true,
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 2,
+          "savedRevision": 2,
+          "error": null,
+          "draft": {
+            "noteId": "c1080ad8-d9f4-40bb-bfc6-3550565ab40e",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "d65dc31ccfa1610cad524b8a9693c2760b712f544604c992b932cd101a7ed62e",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "c1080ad8-d9f4-40bb-bfc6-3550565ab40e",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "d65dc31ccfa1610cad524b8a9693c2760b712f544604c992b932cd101a7ed62e",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 2,
+          "storageToken": "4f5b7eff-f33a-4cdd-8938-e45f2b3933f8"
+        },
+        "operations": [
+          {
+            "operationId": "ea4bce38-5800-4c64-9de7-41918e34d2ae",
+            "status": "pending",
+            "expectedVersion": 0,
+            "localRevision": 2
+          }
+        ],
+        "writes": []
+      }
+    },
+    {
+      "name": "lost-notification-ACK-CAS-then-safe-rebase",
+      "noteId": "16eaccfd-0735-44fd-a13d-9b1e77c24c63",
+      "passed": true,
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 4,
+          "savedRevision": 4,
+          "error": null,
+          "draft": {
+            "noteId": "16eaccfd-0735-44fd-a13d-9b1e77c24c63",
+            "baseVersion": 1,
+            "latestServerVersion": 1,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "ddb54b678e2bccd6f0c6ded78c30058d89c9422e6127c8771cbeaf9fe7e3dbc0",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "befb0cd1fe18f8ad4ccd8a3d890be38d674422a2f364bc2b3634defff473cc37"
+          }
+        },
+        "disk": {
+          "noteId": "16eaccfd-0735-44fd-a13d-9b1e77c24c63",
+          "baseVersion": 1,
+          "latestServerVersion": 1,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "ddb54b678e2bccd6f0c6ded78c30058d89c9422e6127c8771cbeaf9fe7e3dbc0",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "befb0cd1fe18f8ad4ccd8a3d890be38d674422a2f364bc2b3634defff473cc37",
+          "localRevision": 4,
+          "storageToken": "52c4d6ee-cdf1-4b59-a2fe-550c4b5cfbd5"
+        },
+        "operations": [
+          {
+            "operationId": "ec0b2940-3ad4-4ae9-93d7-378c9a277683",
+            "status": "pending",
+            "expectedVersion": 1,
+            "localRevision": 4
+          }
+        ],
+        "writes": [
+          {
+            "revision": 3,
+            "expectedToken": "a35b70e7-75d7-4485-8514-2fb71ac37220",
+            "observedToken": "0a069592-1053-4377-86ec-bfb0c31b2481",
+            "observedRevision": 3,
+            "result": "LocalDraftConflict",
+            "finalToken": "0a069592-1053-4377-86ec-bfb0c31b2481",
+            "finalRevision": 3
+          },
+          {
+            "revision": 4,
+            "expectedToken": "0a069592-1053-4377-86ec-bfb0c31b2481",
+            "observedToken": "0a069592-1053-4377-86ec-bfb0c31b2481",
+            "observedRevision": 3,
+            "result": "committed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "divergent-edits-still-protected",
+      "noteId": "ee4aaac0-c958-42e9-968d-df44a114e73a",
+      "passed": true,
+      "right": {
+        "memory": {
+          "phase": "conflict",
+          "revision": 2,
+          "savedRevision": 1,
+          "error": "다른 탭 또는 로컬 원고가 변경되어 저장을 중단했습니다. 현재 입력은 유지됩니다. 이 탭과 다른 탭의 원고가 달라졌거나 저장 기준을 안전하게 확인할 수 없습니다. 현재 입력을 복사하거나 파일로 보관한 뒤 다른 탭을 확인해주세요. 새로고침·탭 종료 시 아직 로컬 저장되지 않은 입력이 사라질 수 있습니다.",
+          "draft": {
+            "noteId": "ee4aaac0-c958-42e9-968d-df44a114e73a",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "aabd0d586c9a5ec60310711bd41e1b8d531506071dea94d11cb9ca3ee41315cc",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "ee4aaac0-c958-42e9-968d-df44a114e73a",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "7aa3dbaffff054268a0602dd43864b9cba8cac1da0bf05eeec0e6a669d034687",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 2,
+          "storageToken": "cd60d691-c318-403c-9eb9-86f471285639"
+        },
+        "operations": [
+          {
+            "operationId": "76082cce-a3b2-4d98-8443-6c0311ee0f75",
+            "status": "pending",
+            "expectedVersion": 0,
+            "localRevision": 2
+          }
+        ],
+        "writes": []
+      }
+    },
+    {
+      "name": "simultaneous-transaction-CAS-single-winner",
+      "noteId": "7de0fff8-7d1c-4118-af90-cb7c41587455",
+      "passed": true,
+      "left": {
+        "memory": {
+          "phase": "saved",
+          "revision": 2,
+          "savedRevision": 2,
+          "error": null,
+          "draft": {
+            "noteId": "7de0fff8-7d1c-4118-af90-cb7c41587455",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "8b9a4939810c321bb9cce00cc5a0c291749e1475ed218b0c7cdb281222f0a8bc",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "7de0fff8-7d1c-4118-af90-cb7c41587455",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "8b9a4939810c321bb9cce00cc5a0c291749e1475ed218b0c7cdb281222f0a8bc",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 2,
+          "storageToken": "a7a455c2-fbf5-4d11-a048-c76634e00d48"
+        },
+        "operations": [
+          {
+            "operationId": "09385984-d8f5-4513-bf8f-6f4f7daa4c46",
+            "status": "pending",
+            "expectedVersion": 0,
+            "localRevision": 2
+          }
+        ],
+        "writes": [
+          {
+            "revision": 1,
+            "result": "committed"
+          },
+          {
+            "revision": 2,
+            "expectedToken": "cdd6497f-6a10-401f-8898-0d3319a557cb",
+            "observedToken": "cdd6497f-6a10-401f-8898-0d3319a557cb",
+            "observedRevision": 1,
+            "result": "committed"
+          }
+        ]
+      },
+      "right": {
+        "memory": {
+          "phase": "conflict",
+          "revision": 2,
+          "savedRevision": 1,
+          "error": "다른 탭 또는 로컬 원고가 변경되어 저장을 중단했습니다. 현재 입력은 유지됩니다. 이 탭과 다른 탭의 원고가 달라졌거나 저장 기준을 안전하게 확인할 수 없습니다. 현재 입력을 복사하거나 파일로 보관한 뒤 다른 탭을 확인해주세요. 새로고침·탭 종료 시 아직 로컬 저장되지 않은 입력이 사라질 수 있습니다.",
+          "draft": {
+            "noteId": "7de0fff8-7d1c-4118-af90-cb7c41587455",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "f402e8ec7a83a99baedea596317965fad8312b19d0cd2f7aaa343e8306e1cf15",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "7de0fff8-7d1c-4118-af90-cb7c41587455",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "8b9a4939810c321bb9cce00cc5a0c291749e1475ed218b0c7cdb281222f0a8bc",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 2,
+          "storageToken": "a7a455c2-fbf5-4d11-a048-c76634e00d48"
+        },
+        "operations": [
+          {
+            "operationId": "09385984-d8f5-4513-bf8f-6f4f7daa4c46",
+            "status": "pending",
+            "expectedVersion": 0,
+            "localRevision": 2
+          }
+        ],
+        "writes": [
+          {
+            "revision": 2,
+            "expectedToken": "cdd6497f-6a10-401f-8898-0d3319a557cb",
+            "observedToken": "cdd6497f-6a10-401f-8898-0d3319a557cb",
+            "observedRevision": 1,
+            "result": "LocalDraftConflict",
+            "finalToken": "a7a455c2-fbf5-4d11-a048-c76634e00d48",
+            "finalRevision": 2
+          }
+        ]
+      }
+    },
+    {
+      "name": "ACK-while-other-tab-uncommitted-edit-safe-rebase",
+      "noteId": "1c76aba4-10ce-426a-8f3d-7dde19c4d8f8",
+      "passed": true,
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 4,
+          "savedRevision": 4,
+          "error": null,
+          "draft": {
+            "noteId": "1c76aba4-10ce-426a-8f3d-7dde19c4d8f8",
+            "baseVersion": 1,
+            "latestServerVersion": 1,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "e47c4b73a4a8c170c3627bb21047763a460e44491aabe98f248ebeab6aa23603",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "a9037d106fd9f456f96258175c2cb6a02cc15de53868cd7aad39117e1f9f82f2"
+          }
+        },
+        "disk": {
+          "noteId": "1c76aba4-10ce-426a-8f3d-7dde19c4d8f8",
+          "baseVersion": 1,
+          "latestServerVersion": 1,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "e47c4b73a4a8c170c3627bb21047763a460e44491aabe98f248ebeab6aa23603",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "a9037d106fd9f456f96258175c2cb6a02cc15de53868cd7aad39117e1f9f82f2",
+          "localRevision": 4,
+          "storageToken": "8ebffcb4-3c47-48e0-a7de-de238d9aebad"
+        },
+        "operations": [
+          {
+            "operationId": "9cbf0de6-4185-4fa1-b2dc-94e5d82f2cf0",
+            "status": "pending",
+            "expectedVersion": 1,
+            "localRevision": 4
+          }
+        ],
+        "writes": [
+          {
+            "revision": 4,
+            "expectedToken": "3899e5ff-0783-4192-a870-26898aa130ea",
+            "observedToken": "3899e5ff-0783-4192-a870-26898aa130ea",
+            "observedRevision": 3,
+            "result": "committed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "server-lock-does-not-block-other-tab-local-commit",
+      "noteId": "2b0c6319-421b-4fad-9b57-1568a646448a",
+      "passed": true,
+      "during": {
+        "memory": {
+          "phase": "saved",
+          "revision": 3,
+          "savedRevision": 3,
+          "error": null,
+          "draft": {
+            "noteId": "2b0c6319-421b-4fad-9b57-1568a646448a",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "68b75bc7961337a828ca307d3be9bf7dc0e58bf64e8a5ec644c67018c5b10d14",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "2b0c6319-421b-4fad-9b57-1568a646448a",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "68b75bc7961337a828ca307d3be9bf7dc0e58bf64e8a5ec644c67018c5b10d14",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 3,
+          "storageToken": "0e527de4-b674-4c74-8283-c80ea0b2909f"
+        },
+        "operations": [
+          {
+            "operationId": "24ffc6cb-5488-41df-ae2b-fe9bc89d5949",
+            "status": "pending",
+            "expectedVersion": 0,
+            "localRevision": 3
+          },
+          {
+            "operationId": "a3d1e624-da08-43e4-b34f-5879d526ecfe",
+            "status": "inFlight",
+            "expectedVersion": 0,
+            "localRevision": 2
+          }
+        ],
+        "writes": [
+          {
+            "revision": 3,
+            "expectedToken": "40e38d4a-b34a-4bb6-9fef-95eeb443e06c",
+            "observedToken": "40e38d4a-b34a-4bb6-9fef-95eeb443e06c",
+            "observedRevision": 2,
+            "result": "committed"
+          }
+        ]
+      },
+      "after": {
+        "memory": {
+          "phase": "saved",
+          "revision": 3,
+          "savedRevision": 3,
+          "error": null,
+          "draft": {
+            "noteId": "2b0c6319-421b-4fad-9b57-1568a646448a",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "68b75bc7961337a828ca307d3be9bf7dc0e58bf64e8a5ec644c67018c5b10d14",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "2b0c6319-421b-4fad-9b57-1568a646448a",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "68b75bc7961337a828ca307d3be9bf7dc0e58bf64e8a5ec644c67018c5b10d14",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 3,
+          "storageToken": "0e527de4-b674-4c74-8283-c80ea0b2909f"
+        },
+        "operations": [
+          {
+            "operationId": "24ffc6cb-5488-41df-ae2b-fe9bc89d5949",
+            "status": "pending",
+            "expectedVersion": 0,
+            "localRevision": 3
+          },
+          {
+            "operationId": "a3d1e624-da08-43e4-b34f-5879d526ecfe",
+            "status": "inFlight",
+            "expectedVersion": 0,
+            "localRevision": 2
+          }
+        ],
+        "writes": [
+          {
+            "revision": 3,
+            "expectedToken": "40e38d4a-b34a-4bb6-9fef-95eeb443e06c",
+            "observedToken": "40e38d4a-b34a-4bb6-9fef-95eeb443e06c",
+            "observedRevision": 2,
+            "result": "committed"
+          }
+        ]
+      },
+      "result": {
+        "kind": "ACK-local-CAS-rejected"
+      }
+    },
+    {
+      "name": "deleted-local-record-preserves-memory",
+      "noteId": "59e6ce11-4f52-46cd-9da8-37e89398f3c3",
+      "passed": true,
+      "after": {
+        "memory": {
+          "phase": "conflict",
+          "revision": 2,
+          "savedRevision": 1,
+          "error": "다른 탭 또는 로컬 원고가 변경되어 저장을 중단했습니다. 현재 입력은 유지됩니다. 이 탭과 다른 탭의 원고가 달라졌거나 저장 기준을 안전하게 확인할 수 없습니다. 현재 입력을 복사하거나 파일로 보관한 뒤 다른 탭을 확인해주세요. 새로고침·탭 종료 시 아직 로컬 저장되지 않은 입력이 사라질 수 있습니다.",
+          "draft": {
+            "noteId": "59e6ce11-4f52-46cd-9da8-37e89398f3c3",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "6a1c95be6e325559260904f2eeefd8eb8348b9b4cd6ece03128a152540739318",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": null,
+        "operations": [],
+        "writes": []
+      }
+    },
+    {
+      "name": "workspace-sync-skips-local-conflict-and-ACKs-independent-note",
+      "noteId": "46e299e3-28f1-4532-98eb-8458b75b6489",
+      "passed": true,
+      "after": {
+        "memory": {
+          "phase": "conflict",
+          "revision": 2,
+          "savedRevision": 1,
+          "error": "다른 탭 또는 로컬 원고가 변경되어 저장을 중단했습니다. 현재 입력은 유지됩니다. 이 탭과 다른 탭의 원고가 달라졌거나 저장 기준을 안전하게 확인할 수 없습니다. 현재 입력을 복사하거나 파일로 보관한 뒤 다른 탭을 확인해주세요. 새로고침·탭 종료 시 아직 로컬 저장되지 않은 입력이 사라질 수 있습니다.",
+          "draft": {
+            "noteId": "46e299e3-28f1-4532-98eb-8458b75b6489",
+            "baseVersion": 0,
+            "latestServerVersion": 0,
+            "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "contentHash": "96d24eb9e61cc3cd09e0e6ee577a31d3cba02f00457dd8075f95274047723f08",
+            "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+            "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c"
+          }
+        },
+        "disk": {
+          "noteId": "46e299e3-28f1-4532-98eb-8458b75b6489",
+          "baseVersion": 0,
+          "latestServerVersion": 0,
+          "titleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "contentHash": "e52fa58634e18b9e458d4799d9f4fa504656dc1dd3a55a7090a565a9bca9fcad",
+          "baseTitleHash": "889e9910d30dc8a4746f19532dc5f60211e15c40281bb49792518cfab77ac968",
+          "baseContentHash": "9a5b038b289c630fcf58c973340d6f142b1e976b263cce4238c5cbad195b7e7c",
+          "localRevision": 2,
+          "storageToken": "b322d46c-c0ff-491d-8dcb-c959298f7581"
+        },
+        "operations": [
+          {
+            "operationId": "76603ff1-46aa-4b3f-bed5-80e956acd736",
+            "status": "pending",
+            "expectedVersion": 0,
+            "localRevision": 2
+          }
+        ],
+        "writes": [
+          {
+            "revision": 2,
+            "result": "committed"
+          }
+        ]
+      },
+      "result": {
+        "acknowledged": [
+          "7d9cefc2-3926-4c6a-beb3-89ebda8299d3"
+        ],
+        "issues": [
+          {
+            "operationId": "76603ff1-46aa-4b3f-bed5-80e956acd736",
+            "entityId": "46e299e3-28f1-4532-98eb-8458b75b6489",
+            "kind": "deferred",
+            "message": "이 원고의 로컬 저장 확인이 필요합니다."
+          }
+        ],
+        "localFailures": [
+          {
+            "noteId": "46e299e3-28f1-4532-98eb-8458b75b6489",
+            "message": "다른 탭과 로컬 원고 충돌: 현재 입력을 보관하고 다른 탭의 변경을 확인해주세요."
+          }
+        ],
+        "initialCount": 2,
+        "remaining": 1,
+        "newOrRebased": 0
+      },
+      "independentNoteId": "4f7e1d62-5067-4c02-babd-5439b0f2a50f"
+    }
+  ],
+  "environment": {
+    "origin": "http://127.0.0.1:25175",
+    "dbPort": 25442,
+    "dbName": "seam_note_manual_lab",
+    "chrome": "Chrome installed channel",
+    "profiles": "/var/folders/j0/4ncpc9m90tg_c7d24lc1kvnr0000gn/T/seam-multitab-before-P4gADa"
+  },
+  "sourceHashes": {
+    "frontend/src/features/local-drafts/draftSession.ts": "4d3f4057913cd651ff958354dad23b61992ca8083efdcf2f5d7e3de1ba94b187",
+    "frontend/src/features/local-drafts/draftDatabase.ts": "a095d3ff8e6e6455cc2bdc060b9d1817639d05656f14d9b78e1ea1ba14c2124e",
+    "frontend/src/features/manual-sync/manualSync.ts": "907ea1eb745a4e77f085a5c237ec1d77a25811d0862b082f6195801ff1790e1a"
+  }
+}

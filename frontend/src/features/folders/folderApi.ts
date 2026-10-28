@@ -1,4 +1,4 @@
-import { getJson, postJson, patchJson } from '@/lib/api/client'
+import { getJson, postJson, patchJson, deleteResource } from '@/lib/api/client'
 import type { RequestOptions } from '@/lib/api/client'
 import type { CreateFolderRequest, Folder, UUID, UpdateFolderRequest } from '@/lib/api/types'
 
@@ -21,4 +21,8 @@ export function createFolder(request: CreateFolderRequest): Promise<Folder> {
 
 export function renameFolder({ id, ...request }: UpdateFolderRequest & { id: UUID }): Promise<Folder> {
   return patchJson<Folder>(`/folders/${encodeURIComponent(id)}`, request)
+}
+
+export function deleteFolder(id: UUID): Promise<void> {
+  return deleteResource(`/folders/${encodeURIComponent(id)}`)
 }

@@ -1,9 +1,11 @@
 import type { Ref } from 'react'
 import styled from '@emotion/styled'
+import { SyncButton as SaveButton } from '@/components/SyncButton'
 import { Icon } from '@/components/Icon'
 import { IconButton } from '@/components/primitives'
 import type { DraftStatus } from '@/features/notes/noteDrafts'
-import type { useManualSync } from '@/features/manual-sync/useManualSync'
+import type { useWorkspaceSync } from '@/features/manual-sync/useWorkspaceSync'
+import { FolderMenu } from '@/features/folders/FolderMenu'
 import { SyncStatus } from '@/features/sync/SyncStatus'
 
 const Header = styled.header(({ theme }) => ({
@@ -30,15 +32,18 @@ const Header = styled.header(({ theme }) => ({
   },
 }))
 
-const SaveButton = styled.button(({ theme }) => ({
-  border: `1px solid ${theme.colors.border}`, borderRadius: theme.radii.pill,
-  padding: `${theme.spacing.sm} ${theme.spacing.md}`, background: theme.colors.surface,
-  color: theme.colors.text, font: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap',
-  '&:disabled': { opacity: .5, cursor: 'not-allowed' },
-}))
+
+const OfflineStatus = styled.span({
+  color: '#B42318',
+  fontWeight: 600,
+})
 
 interface AppHeaderProps {
-  manualSync: ReturnType<typeof useManualSync>
+  online: boolean
+  canDelete:boolean
+  onDelete:()=>void
+  hasConflict: boolean
+  workspaceSync: ReturnType<typeof useWorkspaceSync>
   sidebarOpen: boolean
   isMobile: boolean
   sidebarId: string
@@ -48,18 +53,19 @@ interface AppHeaderProps {
   status: DraftStatus
 }
 
-export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, toggleRef, path, status, manualSync }: AppHeaderProps) {
+export function AppHeader({ online, sidebarOpen, isMobile, sidebarId, onToggleSidebar, toggleRef, path, status, workspaceSync, hasConflict, canDelete, onDelete }: AppHeaderProps) {
   return (
     <Header>
       <div>
         <IconButton
           ref={toggleRef}
+          aria-keyshortcuts="Meta+B Control+B"
           type="button"
           aria-label={sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'}
           aria-expanded={sidebarOpen}
           aria-controls={sidebarId}
           aria-haspopup={isMobile ? 'dialog' : undefined}
-          title={sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'}
+          title={`${sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'} (⌘B / Ctrl+B)`}
           onClick={onToggleSidebar}
         >
           <Icon name="sidebar" size={19} />
@@ -67,16 +73,21 @@ export function AppHeader({ sidebarOpen, isMobile, sidebarId, onToggleSidebar, t
         <p>Personal{path.map((name, index) => <span key={index} style={{ display: 'contents' }}><Icon name="chevron" size={12} />{name}</span>)}</p>
       </div>
       <div>
-        <SyncStatus status={status} />
-        <SaveButton type="button" disabled={manualSync.disabled} onClick={manualSync.onSync}
-          title={manualSync.summary} aria-describedby="server-save-feedback">서버에 저장</SaveButton>
-        <IconButton type="button" disabled aria-label="More note options (coming later)" title="Note options are not connected">
-          <Icon name="more" />
-        </IconButton>
+        {!hasConflict && <SyncStatus status={status} />}
+
+        {online ? <SaveButton data-workspace-sync aria-keyshortcuts="Meta+S Control+S" title="동기화 (⌘S / Ctrl+S)" aria-label="모든 변경사항 동기화" aria-busy={workspaceSync.busy} type="button" disabled={workspaceSync.disabled} onClick={workspaceSync.onSync} aria-describedby="workspace-sync-feedback">
+          <Icon name="sync" size={16}/>{workspaceSync.busy?'동기화 중…':'동기화'}
+        </SaveButton> : <OfflineStatus role="status">현재 오프라인 작업 중</OfflineStatus>}
+        <FolderMenu kind="note" name="현재" tabIndex={0} disabled={!canDelete} onAction={onDelete}/>
+
       </div>
-      <section id="server-save-feedback" aria-live="polite" style={{ flexBasis: '100%', textAlign: 'right', overflowWrap: 'anywhere' }}>
-        <span>{manualSync.summary}{manualSync.remaining !== undefined ? ` · 남은 Outbox 작업 ${manualSync.remaining}개` : ''}</span>
-        {manualSync.message && <p role={manualSync.error ? 'alert' : 'status'} style={{ justifyContent: 'flex-end', margin: '4px 0 0' }}>{manualSync.message}</p>}
+      <section aria-label="Workspace 동기화" style={{flexBasis:'100%',minWidth:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+          <span>{workspaceSync.summary}</span>
+        </div>
+        <div id="workspace-sync-feedback" aria-live="polite" style={{overflowWrap:'anywhere',lineHeight:1.7}}>
+          {!hasConflict&&workspaceSync.error&&<p role="alert">{workspaceSync.error}</p>}
+        </div>
       </section>
     </Header>
   )

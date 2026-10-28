@@ -42,7 +42,7 @@ async function boot(page, options = {}) {
   await page.route(url => url.pathname === '/storage-test-shell', async route => {
     const response = await route.fetch({ url: origin + '/' })
     // Preserve Vite's React refresh preamble, postponing only the application entry.
-    const html = (await response.text()).replace(/<script[^>]*src=["']\/src\/main\.tsx["'][^>]*>\s*<\/script>/, '')
+    const html = (await response.text()).replace(/<script[^>]*src=["']\/src\/main\.tsx(?:\?[^"']*)?["'][^>]*>\s*<\/script>/, '')
     await route.fulfill({ response, body: html })
   })
   await page.goto(origin + '/storage-test-shell')
@@ -85,7 +85,7 @@ async function main() {
   const profile = mkdtempSync(join(tmpdir(), 'seam-note-idb-profile-'))
   const contexts = [], errors = []
   let persistent, browser
-  function watch(page) { page.setDefaultTimeout(8000); page.on('pageerror', error => errors.push(error.message)); return page }
+  function watch(page) { page.setDefaultTimeout(8000); page.setDefaultNavigationTimeout(30000); page.on('pageerror', error => errors.push(error.message)); return page }
   try {
     persistent = await chromium.launchPersistentContext(profile, { channel: 'chrome', headless: true, viewport: { width: 1360, height: 900 } })
     await mock(persistent)
@@ -282,6 +282,15 @@ async function main() {
       assert.equal(queued[0].content, (await record(right)).content)
       assert.equal(queued[0].status, 'pending', 'foundation does not auto-send')
       assert.equal(await warning(right), true)
+      await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+      await right.getByRole('button', { name: '현재 입력 복사', exact: true }).click()
+      assert.match(await right.evaluate(() => navigator.clipboard.readText()), /오래된 탭의 독립 편집/)
+      const downloaded = right.waitForEvent('download')
+      await right.getByRole('button', { name: '현재 입력 파일로 보관', exact: true }).click()
+      const download = await downloaded
+      const fileText = require('node:fs').readFileSync(await download.path(), 'utf8')
+      assert.match(fileText, /오래된 탭의 독립 편집/)
+      await right.getByText('다른 탭과 로컬 충돌', { exact: true }).waitFor()
       await right.getByRole('button', { name: '로컬 저장 상태 다시 확인', exact: true }).click()
       assert.equal((await record(right)).content, '다른 탭의 먼저 완료된 편집')
       await left.close(); await right.close()

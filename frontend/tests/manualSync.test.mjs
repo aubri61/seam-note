@@ -94,3 +94,14 @@ test('manual UX distinguishes clean, unsaved latest input, uncertainty and block
   assert.equal(manualSaveState(id,entry,true,undefined,false,false).disabled,true)
   assert.equal(view({},[operation]).remaining,1)
 })
+
+test('only a known NOTE_NOT_FOUND quarantines a 404; generic HTTP404 stays uncertain',async()=>{
+  for(const code of ['NOTE_NOT_FOUND','HTTP_ERROR']){
+    const f=fake();let storedCode
+    f.storage.markConflict=async(_key,failureCode)=>{f.calls.conflict++;storedCode=failureCode}
+    await assert.rejects(syncOneNote(id,f.session,{storage:f.storage,locks,send:async()=>{throw new ApiError(404,{code,message:'mock 404',errors:[]})}}))
+    assert.equal(f.calls.conflict,code==='NOTE_NOT_FOUND'?1:0)
+    assert.equal(storedCode,code==='NOTE_NOT_FOUND'?code:undefined)
+    assert.equal(f.calls.ack,0)
+  }
+})

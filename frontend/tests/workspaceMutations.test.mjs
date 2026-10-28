@@ -8,6 +8,10 @@ const { createFolder } = await load('features/folders/folderApi')
 const { createNote, deleteNote } = await load('features/notes/noteApi')
 const { createFolderMutationOptions, createNoteMutationOptions, deleteNoteMutationOptions } = await load('features/workspace/workspaceMutations')
 const { noteQueries } = await load('features/notes/noteQueries')
+// Query contract tests isolate persistence; real IndexedDB is covered by PWA/browser tests.
+const { workspaceStorage } = await load('features/offline/workspaceCache')
+workspaceStorage.save = async () => {}
+workspaceStorage.local = async () => ({entities:[],pendingIds:[]})
 const { workspaceTreeQuery } = await load('features/workspace/workspaceQueries')
 const { workspaceKeys, folderKeys, noteKeys } = await load('lib/query/queryKeys')
 const { buildWorkspaceTree } = await load('features/workspace/workspaceTree')
@@ -253,4 +257,18 @@ test('inline folder rename PATCH updates confirmed metadata, detail and invalida
   assert.equal(qc.getQueryData(folderKeys.detail(folder.id)).version, 1)
   assert.equal(qc.getQueryState(workspaceKeys.tree()).isInvalidated, true)
   assert.deepEqual(calls[1], ['patch', '/api/folders/' + folder.id, { name: '작성 폴더' }])
+})
+
+test('Folder DELETE uses actual bodyless endpoint and preserves server conflict code', async t => {
+  const { deleteFolder } = await load('features/folders/folderApi')
+  const calls = []
+  stub(t, async config => {
+    calls.push([config.method, apiClient.getUri(config), config.data])
+    if (calls.length === 2) throw new AxiosError('not empty', AxiosError.ERR_BAD_RESPONSE, config, undefined,
+      reply(config, {code:'FOLDER_NOT_EMPTY',message:'원고나 하위 폴더가 있습니다.',errors:[]}, 409))
+    return reply(config, '', 204)
+  })
+  assert.equal(await deleteFolder(folder.id), undefined)
+  await assert.rejects(deleteFolder(folder.id), error => error instanceof ApiError && error.status === 409 && error.code === 'FOLDER_NOT_EMPTY')
+  assert.deepEqual(calls, Array(2).fill(['delete','/api/folders/'+folder.id,undefined]))
 })

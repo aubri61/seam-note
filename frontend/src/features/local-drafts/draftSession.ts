@@ -15,6 +15,9 @@ export interface DraftEntry {
   serverProtected?: boolean
 }
 interface WorkingEntry extends DraftEntry {
+  checkpoint?: NoteDraft
+  headCheckRequested?: boolean
+  casRecoveryUsed?: boolean
   ready: boolean
   edited: boolean
   token?: string
@@ -37,13 +40,16 @@ export function sameDraft(a: NoteDraft, b: NoteDraft) {
   return a.noteId === b.noteId && a.title === b.title && a.content === b.content && a.baseVersion === b.baseVersion
     && a.baseTitle === b.baseTitle && a.baseContent === b.baseContent && a.latestServerVersion === b.latestServerVersion
 }
+function sameText(a: NoteDraft, b: NoteDraft) {
+  return a.noteId === b.noteId && a.title === b.title && a.content === b.content
+}
 function fromRecord(record: LocalNoteDraft): NoteDraft {
   const { noteId, title, content, baseVersion, baseTitle, baseContent, latestServerVersion } = record
   return { noteId, title, content, baseVersion, baseTitle, baseContent, latestServerVersion }
 }
 function failureMessage(error: unknown) {
   const name = error instanceof Error ? error.name : 'UnknownError'
-  if (name === 'LocalDraftConflict') return '다른 탭 또는 로컬 원고가 변경되어 저장을 중단했습니다. 현재 입력은 유지됩니다. 원고를 복사하고 다른 탭의 변경을 확인해주세요.'
+  if (name === 'LocalDraftConflict') return '다른 탭 또는 로컬 원고가 변경되어 저장을 중단했습니다. 현재 입력은 유지됩니다. 이 탭과 다른 탭의 원고가 달라졌거나 저장 기준을 안전하게 확인할 수 없습니다. 현재 입력을 복사하거나 파일로 보관한 뒤 다른 탭을 확인해주세요. 새로고침·탭 종료 시 아직 로컬 저장되지 않은 입력이 사라질 수 있습니다.'
   if (name === 'QuotaExceededError') return '브라우저 저장 공간이 부족해 로컬 저장에 실패했습니다. 현재 입력은 메모리에 유지됩니다.'
   if (name === 'InvalidLocalDraft') return '기존 로컬 원고의 형식을 확인할 수 없어 덮어쓰지 않았습니다. 현재 입력을 보관하고 저장소 상태를 확인해주세요.'
   return '로컬 저장소를 읽거나 저장하지 못했습니다. 현재 입력은 메모리에 유지됩니다. 저장소 이용 설정을 확인하고 다시 시도해주세요.'
@@ -112,6 +118,7 @@ export class DraftSession {
         entry.serverProtected = !!record.serverOperationPending
         const stored = fromRecord(record)
         if (memory && entry.edited && isDraftDirty(stored) && !sameDraft(memory, stored)) throw new LocalDraftConflict()
+        entry.checkpoint = stored
         entry.token = record.storageToken
         entry.savedRevision = record.localRevision
         entry.savedAt = record.localSavedAt
@@ -156,7 +163,7 @@ export class DraftSession {
     if (!entry.draft) return
     const next = editDraft({ [id]: entry.draft }, id, patch)[id]
     if (next === entry.draft) return
-    entry.draft = next; entry.revision++; entry.edited = true
+    entry.draft = next; entry.revision++; entry.edited = true; entry.casRecoveryUsed = false
     if (entry.ready && entry.phase !== 'conflict' && entry.phase !== 'failed') this.schedule(id)
     this.publish(id)
   }
@@ -181,12 +188,25 @@ export class DraftSession {
     entry.phase = 'saving'; entry.firstPendingAt = undefined; entry.flushRequested = false
     this.publish(id)
     entry.writing = this.repository.write(draft, revision, expected, this.writerId).then(record => {
+      entry.checkpoint = fromRecord(record); entry.casRecoveryUsed = false
       entry.token = record.storageToken; entry.savedRevision = revision; entry.savedAt = record.localSavedAt
       entry.phase = entry.revision === revision ? 'saved' : 'waiting'; entry.error = null
       this.channel?.postMessage({ noteId: id, writerId: this.writerId })
       this.publish(id)
-    }).catch(error => this.fail(id, error)).finally(() => {
+    }).catch(async error => {
+      // A missed notification can reach the transaction CAS first. Re-read once;
+      // the retry still uses the repository's original token/revision CAS.
+      if (error instanceof LocalDraftConflict && !entry.casRecoveryUsed && !entry.acknowledging) {
+        entry.casRecoveryUsed = true
+        try {
+          const record = await this.repository.read(id)
+          if (!entry.acknowledging && this.reconcile(id, record)) { entry.flushRequested = true; return }
+        } catch (readError) { this.fail(id, readError); return }
+      }
+      this.fail(id, error)
+    }).finally(() => {
       entry.writing = undefined
+      if (entry.headCheckRequested) { entry.headCheckRequested = false; void this.checkHead(id) }
       if (entry.phase === 'failed' || entry.phase === 'conflict' || entry.revision <= entry.savedRevision) return
       if (entry.flushRequested || this.clock.now() - (entry.lastChangedAt ?? 0) >= 400 || this.clock.now() - (entry.firstPendingAt ?? this.clock.now()) >= 2000) void this.flush(id)
       // Otherwise the latest edit's existing debounce timer remains armed.
@@ -201,6 +221,12 @@ export class DraftSession {
     this.entry(id).serverProtected = false
     this.applyServer(id)
     this.publish(id)
+  }
+  async readyForSync(id: string) {
+    const entry = this.entry(id)
+    if (entry.phase === 'failed' || entry.phase === 'conflict') throw new Error(entry.phase === 'conflict' ? '다른 탭과 로컬 원고 충돌: 현재 입력을 보관하고 다른 탭의 변경을 확인해주세요.' : '이 원고의 로컬 저장·복구 문제를 먼저 확인해주세요.')
+    if (!entry.ready) await this.recover(id)
+    if (!entry.ready || !entry.draft || ['failed', 'conflict'].includes(entry.phase)) throw new Error('로컬 원고를 복구하지 못했습니다.')
   }
   async flushLatest(id: string) {
     for (let attempt = 0; attempt < 50; attempt++) {
@@ -234,6 +260,7 @@ export class DraftSession {
       const memory = entry.draft!, stored = fromRecord(record)
       const merged = { ...stored, title: memory.title, content: memory.content,
         latestServerVersion: Math.max(stored.latestServerVersion, memory.latestServerVersion) }
+      entry.checkpoint = stored
       entry.draft = merged; entry.token = record.storageToken; entry.savedRevision = record.localRevision
       entry.revision = Math.max(entry.revision, record.localRevision) + (sameDraft(merged, stored) ? 0 : 1)
       entry.savedAt = record.localSavedAt; entry.error = null
@@ -246,8 +273,31 @@ export class DraftSession {
     } catch (error) { this.fail(id, error); throw error }
     finally {
       entry.acknowledging = false
+      if (entry.headCheckRequested) { entry.headCheckRequested = false; void this.checkHead(id) }
       if (acknowledged) { this.applyServer(id); this.publish(id) }
       if (entry.revision > entry.savedRevision) this.schedule(id)
+    }
+  }
+  async applyConflictChoice(id: string, revision: number,
+    commit: (writerId: string, isCurrent:()=>boolean) => Promise<LocalNoteDraft>) {
+    const entry=this.entry(id)
+    if(!entry.ready||!entry.draft||entry.acknowledging)throw new LocalDraftConflict()
+    if(entry.writing)await entry.writing
+    if(entry.revision!==revision)throw new LocalDraftConflict()
+    entry.acknowledging=true;this.stopTimer(entry)
+    try {
+      const record=await commit(this.writerId,()=>entry.revision===revision)
+      const stored=fromRecord(record),memory=entry.draft!
+      entry.draft=entry.revision===revision?stored:{...stored,title:memory.title,content:memory.content}
+      entry.checkpoint=stored;entry.token=record.storageToken;entry.savedRevision=record.localRevision
+      entry.revision=record.localRevision+(sameDraft(entry.draft,stored)?0:1)
+      entry.savedAt=record.localSavedAt;entry.serverProtected=false;entry.error=null
+      entry.phase=entry.revision===entry.savedRevision?'saved':'waiting'
+      this.channel?.postMessage({noteId:id,writerId:this.writerId});this.publish(id)
+    } finally {
+      entry.acknowledging=false
+      if(entry.headCheckRequested){entry.headCheckRequested=false;void this.checkHead(id)}
+      if(entry.phase==='waiting')this.schedule(id)
     }
   }
   async retry(id: string) {
@@ -255,38 +305,52 @@ export class DraftSession {
     if (entry.reading || entry.writing) return
     if (!entry.ready) return this.recover(id)
     if (entry.phase === 'conflict' || entry.revision <= entry.savedRevision) {
-      try {
-        const record = await this.repository.read(id)
-        if (!record || !entry.draft || !sameDraft(entry.draft, record)) throw new LocalDraftConflict()
-        entry.token = record.storageToken; entry.revision = Math.max(entry.revision, record.localRevision)
-        entry.savedRevision = entry.revision; entry.savedAt = record.localSavedAt; entry.phase = 'saved'; entry.error = null
-        this.publish(id)
-      } catch (error) { this.fail(id, error) }
+      await this.checkHead(id, true)
+      if (entry.phase === 'conflict' || entry.phase === 'failed') return
+      await this.flush(id)
       return
     }
     entry.phase = 'waiting'; entry.error = null
     this.publish(id)
     await this.flush(id)
   }
-  private async checkHead(id: string) {
+  /** Compare current text with our last committed checkpoint, never with a stale server GET. */
+  private reconcile(id: string, record: LocalNoteDraft | undefined) {
+    const entry = this.entry(id), memory = entry.draft, checkpoint = entry.checkpoint
+    if (!record || !memory || record.baseVersion < memory.baseVersion) return false
+    const stored = fromRecord(record)
+    const identical = sameText(memory, stored)
+    const unedited = !!checkpoint && sameText(memory, checkpoint)
+    const metadataOnly = !!checkpoint && sameText(stored, checkpoint) && record.canRebaseLocalEdits === true
+    if (!identical && !unedited && !metadataOnly) return false
+    this.stopTimer(entry)
+    const next = identical || unedited ? stored : { ...stored, title: memory.title, content: memory.content }
+    next.latestServerVersion = Math.max(next.latestServerVersion, memory.latestServerVersion)
+    entry.checkpoint = stored; entry.token = record.storageToken
+    entry.savedRevision = record.localRevision; entry.savedAt = record.localSavedAt
+    entry.draft = next
+    // Local revisions are fencing counters; never mark a larger memory revision as committed.
+    entry.revision = Math.max(entry.revision, record.localRevision) + (sameDraft(next, stored) ? 0 : 1)
+    if (sameDraft(next, stored)) entry.revision = record.localRevision
+    entry.serverProtected = !!record.serverOperationPending
+    entry.phase = entry.revision === entry.savedRevision ? 'saved' : 'waiting'; entry.error = null
+    if (entry.phase === 'waiting') this.schedule(id)
+    this.publish(id)
+    return true
+  }
+  private async checkHead(id: string, retry = false) {
     const entry = this.entries.get(id)
-    if (!entry?.ready || entry.acknowledging || entry.writing || entry.phase === 'conflict') return
+    if (!entry?.ready) return
+    if (entry.acknowledging || entry.writing) { entry.headCheckRequested = true; return }
     const token = entry.token
     try {
       const record = await this.repository.read(id)
-      if (entry.acknowledging || entry.writing || token !== entry.token) return
+      if (entry.acknowledging || entry.writing || token !== entry.token) { entry.headCheckRequested = true; return }
       if (record?.serverOperationPending && !entry.serverProtected) {
-        entry.serverProtected = true
-        this.publish(id)
+        entry.serverProtected = true; this.publish(id)
       }
-      if (record?.storageToken !== token) {
-        if (record && entry.draft && sameDraft(entry.draft, record)) {
-          // Another tab committed the identical snapshot: acknowledging it loses no edits.
-          this.stopTimer(entry)
-          entry.token = record.storageToken; entry.revision = Math.max(entry.revision, record.localRevision)
-          entry.savedRevision = entry.revision; entry.savedAt = record.localSavedAt; entry.phase = 'saved'; entry.error = null
-          this.publish(id)
-        } else this.fail(id, new LocalDraftConflict())
+      if (record?.storageToken !== token || entry.phase === 'conflict' || retry) {
+        if (!this.reconcile(id, record)) this.fail(id, new LocalDraftConflict())
       }
     } catch (error) { this.fail(id, error) }
   }

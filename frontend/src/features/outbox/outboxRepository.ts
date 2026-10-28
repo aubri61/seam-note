@@ -7,8 +7,8 @@ export const outboxRepository = {
   listPending: async () => (await repository()).listPending(),
   listForNote: async (noteId: string) => (await repository()).listOperations(noteId),
   claim: async (operationId: string) => (await repository()).claim(operationId),
-  prepareManual: async (noteId: string, token: string, revision: number) => (await repository()).prepareManual(noteId, token, revision),
+  prepareManual: async (noteId: string, token: string, revision: number, allowedOperationIds?: readonly string[]) => (await repository()).prepareManual(noteId, token, revision, allowedOperationIds),
   acknowledge: async (operation: NoteUpdateOperation, note: Note, token: string, revision: number, writerId: string) =>
     (await repository()).acknowledge(operation, note, token, revision, writerId),
-  markConflict: async (operationId: string) => (await repository()).markConflict(operationId),
+  markConflict: async (operationId: string, failureCode?: string) => (await repository()).markConflict(operationId, failureCode),
 }

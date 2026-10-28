@@ -1,4 +1,4 @@
-import type { RefObject } from 'react'
+import { useState, type RefObject } from 'react'
 import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
 import { IconButton } from '@/components/primitives'
@@ -46,6 +46,8 @@ const Toolbar = styled.div(({ theme }) => ({
 }))
 
 const Writing = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
   flex: 1,
   paddingTop: theme.spacing.xl,
   p: {
@@ -56,8 +58,9 @@ const Writing = styled.div(({ theme }) => ({
   textarea: {
     display: 'block',
     width: '100%',
-    minHeight: '300px',
-    resize: 'vertical',
+    flex: 1,
+    minHeight: '160px',
+    resize: 'none',
     marginTop: theme.spacing.md,
     padding: `${theme.spacing.xs} 0`,
     border: 0,
@@ -73,24 +76,6 @@ const Writing = styled.div(({ theme }) => ({
   'textarea:focus, textarea:focus-visible': { outline: 'none', boxShadow: 'none' },
 }))
 
-const Footer = styled.footer(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  flexWrap: 'wrap',
-  gap: theme.spacing.md,
-  paddingTop: theme.spacing.xxl,
-  paddingBottom: theme.spacing.xxxl,
-  fontSize: '11px',
-  lineHeight: 1.7,
-  color: theme.colors.mutedText,
-  span: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: theme.spacing.sm,
-  },
-}))
-
 const NewDocumentButton = styled.button(({ theme }) => ({
   position: 'fixed', right: theme.spacing.xl, bottom: theme.spacing.xl, zIndex: 2,
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -104,10 +89,11 @@ const NewDocumentButton = styled.button(({ theme }) => ({
   [`@media (max-width: ${theme.breakpoints.mobile})`]: { right: theme.spacing.md, bottom: theme.spacing.md },
 }))
 
-export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNoteId, titleRef, loading, error, onRetry, canRetry, busy, canCreate, canDelete, onCreateNote, onDeleteNote }: {
+export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNoteId, titleRef, loading, error, onRetry, canRetry, busy, canCreate, onCreateNote }: {
   draft: NoteDraft | null
   localEntry?: DraftEntry
   onRetryLocal: () => void
+  onCompareConflict: () => void
   onEdit: (noteId: string, patch: DraftPatch) => void
   selectedNoteId: string | null
   titleRef: RefObject<HTMLInputElement | null>
@@ -121,16 +107,37 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
   onCreateNote: () => void
   onDeleteNote: () => void
 }) {
+  const [backup, setBackup] = useState<{ noteId: string; revision: number; message: string } | null>(null)
   const visible = draft?.noteId === selectedNoteId ? draft : null
+  const copyCurrent = async () => {
+    if (!visible) return
+    try {
+      await navigator.clipboard.writeText(`${visible.title}\n\n${visible.content}`)
+      setBackup({ noteId: visible.noteId, revision: localEntry?.revision ?? 0, message: '현재 입력을 복사했습니다. 안전한 곳에 붙여 넣어 보관해주세요.' })
+    } catch { setBackup({ noteId: visible.noteId, revision: localEntry?.revision ?? 0, message: '복사하지 못했습니다. 파일로 내려받거나 제목·본문을 직접 선택해 보관해주세요.' }) }
+  }
+  const downloadCurrent = () => {
+    if (!visible) return
+    const url = URL.createObjectURL(new Blob([`${visible.title}\n\n${visible.content}`], { type: 'text/plain;charset=utf-8' }))
+    const anchor = document.createElement('a')
+    anchor.href = url; anchor.download = `seam-note-${visible.noteId}.txt`; anchor.click()
+    setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    setBackup({ noteId: visible.noteId, revision: localEntry?.revision ?? 0, message: '파일 다운로드를 요청했습니다. 파일에 현재 입력이 보관됐는지 확인해주세요.' })
+  }
   return (
     <Panel aria-label="노트 편집기" data-note-id={visible?.noteId ?? undefined} aria-busy={loading}>
       <Document>
         {loading && <p role="status">원고 로딩 중</p>}
         {error && <div role="alert"><p>원고 조회 실패: {error.message}</p>{canRetry && <button type="button" onClick={onRetry}>다시 시도</button>}</div>}
         {!loading && !error && !visible && <p role="status">{selectedNoteId ? '원고를 선택해주세요.' : '표시할 원고가 없습니다.'}</p>}
-        {localEntry?.error && <div role="alert">
+        {localEntry?.error && localEntry.phase!=='conflict' && <div role="alert">
           <p>{localEntry.error}</p>
-          <button type="button" onClick={onRetryLocal}>{localEntry.phase === 'conflict' ? '로컬 저장 상태 다시 확인' : '로컬 저장 다시 시도'}</button>
+          {visible && <>
+            <button type="button" onClick={() => { void copyCurrent() }}>현재 입력 복사</button>
+            <button type="button" onClick={downloadCurrent}>현재 입력 파일로 보관</button>
+            {backup?.noteId === visible.noteId && backup.revision === (localEntry?.revision ?? 0) && <p role="status">{backup.message}</p>}
+          </>}
+          <button type="button" onClick={onRetryLocal}>로컬 저장 다시 시도</button>
         </div>}
         <Title ref={titleRef} aria-label="문서 제목" placeholder={visible ? '제목 없음' : ''} value={visible?.title ?? ''} maxLength={200}
           readOnly={!visible} onChange={event => { if (visible) onEdit(visible.noteId, { title: event.target.value }) }} />
@@ -147,15 +154,11 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
           <IconButton type="button" disabled aria-label="Numbered list (coming later)" title="Formatting is not connected">
             <Icon name="ordered" size={19} />
           </IconButton>
-          <IconButton type="button" aria-label="원고 삭제" title="원고 삭제" disabled={busy || !canDelete} onClick={onDeleteNote} style={{ marginLeft: 'auto' }}><Icon name="trash" size={18} /></IconButton>
         </Toolbar>
         <Writing>
           <textarea aria-label="문서 내용" placeholder="" value={visible?.content ?? ''} readOnly={!visible}
             onChange={event => { if (visible) onEdit(visible.noteId, { content: event.target.value }) }} />
         </Writing>
-        <Footer>
-          <span>원고는 이 브라우저에 로컬 저장되며 자동으로 서버에 전송되지 않습니다. 저장 완료 전 종료하면 최신 입력이 유실될 수 있고, 브라우저 저장소 삭제·회수 시 로컬 원고도 사라질 수 있습니다.</span>
-        </Footer>
       </Document>
       <NewDocumentButton type="button" disabled={busy || !canCreate} onClick={onCreateNote} aria-label="새 문서" title="빈 원고 생성"><Icon name="pencil" size={24} /></NewDocumentButton>
     </Panel>

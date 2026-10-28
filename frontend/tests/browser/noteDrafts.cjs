@@ -150,7 +150,7 @@ async function main() {
     await select('A')
     await until(async () => await body.inputValue() === 'A 조회 실패 후에도 작성', 'A survives late response and transitions')
     assert.deepEqual(await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length })), { local: 0, session: 0 })
-    await page.getByText(/원고는 이 브라우저에 로컬 저장되며/).waitFor()
+    assert.equal(await page.getByText(/원고는 이 브라우저에 로컬 저장되며/).count(),0)
     assert.equal(await page.locator('[data-node-key="note:' + ids.A + '"]').getAttribute('aria-selected'), 'true')
     await pause(200) // Let the existing selection background transition settle.
     await page.screenshot({ path: '/private/tmp/seam-note-drafts-desktop.png', fullPage: true })
