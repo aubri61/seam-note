@@ -1,0 +1,109 @@
+{
+  "environment": {
+    "noteId": "4aa580d2-f550-477b-a29e-8ddd9391185d",
+    "folderId": "d460582c-e593-4245-91a4-533dda0d7eaf",
+    "origin": "http://127.0.0.1:25221",
+    "apiOrigin": "http://127.0.0.1:18821",
+    "dbPort": 25521,
+    "dbName": "seam_note_manual_lab",
+    "workDirectory": "/private/tmp/seam-note-manual-sync-urme2dm_"
+  },
+  "results": [
+    {
+      "name": "offline-hierarchy-cold-reopen-auto-parent-order-creation-ACK-additional-input",
+      "passed": true,
+      "folderPosts": 2,
+      "notePosts": 1,
+      "followupPuts": 1,
+      "serverVersion": 1
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/notes/0ba9f654-facd-443b-aa21-b32a35482dfe",
+      "at": 1793270010921,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793270010922,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/0ba9f654-facd-443b-aa21-b32a35482dfe",
+      "at": 1793270011093,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793270011094,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793270013180,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/folders",
+      "at": 1793270013206,
+      "operationId": "2910bf06-ca2e-4ee4-83b5-0b5d2f13b76f",
+      "hash": "dba96fc9e89f3df142c47b0ac2489ad84844c8afc26525c89cf88f7d0474b4a7",
+      "entityId": "5165d1b1-40c6-498a-b1fa-53db002769b4",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/folders",
+      "at": 1793270013223,
+      "operationId": "7ec60180-39e2-40b7-8e72-02b3e730a694",
+      "hash": "7e67b8ef0b23d268db69369ba64cbc3f059e48416daa2b80378e624627552361",
+      "entityId": "c5b948ec-1b3b-4460-bc56-16f69e16acb0",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/notes",
+      "at": 1793270013245,
+      "operationId": "d14d3ca6-f73b-4dc0-b531-2ce71aecea57",
+      "hash": "1c7d331635efc8d6bed08a79984e3ffb4a81b7fd61a1520d4a15a8a5e607a29f",
+      "entityId": "c645a6d3-39df-4961-b246-411069a067f6",
+      "status": 201
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/c645a6d3-39df-4961-b246-411069a067f6",
+      "at": 1793270013739,
+      "operationId": "2beec893-d755-4e9f-88f6-51427fdc91c5",
+      "hash": "18ef53d4ad343cd61b935f54a453de2bb03b2cf1033c0c955a0cef166c106949",
+      "expectedVersion": 0,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793270013757,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/c645a6d3-39df-4961-b246-411069a067f6",
+      "at": 1793270013775,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    }
+  ],
+  "developmentDbWrites": 0
+}

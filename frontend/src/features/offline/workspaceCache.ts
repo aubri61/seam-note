@@ -22,7 +22,9 @@ export function validateWorkspace(data: WorkspaceTreeResponse) {
     notes: data.notes.map(({ id, folderId, title, sortOrder, version, updatedAt }) => ({ id, folderId, title, sortOrder, version, updatedAt })) }
 }
 const repository = async () => (await import('@/features/local-drafts/draftDatabase')).draftRepository
+let initialization: Promise<void> | undefined
 export const workspaceStorage = {
+  initialize: () => initialization ??= repository().then(async repo => { await repo.workspaceSyncSnapshot() }).catch(error => { initialization = undefined; throw error }),
   local: async () => (await repository()).localWorkspace(),
   read: async () => (await repository()).readWorkspace(),
   save: async (data: WorkspaceTreeResponse, requestedAt: number) => (await repository()).saveWorkspace(data, requestedAt),
@@ -32,7 +34,7 @@ interface Dependencies {
   localRefresh?: boolean
   online: () => boolean
   get: typeof getWorkspaceTree
-  storage: Pick<typeof workspaceStorage, 'read' | 'save'> & { local?: () => Promise<{entities:LocalEntity[];pendingIds:string[]}> }
+  storage: Pick<typeof workspaceStorage, 'read' | 'save'> & { initialize?: () => Promise<void>; local?: () => Promise<{entities:LocalEntity[];pendingIds:string[]}> }
 }
 async function mergeLocal(view:WorkspaceView,storage:Dependencies['storage']):Promise<WorkspaceView>{
   let local: {entities:LocalEntity[];pendingIds:string[]}|undefined
@@ -52,6 +54,7 @@ async function mergeLocal(view:WorkspaceView,storage:Dependencies['storage']):Pr
 export async function loadWorkspace(options: RequestOptions = {}, dependencies: Dependencies = {
   online: () => typeof navigator === 'undefined' || navigator.onLine !== false, get: getWorkspaceTree, storage: workspaceStorage,
 }): Promise<WorkspaceView> {
+  await dependencies.storage.initialize?.()
   const requestedAt = Date.now()
   let failure: unknown
   if (dependencies.online()) {

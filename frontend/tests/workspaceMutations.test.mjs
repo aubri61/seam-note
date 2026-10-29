@@ -11,6 +11,7 @@ const deleteNoteMutationOptions = (client, onDeleted) => persistentDeleteOptions
 const { noteQueries } = await load('features/notes/noteQueries')
 // Query contract tests isolate persistence; real IndexedDB is covered by PWA/browser tests.
 const { workspaceStorage } = await load('features/offline/workspaceCache')
+workspaceStorage.initialize = async () => {}
 workspaceStorage.save = async () => {}
 workspaceStorage.local = async () => ({entities:[],pendingIds:[]})
 const { workspaceTreeQuery } = await load('features/workspace/workspaceQueries')

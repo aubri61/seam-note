@@ -18,7 +18,6 @@ import { useNoteDrafts } from '@/features/notes/useNoteDrafts'
 import { notePath } from '@/app/routing/noteRoutes'
 import { useConnectivity } from '@/features/offline/useConnectivity'
 import { PwaStatus } from '@/features/pwa/PwaStatus'
-import { useAutoCreationSync } from '@/features/manual-sync/useAutoCreationSync'
 import { useWorkspaceSync } from '@/features/manual-sync/useWorkspaceSync'
 import { localDraftStatus } from '@/features/local-drafts/localDraftStatus'
 import type { NoteEditor } from '@/features/notes/NoteEditor'
@@ -58,13 +57,12 @@ export function AppLayout() {
   const online = useConnectivity()
   const folders = useFolders()
   const drafts = useNoteDrafts(folders.selectedNoteId, folders.activeNote)
-  const creationSyncError=useAutoCreationSync(drafts.session,online)
-  const editorLoading = !folders.routeError && (folders.workspace.isPending || !!folders.selectedNoteId && folders.noteQuery.isFetching)
+  const editorLoading = !drafts.draft && !folders.routeError && (folders.workspace.isPending || !!folders.selectedNoteId && folders.noteQuery.isFetching)
   const queryError = folders.routeError ?? (!folders.workspace.data ? folders.workspace.error : null) ?? folders.detailError
   const offlineDetail = !online || folders.detailError instanceof ApiError && (folders.detailError.status === 0 || folders.detailError.status >= 500)
   const editorError = offlineDetail && drafts.draft && !folders.routeError && folders.workspace.data ? null : queryError
   const serverAvailable = online && !folders.workspace.data?.localSnapshot?.cachedAt
-  const workspaceSync = useWorkspaceSync(drafts.session, online, folders.workspace.data)
+  const workspaceSync = useWorkspaceSync(drafts.session, online, folders.workspace.data, folders.selectedNoteId)
   const [conflictNoteId,setConflictNoteId]=useState<string|null>(null),[conflictRefresh,setConflictRefresh]=useState(0)
   const conflicts=useConflictList(drafts.session,workspaceSync.busy,conflictRefresh)
   const [resolvedConflicts,setResolvedConflicts]=useState<string[]>([])
@@ -253,7 +251,6 @@ export function AppLayout() {
         />
         <PwaStatus />
         {ManualSyncDelayPanel && <Suspense fallback={null}><ManualSyncDelayPanel noteId={folders.selectedNoteId}/></Suspense>}
-        {creationSyncError&&<p role="alert" style={{padding:'8px 24px',fontSize:13}}>{creationSyncError}</p>}
         {conflicts.error&&<p role="alert">{conflicts.error}</p>}
         {(!online || folders.workspace.data?.localSnapshot && folders.workspace.data.localSnapshot.reason !== 'local-refresh') && <aside role="status" style={{ padding: '8px 24px', fontSize: 12 }}>
           {!online ? '오프라인 편집 · 변경사항은 이 브라우저에 로컬 저장됩니다.' : '저장된 로컬 목록을 표시합니다. 서버 변경사항을 아직 확인하지 못했습니다.'}
