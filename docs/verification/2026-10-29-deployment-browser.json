@@ -1,0 +1,104 @@
+{
+  "scope": "LOCAL production PWA build + real Chrome + isolated Spring/PostgreSQL; NOT Vercel/EC2/Supabase",
+  "count": 18,
+  "results": [
+    {
+      "name": "startup-initializes-local-and-pulls-only-selected-server-note",
+      "passed": true,
+      "unselectedBodyGets": 0,
+      "startupPuts": 0,
+      "triggerBurstEvents": 60
+    },
+    {
+      "name": "server-only-selection-GET-and-clean-local-latest-version",
+      "passed": true
+    },
+    {
+      "name": "focus-visibility-burst-coalesced-clean-pull",
+      "passed": true,
+      "bodyGets": 1
+    },
+    {
+      "name": "dirty-GET-protection-server-409-and-no-retry-loop",
+      "passed": true
+    },
+    {
+      "name": "existing-Diff-choice-and-immediate-manual-save-regression",
+      "passed": true
+    },
+    {
+      "name": "35-fast-inputs-one-PUT-stable-editor-and-caret",
+      "passed": true,
+      "insertTextCalls": 35,
+      "setupFillCalls": 1,
+      "putCount": 1
+    },
+    {
+      "name": "input-during-PUT-preserved-rebased-and-followup-auto-ACK",
+      "passed": true
+    },
+    {
+      "name": "online-reconnect-response-loss-same-operation-and-snapshot",
+      "passed": true,
+      "attempts": 2,
+      "distinctPayloadHashes": 1
+    },
+    {
+      "name": "PWA-offline-close-relaunch-local-workspace-edit-and-online-auto-sync",
+      "passed": true
+    },
+    {
+      "name": "rapid-A-B-A-cancels-stale-pull-keeps-auto-sync-running",
+      "passed": true
+    },
+    {
+      "name": "two-tabs-auto-sync-WebLock-one-server-application",
+      "passed": true,
+      "putCount": 1
+    },
+    {
+      "name": "real-two-tab-local-CAS-keeps-conflicting-input",
+      "passed": true
+    },
+    {
+      "name": "cold-start-recovery-barrier-uncertain-A-successor-B-false",
+      "passed": true,
+      "finalVersion": 4,
+      "serverHadAlreadyAppliedA": false
+    },
+    {
+      "name": "cold-start-recovery-barrier-uncertain-A-successor-B-true",
+      "passed": true,
+      "finalVersion": 4,
+      "serverHadAlreadyAppliedA": true
+    },
+    {
+      "name": "server-NOTE_NOT_FOUND-keeps-local-and-does-not-recreate",
+      "passed": true
+    },
+    {
+      "name": "permanent-401-no-auto-retry-manual-retry-works",
+      "passed": true
+    },
+    {
+      "name": "permanent-400-no-auto-retry-manual-retry-works",
+      "passed": true
+    },
+    {
+      "name": "persistent-503-bounded-backoff-focus-storm-no-PUT-flood",
+      "passed": true,
+      "failedAttempts": 4,
+      "intervalsMs": [
+        5083,
+        15092,
+        30114
+      ]
+    }
+  ],
+  "cloudTestsRun": false,
+  "limitations": [
+    "Synthetic fixtures only",
+    "Native OS IME and Safari not tested",
+    "Cold uncertain queue is an explicit crash-state fixture; PWA close/relaunch is a real browser restart"
+  ]
+}

@@ -18,3 +18,6 @@ An offline-first writing workspace.
 - Cross-device synchronization
 - Conflict detection and recovery
 - Document revision history
+## Deployment
+
+See [EC2 + Supabase + Vercel deployment](deploy/README.md) and the [local verification record](docs/worklogs/2026-10-29-deploy-infra.md).

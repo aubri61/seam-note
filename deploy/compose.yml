@@ -1,0 +1,57 @@
+name: seam-note-prod
+services:
+  backend:
+    image: ${BACKEND_IMAGE:?Set an immutable backend image tag}
+    restart: unless-stopped
+    environment:
+      DB_HOST: ${DB_HOST:?Set the exact Supabase Connect hostname}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:?Set the database name}
+      DB_USERNAME: ${DB_USERNAME:?Set the exact Connect username}
+      DB_PASSWORD: ${DB_PASSWORD:?Set the database password locally}
+      SPRING_PROFILES_ACTIVE: prod
+      JAVA_TOOL_OPTIONS: '-XX:MaxRAMPercentage=65 -XX:+ExitOnOutOfMemoryError'
+    volumes:
+      - ./certs/supabase-ca.crt:/run/certs/supabase-ca.crt:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 1g
+    stop_grace_period: 40s
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, --max-time, '5', 'http://localhost:8080/actuator/health/readiness']
+      interval: 30s
+      timeout: 6s
+      start_period: 90s
+      retries: 3
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: '3'}
+  caddy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    environment:
+      API_HOST: ${API_HOST:?Set the API DNS hostname}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:?Set the exact HTTPS frontend origin}
+      ACME_EMAIL: ${ACME_EMAIL:?Set the ACME contact email}
+      VALIDATION_USERNAME: ${VALIDATION_USERNAME:?Set the validation username}
+      VALIDATION_PASSWORD_HASH: ${VALIDATION_PASSWORD_HASH:?Set a bcrypt hash}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      backend: {condition: service_healthy}
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: '3'}
+volumes:
+  caddy_data:
+  caddy_config:

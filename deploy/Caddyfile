@@ -1,0 +1,34 @@
+{
+	email {$ACME_EMAIL}
+	admin off
+}
+
+{$API_HOST} {
+	header {
+		Cache-Control "no-store"
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+	}
+	route {
+		# Verification access restriction only; no per-user authorization.
+		basic_auth {
+			{$VALIDATION_USERNAME} {$VALIDATION_PASSWORD_HASH}
+		}
+		@crossOriginWrite {
+			method POST PUT PATCH DELETE
+			header Origin *
+			not header Origin {$FRONTEND_ORIGIN}
+		}
+		respond @crossOriginWrite 403
+		handle /api/* {
+			request_body {
+				max_size 2MB
+			}
+			reverse_proxy backend:8080 {
+				header_up -Authorization
+			}
+		}
+		# Actuator and every other internal path stay private.
+		respond 404
+	}
+}
