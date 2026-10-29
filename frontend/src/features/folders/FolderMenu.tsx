@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import styled from '@emotion/styled'
+import { Tooltip } from '@/components/Tooltip'
 import { Icon } from '@/components/Icon'
 
 export type FolderAction = 'add-folder' | 'add-note' | 'rename' | 'delete'
@@ -36,7 +37,7 @@ export function FolderMenu({ name, tabIndex, disabled, onAction, kind='folder' }
   }, [position])
   function close() { setPosition(null); trigger.current?.focus() }
   return <>
-    <Trigger ref={trigger} data-folder-menu data-item-menu type="button" tabIndex={tabIndex} aria-label={`${name} ${kind==='folder'?'폴더':'원고'} 메뉴`}
+    <Tooltip label={`${kind==='folder'?'폴더':'원고'} 메뉴`}><Trigger ref={trigger} data-folder-menu data-item-menu type="button" tabIndex={tabIndex} aria-label={`${name} ${kind==='folder'?'폴더':'원고'} 메뉴`}
       disabled={disabled} aria-haspopup="menu" aria-expanded={!!position}
       onKeyDown={event => event.stopPropagation()}
       onClick={event => {
@@ -44,7 +45,7 @@ export function FolderMenu({ name, tabIndex, disabled, onAction, kind='folder' }
         if (position) { close(); return }
         const bounds = event.currentTarget.getBoundingClientRect()
         setPosition({container: event.currentTarget.closest('[role="dialog"]') ?? document.body, top: Math.max(8, Math.min(bounds.bottom + 4, window.innerHeight - 166)), left: Math.max(8, Math.min(bounds.right - 172, window.innerWidth - 180))})
-      }}><Icon name="more" size={17} /></Trigger>
+      }}><Icon name="more" size={17} /></Trigger></Tooltip>
     {position && createPortal(<Popup ref={menu} role="menu" aria-label={`${name} ${kind==='folder'?'폴더':'원고'} 작업`} style={{top:position.top,left:position.left}}
       onClick={event => event.stopPropagation()} onKeyDown={event => {
         event.stopPropagation()

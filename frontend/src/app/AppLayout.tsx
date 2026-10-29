@@ -87,12 +87,13 @@ export function AppLayout() {
   const [creationMessage, setCreationMessage] = useState('')
   const titleRef = useRef<HTMLInputElement>(null)
   const pendingEditorFocus = useRef(false)
+  const createDocumentGate = useRef(false)
   const pendingCreatedFocus = useRef<{noteId:string;reached:boolean}|null>(null)
   const [createdFocusRequest,setCreatedFocusRequest] = useState<string|null>(null)
   const sidebarId = 'folders-sidebar'
   const onSidebarShortcut = useEffectEvent((event: KeyboardEvent) => {
-    if (event.isComposing || event.altKey || event.shiftKey
-      || !(event.metaKey || event.ctrlKey) || !(event.key.toLowerCase() === 'b' || event.code === 'KeyB')) return
+    if (event.defaultPrevented || event.isComposing || event.altKey || event.shiftKey
+      || !(event.metaKey || event.ctrlKey) || !(event.key === '\\' || event.code === 'Backslash')) return
     event.preventDefault()
     event.stopPropagation()
     if (event.repeat || Array.from(document.querySelectorAll('[role="dialog"][aria-modal="true"]')).some(dialog => dialog.id !== sidebarId)) return
@@ -162,11 +163,23 @@ export function AppLayout() {
     setCreationMessage('')
     if (kind === 'folder' || kind === 'root-folder') {
       folders.beginFolderCreation(kind === 'root-folder')
-    } else if (folders.creationParentId) {
-      void folders.createEmptyNote(folders.creationParentId).then(success => { if (success) showCreatedNote(success) })
     } else {
-      setCreationMessage('먼저 폴더를 만들거나 원고를 넣을 폴더를 선택해주세요.')
+      void createDocument()
     }
+  }
+  async function createDocument() {
+    if (createDocumentGate.current || !folders.workspace.data) return
+    createDocumentGate.current = true
+    try {
+      // Keep the selected destination; otherwise use the first root in existing display order.
+      let parentId = folders.creationParentId ?? folders.tree.roots[0]?.folder.id
+      if (!parentId) {
+        parentId = crypto.randomUUID()
+        if (!await folders.createFolder({id:parentId,parentId:null,name:'새 폴더'})) return
+      }
+      const createdId = await folders.createEmptyNote(parentId)
+      if (createdId) showCreatedNote(createdId)
+    } finally { createDocumentGate.current = false }
   }
   function folderAction(id: string, kind: FolderAction) {
     if (folders.busy || folders.pendingFolder) return

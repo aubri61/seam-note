@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),{chromium}=require(process.env.SEAM_NOTE_PLAYWRIGHT_MODULE||'playwright')
+async function main(){const b=await chromium.launch({channel:'chrome',headless:true});try{const ctx=await b.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'}),p=await ctx.newPage(),id='ac000000-0000-4000-8000-000000000001',folder='ac000000-0000-4000-8000-000000000002',stamp='2026-10-29T00:00:00Z',note={id,folderId:folder,title:'Test title',content:'{"type":"doc","content":[{"type":"paragraph"}]}',version:0,sortOrder:0,createdAt:stamp,updatedAt:stamp}
+ await ctx.route(u=>u.pathname.startsWith('/api/'),r=>{assert.equal(r.request().method(),'GET');return r.fulfill({json:new URL(r.request().url()).pathname==='/api/workspace/tree'?{folders:[{id:folder,parentId:null,name:'Folder',sortOrder:0,version:0}],notes:[note]}:note})})
+ await p.goto('http://127.0.0.1:25213/notes/'+id);const editor=p.getByRole('textbox',{name:'문서 내용',exact:true});await editor.waitFor();await p.getByLabel('문서 제목',{exact:true}).focus();await p.keyboard.press('Tab');assert.equal(await editor.evaluate(el=>document.activeElement===el),true)
+ await editor.fill('Test');const checks=[['굵게','Ctrl+B'],['기울임','Ctrl+I'],['실행 취소','Ctrl+Z'],['사이드바 접기','Ctrl+\\']]
+ for(const [name,key] of checks){await p.getByRole('button',{name,exact:true}).hover();const tooltip=p.getByRole('tooltip');await tooltip.waitFor();assert.ok((await tooltip.innerText()).includes(key));await p.mouse.move(1400,980);await tooltip.waitFor({state:'hidden'})}
+ assert.equal(await p.getByRole('button',{name:'실행 취소',exact:true}).locator('svg').count(),1)
+ fs.writeFileSync(new URL('../../../docs/verification/2026-10-29-title-tooltip.json',`file://${__filename}`),JSON.stringify({titleTabToBody:true,tooltipChecks:checks.map(v=>v[0]),undoSvg:true,developmentDbWrites:0},null,2)+'\n');console.log('PASS: Title Tab, tooltip labels and shortcuts, undo SVG')
+ }finally{await b.close()}}
+main().catch(e=>{console.error(e);process.exitCode=1})

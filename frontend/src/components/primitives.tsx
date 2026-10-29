@@ -1,6 +1,8 @@
+import { forwardRef, type ComponentProps } from 'react'
+import { Tooltip } from './Tooltip'
 import styled from '@emotion/styled'
 
-export const IconButton = styled.button(({ theme }) => ({
+const Button = styled.button(({ theme }) => ({
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -16,7 +18,11 @@ export const IconButton = styled.button(({ theme }) => ({
   },
 }))
 
-export const Eyebrow = styled.p(({ theme }) => ({
+export const IconButton = forwardRef<HTMLButtonElement, ComponentProps<'button'>>(function IconButton({title,...props},ref) {
+  return <Tooltip label={title ?? props['aria-label']}><Button {...props} ref={ref}/></Tooltip>
+})
+
+const EyebrowText = styled.p(({ theme }) => ({
   fontSize: '11px',
   fontWeight: 600,
   lineHeight: 1.5,
@@ -24,3 +30,5 @@ export const Eyebrow = styled.p(({ theme }) => ({
   textTransform: 'uppercase',
   color: theme.colors.mutedText,
 }))
+
+export function Eyebrow(props: ComponentProps<'p'>) { return <EyebrowText {...props}/> }

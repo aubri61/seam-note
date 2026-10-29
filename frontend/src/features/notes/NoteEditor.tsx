@@ -1,5 +1,7 @@
 import { lazy, Suspense, useState, type RefObject } from 'react'
 import styled from '@emotion/styled'
+import { Tooltip } from '@/components/Tooltip'
+import { SyncButton } from '@/components/SyncButton'
 import { Icon } from '@/components/Icon'
 import { EMPTY_DOCUMENT, documentText } from './richTextDocument'
 import type { DraftEntry } from '@/features/local-drafts/draftSession'
@@ -40,6 +42,12 @@ const Title = styled.input(({ theme }) => ({
   '&:focus, &:focus-visible': { outline: 'none', boxShadow: 'none' },
 }))
 
+const EmptyState = styled.div(({theme})=>({
+  display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:theme.spacing.md,
+  flex:1,minHeight:240,textAlign:'center',color:theme.colors.mutedText,
+  h2:{fontSize:20,fontWeight:600,color:theme.colors.text},p:{fontSize:14,lineHeight:1.7},
+}))
+
 const NewDocumentButton = styled.button(({ theme }) => ({
   position: 'fixed', right: theme.spacing.xl, bottom: theme.spacing.xl, zIndex: 2,
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -73,6 +81,7 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
 }) {
   const [backup, setBackup] = useState<{ noteId: string; revision: number; message: string } | null>(null)
   const visible = draft?.noteId === selectedNoteId ? draft : null
+  const empty = !loading && !error && !visible && !selectedNoteId
   const copyCurrent = async () => {
     if (!visible) return
     try {
@@ -93,7 +102,12 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
       <Document>
         {loading && <p role="status">원고 로딩 중</p>}
         {error && <div role="alert"><p>원고 조회 실패: {error.message}</p>{canRetry && <button type="button" onClick={onRetry}>다시 시도</button>}</div>}
-        {!loading && !error && !visible && <p role="status">{selectedNoteId ? '원고를 선택해주세요.' : '표시할 원고가 없습니다.'}</p>}
+        {empty && <EmptyState aria-label="새 원고 시작">
+          <h2>새 원고를 만들어보세요</h2>
+          <p>왼쪽에서 폴더를 선택하거나 바로 원고를 생성하세요.</p>
+          <SyncButton type="button" disabled={busy || !canCreate} onClick={onCreateNote}>노트 생성</SyncButton>
+        </EmptyState>}
+        {!empty && !loading && !error && !visible && <p role="status">원고를 선택해주세요.</p>}
         {localEntry?.error && localEntry.phase!=='conflict' && <div role="alert">
           <p>{localEntry.error}</p>
           {visible && <>
@@ -103,12 +117,17 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
           </>}
           <button type="button" onClick={onRetryLocal}>로컬 저장 다시 시도</button>
         </div>}
-        <Title ref={titleRef} aria-label="문서 제목" placeholder={visible ? '제목 없음' : ''} value={visible?.title ?? ''} maxLength={200}
-          readOnly={!visible} onChange={event => { if (visible) onEdit(visible.noteId, { title: event.target.value }) }} />
+        {!empty && <><Title ref={titleRef} aria-label="문서 제목" placeholder={visible ? '제목 없음' : ''} value={visible?.title ?? ''} maxLength={200}
+          readOnly={!visible} onKeyDown={event=>{
+            if(event.key==='Tab'&&!event.shiftKey&&!event.altKey&&!event.ctrlKey&&!event.metaKey&&!event.nativeEvent.isComposing){
+              const body=event.currentTarget.closest('section')?.querySelector<HTMLElement>('[contenteditable="true"][role="textbox"]')
+              if(body){event.preventDefault();body.focus()}
+            }
+          }} onChange={event => { if (visible) onEdit(visible.noteId, { title: event.target.value }) }} />
         <Suspense fallback={<p role="status">에디터 준비 중</p>}><RichTextEditor key={visible?.noteId ?? 'empty'} content={visible?.content ?? EMPTY_DOCUMENT} editable={!!visible}
-          onChange={content=>{if(visible)onEdit(visible.noteId,{content})}} /></Suspense>
+          onChange={content=>{if(visible)onEdit(visible.noteId,{content})}} /></Suspense></>}
       </Document>
-      <NewDocumentButton type="button" disabled={busy || !canCreate} onClick={onCreateNote} aria-label="새 문서" title="빈 원고 생성"><Icon name="pencil" size={24} /></NewDocumentButton>
+      <Tooltip label="새 원고 생성"><NewDocumentButton type="button" disabled={busy || !canCreate} onClick={onCreateNote} aria-label="새 문서" ><Icon name="pencil" size={24} /></NewDocumentButton></Tooltip>
     </Panel>
   )
 }

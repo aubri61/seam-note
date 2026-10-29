@@ -1,5 +1,6 @@
 import type { Ref } from 'react'
 import styled from '@emotion/styled'
+import { Tooltip } from '@/components/Tooltip'
 import { SyncButton as SaveButton } from '@/components/SyncButton'
 import { Icon } from '@/components/Icon'
 import { IconButton } from '@/components/primitives'
@@ -59,13 +60,13 @@ export function AppHeader({ online, sidebarOpen, isMobile, sidebarId, onToggleSi
       <div>
         <IconButton
           ref={toggleRef}
-          aria-keyshortcuts="Meta+B Control+B"
+          aria-keyshortcuts={'Meta+\\ Control+\\'}
           type="button"
           aria-label={sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'}
           aria-expanded={sidebarOpen}
           aria-controls={sidebarId}
           aria-haspopup={isMobile ? 'dialog' : undefined}
-          title={`${sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'} (⌘B / Ctrl+B)`}
+          title={`${sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'} (⌘\\ / Ctrl+\\)`}
           onClick={onToggleSidebar}
         >
           <Icon name="sidebar" size={19} />
@@ -75,9 +76,9 @@ export function AppHeader({ online, sidebarOpen, isMobile, sidebarId, onToggleSi
       <div>
         {!hasConflict && <SyncStatus status={status} />}
 
-        {online ? <SaveButton data-workspace-sync aria-keyshortcuts="Meta+S Control+S" title="동기화 (⌘S / Ctrl+S)" aria-label="모든 변경사항 동기화" aria-busy={workspaceSync.busy} type="button" disabled={workspaceSync.disabled} onClick={workspaceSync.onSync} aria-describedby="workspace-sync-feedback">
+        {online ? <Tooltip label="동기화 (⌘S / Ctrl+S)"><SaveButton data-workspace-sync aria-keyshortcuts="Meta+S Control+S" aria-label="모든 변경사항 동기화" aria-busy={workspaceSync.busy} type="button" disabled={workspaceSync.disabled} onClick={workspaceSync.onSync} aria-describedby="workspace-sync-feedback">
           <Icon name="sync" size={16}/>{workspaceSync.busy?'동기화 중…':'동기화'}
-        </SaveButton> : <OfflineStatus role="status">현재 오프라인 작업 중</OfflineStatus>}
+        </SaveButton></Tooltip> : <OfflineStatus role="status">현재 오프라인 작업 중</OfflineStatus>}
         <FolderMenu kind="note" name="현재" tabIndex={0} disabled={!canDelete} onAction={onDelete}/>
 
       </div>

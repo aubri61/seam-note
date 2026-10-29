@@ -4,7 +4,7 @@
 
 - `feat/tiptap-editor`, 시작 `bb1a039` (최신 main, PR #3 merge).
 - Tiptap React/PM/StarterKit 3.32.0. 문단·bold/italic·bullet/ordered list·hardBreak·undo/redo만 제공한다. 이미지·링크·heading·코드블록·협업 확장은 등록하지 않는다.
-- 기존 폴더/노트 생성 자동 반영은 유지한다. NOTE_UPDATE 자동 서버 동기화는 추가하지 않는다. 원고 수정은 기존 전체 동기화/Command·Ctrl+S로 전송한다. Command·Ctrl+B는 기존 사이드바 토글이 우선하며 굵게는 툴바를 사용한다.
+- 기존 폴더/노트 생성 자동 반영은 유지한다. NOTE_UPDATE 자동 서버 동기화는 추가하지 않는다. 원고 수정은 기존 전체 동기화/Command·Ctrl+S로 전송한다. Command·Ctrl+B는 굵게, I는 기울임이다. 사이드바는 Command·Ctrl+Backslash로 토글한다.
 
 ## 한 가지 저장 표현
 
@@ -69,3 +69,11 @@ node frontend/tests/browser/tiptapLive.cjs
 공식 API 확인 자료: [Tiptap React](https://tiptap.dev/docs/editor/getting-started/install/react), [setContent/emitUpdate](https://tiptap.dev/docs/editor/api/commands/content/set-content), [React performance](https://tiptap.dev/docs/guides/performance). 실제 설치된3.32.0 타입·소스와 함께 확인했다.
 
 과거 plaintext/textarea 기반 단독 브라우저 하네스는 새 UI 저장 계약의 실행 경로가 아니다. 이번 전환의 브라우저 회귀 기준은 tiptapLive와 JSON fixture로 갱신한 inFlightCrashRecovery이며, 옛 실증 결과는 삭제/덮어쓰지 않았다.
+
+## 2026-10-29: 단축키와 빈 원고 화면
+
+- Ctrl/Command+B 굵게, I 기울임, Shift+8 글머리 목록, Shift+7 번호 목록, Z 실행취소, Shift+Z 또는 Y 다시실행을 에디터 안에서 지원한다. 두 플랫폼 modifier를 명시해 Mac에서도 Ctrl 조합을 사용할 수 있다. 툴바에 title/aria-keyshortcuts를 제공한다.
+- 사이드바는 Ctrl/Command+\\로 옮겼다. S는 기존 전체 동기화다.
+- 원고가 없는 기본 경로는 중앙 안내와 노트 생성 버튼을 표시하며 빈 readonly Editor를 렌더하지 않는다.
+- 생성 위치 우선순위: 선택 폴더 → 현재 원고의 폴더 → 기존 트리 sortOrder/id 순 첫 최상위 폴더. 폴더가 전혀 없으면 새 UUID의 최상위 ‘새 폴더’를 먼저 로컬 생성한 뒤 그 안에 노트를 만든다.
+- 폴더 생성 실패 시 노트는 만들지 않는다. 노트 생성이 실패하면 이미 생성한 폴더는 유지하고 재시도를 제공한다. 두 단계 전체를 하나의 트랜잭션이라고 주장하지 않는다. 각 기존 create의 엔티티/Outbox 원자성은 유지된다. 동기 ref gate로 두 단계 중 중복 클릭을 막는다.
