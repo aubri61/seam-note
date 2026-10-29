@@ -1,3 +1,4 @@
+import { shortcutLabel } from '@/lib/keyboard/shortcutLabel'
 import { useRef } from 'react'
 import type { ReactNode } from 'react'
 import styled from '@emotion/styled'
@@ -105,20 +106,12 @@ const CreatePicker = styled.details(({ theme }) => ({
 }))
 
 
-const Footnote = styled.p(({ theme }) => ({
-  marginTop: 'auto',
-  padding: `${theme.spacing.xl} ${theme.spacing.md} 0`,
-  fontSize: '10px',
-  lineHeight: 1.8,
-  color: theme.colors.mutedText,
-}))
-
 export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate, onFolderAction, onDeleteNote, canDeleteNote, creationFeedback }: {
   onClose: () => void
   folders: ReturnType<typeof useFolders>
   draftTitles: Readonly<Partial<Record<string, string>>>
   onSelectNote: (id: string) => void
-  onCreate: (kind: 'folder' | 'root-folder' | 'document') => void
+  onCreate: (kind: 'folder' | 'root-folder' | 'document' | 'unfiled-document') => void
   onFolderAction: (id: string, action: FolderAction) => void
   onDeleteNote:(id:string)=>void
   canDeleteNote:(id:string)=>boolean
@@ -134,7 +127,7 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
           <h1>seam note</h1>
           <p>당신의 생각이 끊기지 않도록</p>
         </div>
-        <IconButton type="button" aria-label="사이드바 닫기" title="사이드바 접기" onClick={onClose}>
+        <IconButton type="button" aria-label="사이드바 닫기" title={shortcutLabel('사이드바 접기', '\\')} onClick={onClose}>
           <Icon name="collapse" size={17} />
         </IconButton>
       </Brand>
@@ -156,6 +149,7 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
             <div aria-label="추가할 항목">
               <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('folder') }}><Icon name="folder" size={17} />새 폴더</button>
               <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('document') }}><Icon name="note" size={17} />새 문서</button>
+              <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('unfiled-document') }}><Icon name="note" size={17} />폴더 없이 새 문서</button>
             </div>
           </CreatePicker>
         </FolderHeading>
@@ -174,7 +168,6 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
           openFolders={folders.openFolders} onFolderOpen={folders.setFolderOpen} onSelect={onSelectNote}
         />}
       </nav>
-      <Footnote>A little room for everything on your mind.<br />로컬 저장과 서버 동기화는 별개입니다.</Footnote>
     </Panel>
   )
 }

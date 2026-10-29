@@ -34,3 +34,11 @@ export function creationParent(tree: WorkspaceTreeModel, selection: TreeSelectio
   const note = selection?.kind === 'note' ? tree.notes.get(selection.id) : undefined
   return (note ?? (activeNoteId ? tree.notes.get(activeNoteId) : undefined))?.note.folderId ?? null
 }
+
+export function folderSubtree(data: import('@/lib/api/types').WorkspaceTreeResponse | undefined, id: string) {
+  const folders=new Set([id]),children=new Map<string,string[]>()
+  for(const folder of data?.folders??[])if(folder.parentId){const ids=children.get(folder.parentId)??[];ids.push(folder.id);children.set(folder.parentId,ids)}
+  const stack=[id]
+  while(stack.length){for(const child of children.get(stack.pop()!)??[])if(!folders.has(child)){folders.add(child);stack.push(child)}}
+  return {folderIds:[...folders],noteIds:(data?.notes??[]).filter(n=>n.folderId&&folders.has(n.folderId)).map(n=>n.id)}
+}

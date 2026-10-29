@@ -1,0 +1,11 @@
+{
+  "titleTabToBody": true,
+  "tooltipChecks": [
+    "굵게",
+    "기울임",
+    "실행 취소",
+    "사이드바 접기"
+  ],
+  "undoSvg": true,
+  "developmentDbWrites": 0
+}

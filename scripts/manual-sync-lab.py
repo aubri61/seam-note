@@ -45,6 +45,9 @@ def wait_http(url, child, timeout=90):
         time.sleep(.2)
     raise RuntimeError('Timed out waiting for isolated lab; logs: '+str(work))
 
+def rich(text):
+    return json.dumps({'type':'doc','content':[{'type':'paragraph',**({'content':[{'type':'text','text':text}]} if text else {})}]},ensure_ascii=False,separators=(',',':'))
+
 def api(method,path,body=None,operation_id=None):
     raw=None if body is None else json.dumps(body).encode()
     req=urllib.request.Request(f'http://127.0.0.1:{a.api_port}/api'+path,data=raw,headers={'Content-Type':'application/json',**({'Idempotency-Key':operation_id} if operation_id else {})},method=method)
@@ -65,10 +68,10 @@ try:
     server=start(['java','-jar',ROOT/'backend/build/libs/backend-0.0.1-SNAPSHOT.jar',f'--server.port={a.api_port}',f'--spring.datasource.url={db_url}','--spring.datasource.username=postgres','--spring.datasource.password=','--spring.devtools.restart.enabled=false'],'spring.log')
     wait_http(f'http://127.0.0.1:{a.api_port}/api/workspace/tree',server)
     folder=api('POST','/folders',{'id':str(uuid.uuid4()),'name':'수동 동기화 실험 전용'})
-    note=api('POST','/notes',{'id':str(uuid.uuid4()),'folderId':folder['id'],'title':'실험 원고','content':'격리된 초기 본문'})
+    note=api('POST','/notes',{'id':str(uuid.uuid4()),'folderId':folder['id'],'title':'실험 원고','content':rich('격리된 초기 본문')})
     if a.delay:
         for _ in range(2):
-            note=api('PUT','/notes/'+note['id'],{'title':note['title'],'content':note['content']+' 실험 기준','expectedVersion':note['version']},str(uuid.uuid4()))
+            note=api('PUT','/notes/'+note['id'],{'title':note['title'],'content':rich('격리된 초기 본문'+' 실험 기준'*(_+1)),'expectedVersion':note['version']},str(uuid.uuid4()))
     config=work/'vite.config.mjs'
     config.write_text("import config from "+json.dumps(str(ROOT/'frontend/vite.config.ts'))+"\nexport default {...config,cacheDir:"+json.dumps(str(work/'vite-cache'))+"}\n")
     ui_env={**base,'SEAM_NOTE_API_TARGET':f'http://127.0.0.1:{a.api_port}'}

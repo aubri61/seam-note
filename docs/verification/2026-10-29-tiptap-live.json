@@ -1,0 +1,175 @@
+{
+  "environment": {
+    "noteId": "65c8932a-977e-49ad-bd12-72923f510f66",
+    "folderId": "b7a0163a-5621-4b77-8566-46ee347273d7",
+    "origin": "http://127.0.0.1:25221",
+    "apiOrigin": "http://127.0.0.1:18821",
+    "dbPort": 25521,
+    "dbName": "seam_note_manual_lab",
+    "workDirectory": "/private/tmp/seam-note-manual-sync-4mw4xlda",
+    "productionOrigin": "http://127.0.0.1:25203",
+    "artifacts": "/var/folders/j0/4ncpc9m90tg_c7d24lc1kvnr0000gn/T/seam-tiptap-live-dzZYmm"
+  },
+  "results": [
+    {
+      "name": "rich-formatting-undo-redo-local-reload-note-switch",
+      "passed": true,
+      "contentHash": "fcaef911a56c70020189bee9676fe11a91eab75ba1b61e6191bc9dc1d1f6a8c0",
+      "sidebarShortcutDoesNotToggleBold": true
+    },
+    {
+      "name": "empty-paragraph-hardbreak-korean-composition-events-paste",
+      "passed": true,
+      "nativeOsIme": "not automated; composition DOM events plus Korean insertText tested"
+    },
+    {
+      "name": "existing-rich-update-server-ack",
+      "passed": true,
+      "version": 1
+    },
+    {
+      "name": "inflight-additional-rich-input-preserved-and-rebased",
+      "passed": true,
+      "serverVersion": 3
+    },
+    {
+      "name": "lost-response-reload-same-key-snapshot-replay",
+      "passed": true,
+      "operationId": "03a4d6f5-377c-4aa0-8e0f-d6eb00380aa9",
+      "serverVersion": 4
+    },
+    {
+      "name": "server-version-conflict-diff-choose-mine-keeps-format",
+      "passed": true,
+      "version": 6
+    },
+    {
+      "name": "server-version-conflict-choose-other-keeps-format-and-recovery-copy",
+      "passed": true
+    },
+    {
+      "name": "two-tabs-real-local-cas-diff-and-safe-choice",
+      "passed": true
+    },
+    {
+      "name": "pwa-offline-folder-note-create-close-reopen-rich-edit",
+      "passed": true,
+      "noteId": "7da5eb9a-1bec-4eb5-9621-13ca4a33a9ae",
+      "apiCacheEntries": 0
+    },
+    {
+      "name": "offline-creation-parent-order-online-create-followup-full-workspace-ack",
+      "passed": true,
+      "version": 0
+    },
+    {
+      "name": "server-get-failure-does-not-delete-rich-local-draft",
+      "passed": true
+    },
+    {
+      "name": "long-korean-manuscript-edit-stable-editor-instance",
+      "passed": true,
+      "characters": 42500,
+      "bulkInputToCommitMs": 763,
+      "lastInputToCommitMs": 469,
+      "measurement": "Includes real UI event, serialization, debounce and IndexedDB; one run, not a percentile or improvement claim"
+    },
+    {
+      "name": "long-note-switch-back-preserves-rich-draft",
+      "passed": true,
+      "roundTripMs": 175
+    }
+  ],
+  "requests": [
+    {
+      "method": "PUT",
+      "path": "/api/notes/91daa474-4f37-4707-832d-f32ed650d699",
+      "key": "a94730e3-9af0-4a90-b59f-8454a29301dc",
+      "payloadHash": "3925f6ee5edcbf59c3933732eb619dbbe7c370429b4d939eff586edede75156f",
+      "expectedVersion": 0,
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/91daa474-4f37-4707-832d-f32ed650d699",
+      "key": "1de4c568-4615-4e24-9004-b7c7a6cf8929",
+      "payloadHash": "2c80a924272a6389f66ba575af61dfbc1dc59d9736e57ef0d0412efd5282060d",
+      "expectedVersion": 1,
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/91daa474-4f37-4707-832d-f32ed650d699",
+      "key": "54ffb14c-edbc-4d18-a8dd-4c97804c46c5",
+      "payloadHash": "8cbfe60f434dd5b7c8e882770ecf7e3c02252980bf66fb28e73daa6910ea6ed1",
+      "expectedVersion": 2,
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/91daa474-4f37-4707-832d-f32ed650d699",
+      "key": "03a4d6f5-377c-4aa0-8e0f-d6eb00380aa9",
+      "payloadHash": "8241db0d112668d1539ec1050b750bfdb184d96309091fb5e37dd166273ac61a",
+      "expectedVersion": 3,
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/91daa474-4f37-4707-832d-f32ed650d699",
+      "key": "03a4d6f5-377c-4aa0-8e0f-d6eb00380aa9",
+      "payloadHash": "8241db0d112668d1539ec1050b750bfdb184d96309091fb5e37dd166273ac61a",
+      "expectedVersion": 3,
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/91daa474-4f37-4707-832d-f32ed650d699",
+      "key": "b2e74a59-1809-44c1-9e5d-2e3f4321f2e2",
+      "payloadHash": "84fc4b71189ebc34503e489e53c170db267f07fd914465afbbdf5becafbac8ab",
+      "expectedVersion": 4,
+      "status": 409
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/91daa474-4f37-4707-832d-f32ed650d699",
+      "key": "0e9221df-c2bb-43b3-82d1-dc3f9e24111b",
+      "payloadHash": "01d2175b9b14d8b81678ec940d9ce26e44137d347e52ca04efd98d389353c025",
+      "expectedVersion": 5,
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/91daa474-4f37-4707-832d-f32ed650d699",
+      "key": "c2a4b484-8101-4880-a7ad-a379d493b726",
+      "payloadHash": "1a41868b07187f2535730adff6de04a0c857a126269b64a064306ab69104c0e6",
+      "expectedVersion": 6,
+      "status": 409
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/91daa474-4f37-4707-832d-f32ed650d699",
+      "key": "653a7ae6-f2f9-4134-ae93-f59a08adda62",
+      "payloadHash": "01a63ecd74e6cbb3fc64447e36e4688fc1f271047587fd8c991deda4ca75aa9b",
+      "expectedVersion": 7,
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/folders",
+      "key": "3e49b2d3-8ed7-422b-aaaa-3a743278320c",
+      "payloadHash": "fa31277b17fb274c47f7167f2b0941cd6438d63983fe3336ea68003d8dbe6e5c",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/notes",
+      "key": "8256de1b-e4a4-4175-af90-d7063191d0d7",
+      "payloadHash": "5958da10d05585f58028ca8107f5a1369ac5f6036cfc3e6e3641fb716926b3be",
+      "status": 201
+    }
+  ],
+  "limits": [
+    "Native OS Korean IME candidate window not automated; Korean text + composition DOM events checked.",
+    "One long-document measurement; no statistical performance claim."
+  ]
+}

@@ -30,8 +30,8 @@ public class NoteService {
         lock.acquire();
         UUID id = request.getId() == null ? UUID.randomUUID() : request.getId();
         if (notes.existsById(id)) throw new BusinessException(ErrorCode.DUPLICATE_ENTITY_ID);
-        Folder folder = folders.requireFolder(request.getFolderId());
-        Note note = new Note(id, folder, request.getTitle(), request.getContent(), Math.addExact(notes.maxOrder(folder.getId()), 1));
+        Folder folder = request.getFolderId() == null ? null : folders.requireFolder(request.getFolderId());
+        Note note = new Note(id, folder, request.getTitle(), request.getContent(), Math.addExact(notes.maxOrder(request.getFolderId()), 1));
         em.persist(note);
         em.flush();
         return new NoteResponse(note);
@@ -53,9 +53,9 @@ public class NoteService {
     public NoteResponse move(UUID id, MoveNoteRequest request) {
         lock.acquire();
         Note note = requireNote(id);
-        Folder target = folders.requireFolder(request.getTargetFolderId());
-        if (!note.getFolder().getId().equals(target.getId())) {
-            note.move(target, Math.addExact(notes.maxOrder(target.getId()), 1));
+        Folder target = request.getTargetFolderId() == null ? null : folders.requireFolder(request.getTargetFolderId());
+        if (!Objects.equals(note.getFolder() == null ? null : note.getFolder().getId(), request.getTargetFolderId())) {
+            note.move(target, Math.addExact(notes.maxOrder(request.getTargetFolderId()), 1));
         em.flush();
         }
         return new NoteResponse(note);

@@ -27,7 +27,7 @@ public class IdempotentCreations {
     }
     @Transactional(isolation=Isolation.READ_COMMITTED)
     public String note(CreateNoteRequest r,String key) {
-        return apply("NOTE_CREATE",r.getId(),key,new String[]{r.getFolderId().toString(),r.getTitle(),r.getContent()},()->notes.createNote(r));
+        return apply("NOTE_CREATE",r.getId(),key,new String[]{Objects.toString(r.getFolderId(),"root"),r.getTitle(),r.getContent()},()->notes.createNote(r));
     }
     public java.net.URI location(String prefix,String response) { return java.net.URI.create(prefix+json.readValue(response,java.util.Map.class).get("id")); }
     private String apply(String type,UUID id,String key,String[] fields,Supplier<Object> create) {

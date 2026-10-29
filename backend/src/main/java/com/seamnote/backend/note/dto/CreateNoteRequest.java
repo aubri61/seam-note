@@ -6,11 +6,11 @@ import jakarta.validation.constraints.*;
 public class CreateNoteRequest {
 
     private UUID id;
-    @NotNull
     private UUID folderId;
     @NotNull @Size(max = 200)
     private String title;
     @NotNull
+    @com.seamnote.backend.note.validation.TiptapDocument
     private String content;
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }

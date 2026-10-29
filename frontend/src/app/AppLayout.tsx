@@ -87,13 +87,15 @@ export function AppLayout() {
   const [creationMessage, setCreationMessage] = useState('')
   const titleRef = useRef<HTMLInputElement>(null)
   const pendingEditorFocus = useRef(false)
+  const createDocumentGate = useRef(false)
   const pendingCreatedFocus = useRef<{noteId:string;reached:boolean}|null>(null)
   const [createdFocusRequest,setCreatedFocusRequest] = useState<string|null>(null)
   const sidebarId = 'folders-sidebar'
   const onSidebarShortcut = useEffectEvent((event: KeyboardEvent) => {
     if (event.defaultPrevented || event.isComposing || event.altKey || event.shiftKey
-      || !(event.metaKey || event.ctrlKey) || !(event.key.toLowerCase() === 'b' || event.code === 'KeyB')) return
+      || !(event.metaKey || event.ctrlKey) || !(event.key === '\\' || event.code === 'Backslash')) return
     event.preventDefault()
+    event.stopPropagation()
     if (event.repeat || Array.from(document.querySelectorAll('[role="dialog"][aria-modal="true"]')).some(dialog => dialog.id !== sidebarId)) return
     // Closing the desktop sidebar must not leave focus inside its inert subtree.
     // Radix restores mobile drawer focus through onCloseAutoFocus.
@@ -102,8 +104,8 @@ export function AppLayout() {
   })
   useEffect(() => {
     const listener = (event: KeyboardEvent) => onSidebarShortcut(event)
-    window.addEventListener('keydown', listener)
-    return () => window.removeEventListener('keydown', listener)
+    window.addEventListener('keydown', listener, true)
+    return () => window.removeEventListener('keydown', listener, true)
   }, [])
 
   // Reset before rendering the new presentation so an open desktop sidebar
@@ -156,16 +158,24 @@ export function AppLayout() {
     pendingCreatedFocus.current = {noteId,reached:false}
     setCreatedFocusRequest(noteId)
   }
-  function create(kind: 'folder' | 'root-folder' | 'document') {
+  function create(kind: 'folder' | 'root-folder' | 'document' | 'unfiled-document') {
     if (folders.busy || folders.pendingFolder) return
     setCreationMessage('')
     if (kind === 'folder' || kind === 'root-folder') {
       folders.beginFolderCreation(kind === 'root-folder')
-    } else if (folders.creationParentId) {
-      void folders.createEmptyNote(folders.creationParentId).then(success => { if (success) showCreatedNote(success) })
     } else {
-      setCreationMessage('먼저 폴더를 만들거나 원고를 넣을 폴더를 선택해주세요.')
+      void createDocument(kind==='unfiled-document')
     }
+  }
+  async function createDocument(unfiled=false) {
+    if (createDocumentGate.current || !folders.workspace.data) return
+    createDocumentGate.current = true
+    try {
+      // No selection means an unfiled workspace note; never invent a parent folder.
+      const parentId = unfiled ? null : folders.creationParentId
+      const createdId = await folders.createEmptyNote(parentId)
+      if (createdId) showCreatedNote(createdId)
+    } finally { createDocumentGate.current = false }
   }
   function folderAction(id: string, kind: FolderAction) {
     if (folders.busy || folders.pendingFolder) return

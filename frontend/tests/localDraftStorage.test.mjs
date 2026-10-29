@@ -394,3 +394,35 @@ test('input arriving after choice transaction commit remains in memory and needs
  assert.equal(get().draft.content,'newer input');assert.equal(get().phase,'waiting');assert.equal(hasUnprotectedChanges(session.getSnapshot()),true)
  await session.flushLatest('A');assert.equal(repo.records.get('A').content,'newer input')
 })
+
+test('missing-row restoration retains additional input arriving during its atomic commit', async t => {
+  const {repo,session,get}=setup(t,stored()),gate=deferred()
+  let captured
+  repo.restoreMissing=async(draft,revision,checkpoint,writer)=>{
+    captured=checkpoint
+    await gate.promise
+    if(repo.records.has(draft.noteId))throw new LocalDraftConflict()
+    return repo.write(draft,revision,undefined,writer)
+  }
+  await ready(session)
+  repo.records.delete('A')
+  session.edit('A',{content:'input A'})
+  const restoring=session.flush('A');await settle()
+  assert.equal(captured.revision,7);assert.equal(captured.draft.content,'로컬 원고')
+  session.edit('A',{content:'input A+B'})
+  gate.resolve();await restoring;await session.flushLatest('A')
+  assert.equal(repo.records.get('A').content,'input A+B')
+  assert.equal(get().draft.content,'input A+B')
+  assert.equal(get().revision,get().savedRevision)
+})
+test('a concurrent replacement row is never overwritten by missing-row recovery', async t => {
+  const {repo,session,get}=setup(t,stored())
+  repo.restoreMissing=async()=>{
+    repo.records.set('A',{...stored('A','other tab'),storageToken:'other-token',localRevision:8})
+    throw new LocalDraftConflict()
+  }
+  await ready(session);repo.records.delete('A');session.edit('A',{content:'current tab'})
+  await session.flush('A')
+  assert.equal(repo.records.get('A').content,'other tab')
+  assert.equal(get().draft.content,'current tab');assert.equal(get().phase,'conflict')
+})

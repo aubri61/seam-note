@@ -71,7 +71,6 @@ public class FolderService {
     public void delete(UUID id) {
         lock.acquire();
         Folder folder = requireFolder(id);
-        if (folders.existsByParentId(id) || notes.existsByFolderId(id)) throw new BusinessException(ErrorCode.FOLDER_NOT_EMPTY);
         folders.delete(folder);
         em.flush();
     }

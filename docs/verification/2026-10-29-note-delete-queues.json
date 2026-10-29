@@ -1,0 +1,88 @@
+{
+  "environment": "Production build + headless Chrome, isolated browser contexts, real IndexedDB, synthetic API only",
+  "before": {
+    "reproduced": true,
+    "serverDeleted": true,
+    "localDraftRemained": true,
+    "outboxRemained": 1,
+    "stalePutAfterDelete": 1,
+    "unexpectedRecoveryModal": true
+  },
+  "after": [
+    {
+      "mode": "normal",
+      "passed": true,
+      "noStaleDraftOrQueues": true,
+      "noResend": true,
+      "noRecoveryModal": true,
+      "deleteCalls": 1
+    },
+    {
+      "mode": "failure",
+      "passed": true,
+      "noStaleDraftOrQueues": true,
+      "noResend": true,
+      "noRecoveryModal": true,
+      "deleteCalls": 2
+    },
+    {
+      "mode": "quota",
+      "passed": true,
+      "noStaleDraftOrQueues": true,
+      "noResend": true,
+      "noRecoveryModal": true,
+      "deleteCalls": 2
+    },
+    {
+      "mode": "residue",
+      "passed": true,
+      "noStaleDraftOrQueues": true,
+      "noResend": true,
+      "noRecoveryModal": true,
+      "deleteCalls": 1
+    },
+    {
+      "mode": "peer",
+      "passed": true,
+      "noStaleDraftOrQueues": true,
+      "noResend": true,
+      "noRecoveryModal": true,
+      "deleteCalls": 1
+    },
+    {
+      "mode": "open-modal",
+      "passed": true,
+      "noStaleDraftOrQueues": true,
+      "noResend": true,
+      "noRecoveryModal": true,
+      "deleteCalls": 1
+    }
+  ],
+  "orphan": {
+    "passed": true,
+    "orphanOutboxPreserved": true,
+    "noFakeDraft": true,
+    "noAutoRecoveryModal": true,
+    "noOrphanGetOrPut": true
+  },
+  "unitTests": {
+    "passed": 183,
+    "failed": 0
+  },
+  "lint": "passed",
+  "build": "passed",
+  "existingDiscardRegressionScenarios": 6,
+  "sourceHashes": {
+    "frontend/src/features/notes/noteDeletion.ts": "173c5fbaddf9042a14b7de19d1371bb5ed01987c3709aec166dd5ee8c6b8f832",
+    "frontend/src/features/local-drafts/draftDatabase.ts": "36937e89f086539e5f7f459f6983ca7f45b75498a08c91e6156d62641787ade6",
+    "frontend/src/features/local-drafts/draftSession.ts": "9566ab382d2a6c9e7af7b0911307627619c5e14d1ab956b16ead21cdd9f6fa81",
+    "frontend/src/features/conflicts/useConflictList.ts": "e532b95fcb340f4c64267b0faf1eb9db556fb4d968b7aa73edfc913db07148b4",
+    "frontend/src/features/conflicts/ConflictDialog.tsx": "d3ac3e196bc995f26a116d8fc14474c34b2fc9889f689361be1120960276d3bc"
+  },
+  "developmentDbWrites": 0,
+  "limits": [
+    "No inspection or bulk cleanup of the user browser profile",
+    "Existing records without proven deletion intent are preserved",
+    "Server responses in this investigation use a mock; no new PostgreSQL experiment was run"
+  ]
+}

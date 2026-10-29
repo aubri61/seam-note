@@ -1,0 +1,56 @@
+{
+  "results": [
+    {
+      "scenario": "root-fallback",
+      "emptyCentered": true,
+      "lastNoteDeleteAndRecreate": false,
+      "createdNoteId": "bf23308c-b70b-4800-a06f-2b1e56b6cc39",
+      "duplicateClicksOneNote": true,
+      "selectedOrRootDestination": true,
+      "offline": false,
+      "writeCount": 1,
+      "shortcuts": "Command/Control B I, list keys, Z/ShiftZ/Y, Backslash passed"
+    },
+    {
+      "scenario": "no-folders",
+      "emptyCentered": true,
+      "lastNoteDeleteAndRecreate": true,
+      "createdNoteId": "831a2d85-da6b-49c6-a3b4-b51f806c574b",
+      "duplicateClicksOneNote": true,
+      "selectedOrRootDestination": true,
+      "offline": false,
+      "writeCount": 3
+    },
+    {
+      "scenario": "selected-folder",
+      "emptyCentered": true,
+      "lastNoteDeleteAndRecreate": false,
+      "createdNoteId": "6c6521dd-1007-4cd6-8f72-6e0aa9cdf666",
+      "duplicateClicksOneNote": true,
+      "selectedOrRootDestination": true,
+      "offline": false,
+      "writeCount": 1
+    },
+    {
+      "scenario": "offline-no-folders",
+      "emptyCentered": true,
+      "lastNoteDeleteAndRecreate": false,
+      "createdNoteId": "57f46531-4ea4-4840-802c-89864ea8e194",
+      "duplicateClicksOneNote": true,
+      "selectedOrRootDestination": true,
+      "offline": true,
+      "writeCount": 0
+    },
+    {
+      "scenario": "mobile-empty",
+      "emptyCentered": true,
+      "lastNoteDeleteAndRecreate": false,
+      "createdNoteId": "41fc402d-6115-413a-a8ff-37e9c61fab5f",
+      "duplicateClicksOneNote": true,
+      "selectedOrRootDestination": true,
+      "offline": false,
+      "writeCount": 1
+    }
+  ],
+  "developmentDbWrites": 0
+}

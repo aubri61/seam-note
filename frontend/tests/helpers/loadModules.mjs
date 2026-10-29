@@ -8,13 +8,13 @@ import ts from 'typescript'
 // Exercise real TypeScript modules using the project's existing test tools.
 const temporary = mkdtempSync(join(tmpdir(), 'seam-note-api-tests-'))
 for (const name of [
-  'features/conflicts/conflictModel', 'features/conflicts/conflictService', 'features/conflicts/lineDiff',
+  'features/notes/richTextDocument', 'features/conflicts/conflictModel', 'features/conflicts/conflictService', 'features/conflicts/lineDiff',
   'features/manual-sync/autoCreationSync', 'features/manual-sync/SyncCoordinator', 'features/manual-sync/workspaceSyncStorage', 'features/manual-sync/syncLock', 'features/manual-sync/creationSync',
   'features/outbox/creationStorage', 'features/outbox/creationModel', 'features/offline/workspaceCache', 'features/manual-sync/syncContract', 'features/manual-sync/manualSync', 'features/outbox/outboxRepository', 'features/outbox/outboxModel', 'features/local-drafts/localDraftTypes', 'features/local-drafts/draftDatabase', 'features/local-drafts/draftSession', 'features/local-drafts/localDraftStatus',
   'features/folders/folderRenaming', 'features/folders/folderDeletion', 'features/folders/folderExpansion', 'app/routing/noteRoutes',
-  'lib/api/types', 'lib/api/client', 'lib/query/queryKeys', 'lib/query/queryClient',
+  'lib/keyboard/shortcutLabel', 'lib/api/types', 'lib/api/client', 'lib/query/queryKeys', 'lib/query/queryClient',
   'features/folders/folderApi', 'features/folders/folderQueries',
-  'features/notes/noteApi', 'features/notes/noteQueries', 'features/notes/notePresentation',
+  'features/notes/noteDeletion', 'features/notes/noteApi', 'features/notes/noteQueries', 'features/notes/notePresentation',
   'features/notes/noteDrafts', 'features/notes/draftNavigation',
   'features/workspace/workspaceActions', 'features/workspace/workspaceMutations',
   'features/workspace/workspaceApi', 'features/workspace/workspaceQueries', 'features/workspace/workspaceTree',

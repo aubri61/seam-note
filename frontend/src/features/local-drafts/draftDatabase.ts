@@ -15,8 +15,8 @@ import type { Note } from '@/lib/api/types'
 import { verifySyncResponse } from '@/features/manual-sync/syncContract'
 import type { NoteDraft } from '@/features/notes/noteDrafts'
 
-import { DRAFT_DB_NAME, InvalidLocalDraft, LocalDraftConflict } from './localDraftTypes'
-import type { DraftRepository, LocalNoteDraft } from './localDraftTypes'
+import { DRAFT_DB_NAME, DRAFT_CHANNEL, InvalidLocalDraft, LocalDraftConflict, LocalNoteDeleted, MissingDraftRecoveryBlocked } from './localDraftTypes'
+import type { DraftRepository, LocalNoteDraft, MissingDraftCheckpoint } from './localDraftTypes'
 
 export function validateLocalDraft(value: LocalNoteDraft): LocalNoteDraft {
   const strings = [value.noteId, value.title, value.content, value.baseTitle, value.baseContent, value.storageToken, value.writerId]
@@ -41,6 +41,7 @@ export function validateLocalDraft(value: LocalNoteDraft): LocalNoteDraft {
 }
 
 export class DraftDatabase extends Dexie {
+  deletedEntities!: Table<{key:string;id:string;kind:'folder'|'note';deletedAt:number},string>
   localEntities!: Table<LocalEntity,string>
   creationOutbox!: Table<CreationOperation,string>
   workspace!: Table<WorkspaceRecord, string>
@@ -60,6 +61,7 @@ export class DraftDatabase extends Dexie {
     })
     this.version(3).stores({ drafts: '&noteId', outbox: '&operationId, noteId, status', workspace: '&key' })
     this.version(4).stores({ drafts: '&noteId', outbox: '&operationId, noteId, status', workspace: '&key', localEntities: '&id, kind', creationOutbox: '&operationId, entityId, status' })
+    this.version(5).stores({ deletedEntities: '&key' })
   }
 }
 export class DexieDraftRepository implements DraftRepository {
@@ -87,7 +89,8 @@ export class DexieDraftRepository implements DraftRepository {
         if (!draftSchema || !(existing.verno === 1 && existing.tables.length === 1
           || existing.verno === 2 && existing.tables.length === 2 && outboxSchema
           || existing.verno === 3 && existing.tables.length === 3 && outboxSchema && workspaceSchema
-          || existing.verno === 4 && existing.tables.length === 5 && outboxSchema && workspaceSchema && localSchema)) throw new InvalidLocalDraft()
+          || existing.verno === 4 && existing.tables.length === 5 && outboxSchema && workspaceSchema && localSchema
+          || existing.verno === 5 && existing.tables.length === 6 && outboxSchema && workspaceSchema && localSchema && existing.tables.find(t=>t.name==='deletedEntities')?.schema.primKey.keyPath==='key')) throw new InvalidLocalDraft()
       } finally { existing.close() }
     })().catch(error => { this.checked = undefined; throw error })
     const pending = this.checked
@@ -96,20 +99,23 @@ export class DexieDraftRepository implements DraftRepository {
   async localEntity(id:string) { await this.ensureSchema(); return this.db.localEntities.get(id) }
   async localWorkspace() {
     await this.ensureSchema()
-    return this.db.transaction('r',[this.db.workspace,this.db.localEntities],async()=>{
+    return this.db.transaction('r',[this.db.workspace,this.db.localEntities,this.db.deletedEntities],async()=>{
       const snapshot=await this.db.workspace.get('current'),all=await this.db.localEntities.toArray()
-      return { entities:all.filter(e=>!e.confirmed||(e.confirmedAt??0)>=(snapshot?.requestedAt??0)),
+      return { entities:[...all.filter(e=>!e.confirmed||(e.confirmedAt??0)>=(snapshot?.requestedAt??0)),...(await this.db.deletedEntities.toArray()).map(d=>({id:d.id,kind:d.kind,confirmed:true,deleted:true}))],
         pendingIds:all.filter(e=>!e.confirmed).map(e=>e.id) }
     })
   }
   private async checkNewId(id:string) {
+    if(await this.db.deletedEntities.get(`note:${id}`)||await this.db.deletedEntities.get(`folder:${id}`))throw new LocalDraftConflict()
     const cache=await this.db.workspace.get('current')
     if(await this.db.localEntities.get(id)||await this.db.drafts.get(id)
       ||cache?.data.folders.some(f=>f.id===id)||cache?.data.notes.some(n=>n.id===id)
       ||await this.db.outbox.where('noteId').equals(id).count()||await this.db.creationOutbox.where('entityId').equals(id).count())throw new LocalDraftConflict()
   }
   private async parentExists(id:string) {
+    if(await this.db.deletedEntities.get(`folder:${id}`))throw new Error('삭제된 폴더입니다.')
     const local=await this.db.localEntities.get(id),cache=await this.db.workspace.get('current')
+    if(local?.deleted)throw new Error('삭제된 폴더에는 원고를 만들 수 없습니다.')
     const provisional=local?.kind==='folder'&&(!local.confirmed||(local.confirmedAt??0)>=(cache?.requestedAt??0))
     if(!provisional&&!cache?.data.folders.some(f=>f.id===id))throw new Error('부모 폴더의 로컬 기록이 없습니다.')
   }
@@ -117,7 +123,7 @@ export class DexieDraftRepository implements DraftRepository {
     await this.ensureSchema()
     const id=r.id??crypto.randomUUID(),parentId=r.parentId??null,name=r.name.trim(),stamp=new Date().toISOString()
     const op=creationOperation(id,{type:'FOLDER_CREATE',payload:{id,parentId,name}})
-    return this.db.transaction('rw',[this.db.localEntities,this.db.creationOutbox,this.db.workspace,this.db.drafts,this.db.outbox],async()=>{
+    return this.db.transaction('rw',[this.db.localEntities,this.db.creationOutbox,this.db.workspace,this.db.drafts,this.db.outbox,this.db.deletedEntities],async()=>{
       await this.checkNewId(id);if(parentId)await this.parentExists(parentId)
       const cache=await this.db.workspace.get('current'),entities=await this.db.localEntities.toArray()
       const peers=[...(cache?.data.folders??[]),...entities.flatMap(e=>e.folder?[e.folder]:[])].filter(f=>f.parentId===parentId)
@@ -130,8 +136,8 @@ export class DexieDraftRepository implements DraftRepository {
     await this.ensureSchema()
     const id=r.id??crypto.randomUUID(),stamp=new Date().toISOString()
     const op=creationOperation(id,{type:'NOTE_CREATE',payload:{id,folderId:r.folderId,title:r.title,content:r.content},localRevision:1})
-    return this.db.transaction('rw',[this.db.localEntities,this.db.creationOutbox,this.db.workspace,this.db.drafts,this.db.outbox],async()=>{
-      await this.checkNewId(id);await this.parentExists(r.folderId)
+    return this.db.transaction('rw',[this.db.localEntities,this.db.creationOutbox,this.db.workspace,this.db.drafts,this.db.outbox,this.db.deletedEntities],async()=>{
+      await this.checkNewId(id);if(r.folderId)await this.parentExists(r.folderId)
       const cache=await this.db.workspace.get('current'),entities=await this.db.localEntities.toArray()
       const peers=[...(cache?.data.notes??[]),...entities.flatMap(e=>e.note?[e.note]:[])].filter(n=>n.folderId===r.folderId)
       const note:Note={id,folderId:r.folderId,title:r.title,content:r.content,sortOrder:Math.max(-1,...peers.map(n=>n.sortOrder))+1,version:0,createdAt:stamp,updatedAt:stamp}
@@ -171,47 +177,61 @@ export class DexieDraftRepository implements DraftRepository {
         requestedAt:Math.max(Date.now(),cache.requestedAt+1),cachedAt:Date.now()})
     })
   }
-  private async folderDeletionState(id: string) {
-    const cache = await this.db.workspace.get('current')
-    const entities = await this.db.localEntities.toArray()
-    const active = entities.filter(e => !e.confirmed || (e.confirmedAt ?? 0) >= (cache?.requestedAt ?? 0))
-    if (cache?.data.folders.some(f => f.parentId === id) || cache?.data.notes.some(n => n.folderId === id)
-      || active.some(e => e.folder?.parentId === id || e.note?.folderId === id)) {
-      throw new Error('원고나 하위 폴더가 있는 폴더는 삭제할 수 없습니다. 먼저 안의 항목을 정리해주세요.')
-    }
-    const local = entities.find(e => e.id === id)
-    const allOperations = (await this.db.creationOutbox.toArray()).map(validateCreation)
-    if (allOperations.some(op => op.type === 'FOLDER_CREATE' ? op.payload.parentId === id : op.payload.folderId === id)) {
-      throw new Error('하위 항목의 생성 대기가 남아 있어 폴더를 삭제할 수 없습니다.')
-    }
-    const operations = allOperations.filter(op => op.entityId === id)
-    if (operations.some(op => op.type !== 'FOLDER_CREATE' || op.status !== 'pending' || op.attemptedAt !== null)) {
-      throw new Error('서버 생성 결과가 불확실하거나 충돌한 폴더는 삭제할 수 없습니다. 서버 반영 상태를 먼저 확인해주세요.')
-    }
-    if (local && local.kind !== 'folder' || (!local || local.confirmed) && operations.length) throw new LocalDraftConflict()
-    if (!local?.folder && !cache?.data.folders.some(f => f.id === id)) throw new Error('폴더의 로컬 기록을 확인하지 못했습니다.')
-    if (local && !local.confirmed && operations.length !== 1) throw new LocalDraftConflict()
-    return { local, operations, cache }
+  private async folderDeletionState(id:string) {
+    const cache=await this.db.workspace.get('current'),entities=await this.db.localEntities.toArray(),operations=(await this.db.creationOutbox.toArray()).map(validateCreation)
+    const folderIds=new Set([id]),noteIds=new Set<string>()
+    const folders=[...(cache?.data.folders??[]),...entities.flatMap(e=>e.folder?[e.folder]:[])]
+    let changed=true
+    while(changed){changed=false;for(const f of folders)if(f.parentId&&folderIds.has(f.parentId)&&!folderIds.has(f.id)){folderIds.add(f.id);changed=true}}
+    for(const n of [...(cache?.data.notes??[]),...entities.flatMap(e=>e.note?[e.note]:[])])if(n.folderId&&folderIds.has(n.folderId))noteIds.add(n.id)
+    for(const op of operations)if(op.type==='NOTE_CREATE'&&op.payload.folderId&&folderIds.has(op.payload.folderId))noteIds.add(op.entityId)
+    const local=entities.find(e=>e.kind==='folder'&&e.id===id)
+    const affected=operations.filter(op=>op.type==='FOLDER_CREATE'?folderIds.has(op.entityId):noteIds.has(op.entityId))
+    const localOnly=!!local&&!local.confirmed&&!cache?.data.folders.some(f=>f.id===id)&&!entities.some(e=>e.confirmed&&(e.kind==='folder'?folderIds.has(e.id):noteIds.has(e.id)))&&affected.every(op=>op.status==='pending'&&op.attemptedAt===null)
+    return {folderIds:[...folderIds],noteIds:[...noteIds],cache,entities,operations:affected,localOnly}
   }
-  async prepareFolderDeletion(id: string) {
+  private async removeFolderTree(id:string) {
+    const plan=await this.folderDeletionState(id),now=Date.now()
+    await this.db.creationOutbox.bulkDelete(plan.operations.map(op=>op.operationId))
+    for(const noteId of plan.noteIds){await this.db.outbox.where('noteId').equals(noteId).delete();await this.db.drafts.delete(noteId)}
+    for(const e of plan.entities)if(e.kind==='folder'?plan.folderIds.includes(e.id):plan.noteIds.includes(e.id))await this.db.localEntities.delete(e.id)
+    await this.db.deletedEntities.bulkPut([...plan.folderIds.map(id=>({key:`folder:${id}`,id,kind:'folder' as const,deletedAt:now})),...plan.noteIds.map(id=>({key:`note:${id}`,id,kind:'note' as const,deletedAt:now}))])
+    if(plan.cache)await this.db.workspace.put({...plan.cache,requestedAt:Math.max(now,plan.cache.requestedAt+1),cachedAt:now,data:{...plan.cache.data,
+      folders:plan.cache.data.folders.filter(f=>!plan.folderIds.includes(f.id)),notes:plan.cache.data.notes.filter(n=>!plan.noteIds.includes(n.id))}})
+    return {folderIds:plan.folderIds,noteIds:plan.noteIds}
+  }
+  async prepareFolderDeletion(id:string) {
     await this.ensureSchema()
-    return this.db.transaction('rw', [this.db.workspace, this.db.localEntities, this.db.creationOutbox], async () => {
-      const {local, operations} = await this.folderDeletionState(id)
-      if (!local || local.confirmed) return 'server' as const
-      await this.db.creationOutbox.bulkDelete(operations.map(op => op.operationId))
-      await this.db.localEntities.delete(id)
+    return this.db.transaction('rw',[this.db.workspace,this.db.localEntities,this.db.creationOutbox,this.db.drafts,this.db.outbox,this.db.deletedEntities],async()=>{
+      const plan=await this.folderDeletionState(id)
+      if(!plan.localOnly)return 'server' as const
+      await this.removeFolderTree(id)
       return 'local' as const
     })
   }
-  async finishFolderDeletion(id: string) {
+  async finishFolderDeletion(id:string) {
     await this.ensureSchema()
-    await this.db.transaction('rw', [this.db.workspace, this.db.localEntities, this.db.creationOutbox], async () => {
-      const {local, operations, cache} = await this.folderDeletionState(id)
-      if (local && !local.confirmed || operations.length) throw new LocalDraftConflict()
-      if (cache) await this.db.workspace.put({...cache, data: {...cache.data, folders: cache.data.folders.filter(f => f.id !== id)},
-        requestedAt: Math.max(Date.now(), cache.requestedAt + 1), cachedAt: Date.now()})
-      await this.db.localEntities.delete(id)
-    })
+    return this.db.transaction('rw',[this.db.workspace,this.db.localEntities,this.db.creationOutbox,this.db.drafts,this.db.outbox,this.db.deletedEntities],()=>this.removeFolderTree(id))
+  }
+  private async removeLocalNote(id:string) {
+    await this.db.drafts.delete(id)
+    await this.db.outbox.where('noteId').equals(id).delete()
+    const creations=await this.db.creationOutbox.where('entityId').equals(id).toArray()
+    await this.db.creationOutbox.bulkDelete(creations.filter(op=>op.type==='NOTE_CREATE').map(op=>op.operationId))
+    const entity=await this.db.localEntities.get(id)
+    if(entity?.kind==='note')await this.db.localEntities.delete(id)
+    const cache=await this.db.workspace.get('current'),now=Date.now()
+    if(cache)await this.db.workspace.put({...cache,requestedAt:Math.max(now,cache.requestedAt+1),cachedAt:now,data:{...cache.data,notes:cache.data.notes.filter(n=>n.id!==id)}})
+    await this.db.deletedEntities.put({key:`note:${id}`,id,kind:'note',deletedAt:now})
+  }
+  async finishNoteDeletion(id:string) {
+    await this.ensureSchema()
+    return this.db.transaction('rw',[this.db.drafts,this.db.outbox,this.db.creationOutbox,this.db.localEntities,this.db.workspace,this.db.deletedEntities],()=>this.removeLocalNote(id))
+  }
+  async deletedEntities() { await this.ensureSchema();return this.db.deletedEntities.toArray() }
+  notifyDeleted() {
+    try{const channel=new BroadcastChannel(DRAFT_CHANNEL);channel.postMessage({deleted:true});channel.close()}catch{ /* transaction tombstones remain authoritative */ }
+    window.dispatchEvent(new Event('seam-note:workspace-deleted'))
   }
   async listCreations() {
     await this.ensureSchema()
@@ -301,10 +321,23 @@ export class DexieDraftRepository implements DraftRepository {
   async saveWorkspace(data: WorkspaceTreeResponse, requestedAt: number) {
     await this.ensureSchema()
     const metadata = validateWorkspace(data)
-    return this.db.transaction('rw', this.db.workspace, async () => {
+    return this.db.transaction('rw', [this.db.workspace,this.db.localEntities,this.db.creationOutbox,this.db.outbox], async () => {
       const previous = await this.db.workspace.get('current')
       if (previous && previous.requestedAt > requestedAt) return
-      await this.db.workspace.put({ key: 'current', data: metadata, requestedAt, cachedAt: Date.now() })
+      await this.db.workspace.put({ key: 'current', data: metadata, cachedAt: Date.now(), requestedAt })
+      // Confirmed metadata bridges the period until a newer full server GET.
+      const entities=await this.db.localEntities.toArray(),creates=(await this.db.creationOutbox.toArray()).map(validateCreation)
+      const updates=(await this.db.outbox.toArray()).map(validateOperation)
+      const queued=new Set(creates.map(op=>`${op.type==='FOLDER_CREATE'?'folder':'note'}:${op.entityId}`))
+      const updating=new Set(updates.map(op=>op.noteId))
+      const referenced=new Set(creates.flatMap(op=>{const parent=op.type==='FOLDER_CREATE'?op.payload.parentId:op.payload.folderId;return parent?[parent]:[]}))
+      for(const e of entities)if(!e.confirmed){const parent=e.kind==='folder'?e.folder?.parentId:e.note?.folderId;if(parent)referenced.add(parent)}
+      const serverFolders=new Set(metadata.folders.map(f=>f.id))
+      for(const e of entities){
+        if(!e.confirmed||!Number.isSafeInteger(e.confirmedAt)||e.confirmedAt!>=requestedAt||queued.has(`${e.kind}:${e.id}`)
+          ||e.kind==='note'&&updating.has(e.id)||e.kind==='folder'&&referenced.has(e.id)&&!serverFolders.has(e.id))continue
+        await this.db.localEntities.delete(e.id)
+      }
     })
   }
   async readTitles() {
@@ -318,7 +351,8 @@ export class DexieDraftRepository implements DraftRepository {
   }
   async read(noteId: string) {
     await this.ensureSchema()
-    return this.db.transaction('r', [this.db.drafts, this.db.outbox, this.db.localEntities, this.db.creationOutbox], async () => {
+    return this.db.transaction('r', [this.db.drafts, this.db.outbox, this.db.localEntities, this.db.creationOutbox,this.db.deletedEntities], async () => {
+      if(await this.db.deletedEntities.get(`note:${noteId}`))throw new LocalNoteDeleted()
       const record = await this.db.drafts.get(noteId)
       if (!record) return undefined
       validateLocalDraft(record)
@@ -331,10 +365,36 @@ export class DexieDraftRepository implements DraftRepository {
       return { ...record, serverOperationPending, canRebaseLocalEdits }
     })
   }
+  /** Recreate only an externally removed row, never an explicitly deleted note.
+   * The absence check, queue/checkpoint validation and regular CAS write share one transaction. */
+  async restoreMissing(draft:NoteDraft,revision:number,checkpoint:MissingDraftCheckpoint,writerId:string) {
+    await this.ensureSchema()
+    return this.db.transaction('rw',[this.db.drafts,this.db.outbox,this.db.localEntities,this.db.creationOutbox,this.db.deletedEntities],async()=>{
+      if(await this.db.deletedEntities.get(`note:${draft.noteId}`))throw new LocalNoteDeleted()
+      if(await this.db.drafts.get(draft.noteId))throw new LocalDraftConflict()
+      const old=checkpoint.draft
+      if(old.noteId!==draft.noteId||!checkpoint.storageToken||!Number.isSafeInteger(checkpoint.revision)||checkpoint.revision<1
+        ||revision<=checkpoint.revision||draft.baseVersion<old.baseVersion)throw new MissingDraftRecoveryBlocked()
+      const operations=(await this.db.outbox.where('noteId').equals(draft.noteId).toArray()).map(validateOperation)
+      if(operations.length>1||operations.some(op=>op.status!=='pending'||op.attemptedAt!==null||op.title!==old.title
+        ||op.content!==old.content||op.expectedVersion!==old.baseVersion||op.localRevision!==checkpoint.revision))throw new MissingDraftRecoveryBlocked()
+      const creates=(await this.db.creationOutbox.where('entityId').equals(draft.noteId).toArray()).map(validateCreation).filter(op=>op.type==='NOTE_CREATE')
+      const local=await this.db.localEntities.get(draft.noteId)
+      if(local?.kind==='note'&&!local.confirmed){
+        if(operations.length||creates.length!==1)throw new MissingDraftRecoveryBlocked()
+        const op=creates[0]
+        if(op.type!=='NOTE_CREATE'||op.status!=='pending'||op.attemptedAt!==null||op.payload.title!==old.title
+          ||op.payload.content!==old.content||op.localRevision!==checkpoint.revision||draft.baseVersion!==0)throw new MissingDraftRecoveryBlocked()
+      }else if(creates.length)throw new MissingDraftRecoveryBlocked()
+      // Still uses write's missing-row CAS. A concurrent new row cannot be overwritten.
+      return this.write(draft,revision,undefined,writerId)
+    })
+  }
   async write(draft: NoteDraft, revision: number, expectedToken: string | undefined, writerId: string) {
     await this.ensureSchema()
     // The returned promise resolves only after the entire transaction commits.
-    return this.db.transaction('rw', [this.db.drafts, this.db.outbox, this.db.localEntities, this.db.creationOutbox], async () => {
+    return this.db.transaction('rw', [this.db.drafts, this.db.outbox, this.db.localEntities, this.db.creationOutbox,this.db.deletedEntities], async () => {
+      if(await this.db.deletedEntities.get(`note:${draft.noteId}`))throw new LocalNoteDeleted()
       const current = await this.db.drafts.get(draft.noteId)
       if (current) validateLocalDraft(current)
       if (current?.recoveredAs) throw new Error('이 원고는 새 UUID로 복구됐습니다. 복구된 원고를 열어주세요.')
@@ -380,14 +440,36 @@ export class DexieDraftRepository implements DraftRepository {
   }
   async conflictNotes() {
     await this.ensureSchema()
-    return (await this.db.outbox.where('status').equals('conflict').toArray()).map(validateOperation)
-      .map(o=>({noteId:o.noteId,code:o.failureCode}))
+    return this.db.transaction('r',[this.db.outbox,this.db.drafts,this.db.deletedEntities],async()=>{
+      const operations=(await this.db.outbox.where('status').equals('conflict').toArray()).map(validateOperation)
+      const result:{noteId:string;code?:string;hasDraft:boolean}[]=[]
+      for(const op of operations){
+        if(await this.db.deletedEntities.get(`note:${op.noteId}`))continue
+        const record=await this.db.drafts.get(op.noteId)
+        if(record)validateLocalDraft(record)
+        result.push({noteId:op.noteId,code:op.failureCode,hasDraft:!!record})
+      }
+      return result
+    })
+  }
+  /** Explicit user discard only after the server has confirmed NOTE_NOT_FOUND. */
+  async discardDeletedConflict(preview: ConflictPreview, isCurrent:()=>boolean) {
+    await this.ensureSchema()
+    return this.db.transaction('rw',[this.db.drafts,this.db.outbox,this.db.creationOutbox,this.db.localEntities,this.db.workspace,this.db.deletedEntities],async()=>{
+      const head=await this.conflictHead(preview.noteId)
+      if(preview.kind!=='SERVER_NOTE_DELETED'||!preview.serverMissing||!isCurrent()||headStamp(head)!==headStamp(preview.head))throw new ChangedConflict()
+      const blocked=blockedChoice(preview.kind,head)
+      if(blocked)throw new Error(blocked)
+      await this.removeLocalNote(preview.noteId)
+      if(!isCurrent())throw new ChangedConflict()
+      return null
+    })
   }
   /** Selection, recovery copies and queue replacement commit or roll back together. No network in IDB. */
   async resolveConflict(preview: ConflictPreview, choice: 'mine'|'other'|'recover', writerId: string,
-    isCurrent:()=>boolean, folderId?: string) {
+    isCurrent:()=>boolean, folderId?: string | null) {
     await this.ensureSchema()
-    return this.db.transaction('rw',[this.db.drafts,this.db.outbox,this.db.creationOutbox,this.db.localEntities,this.db.workspace],async()=>{
+    return this.db.transaction('rw',[this.db.drafts,this.db.outbox,this.db.creationOutbox,this.db.localEntities,this.db.workspace,this.db.deletedEntities],async()=>{
       const head=await this.conflictHead(preview.noteId)
       if(!isCurrent()||headStamp(head)!==headStamp(preview.head))throw new ChangedConflict()
       const blocked=blockedChoice(preview.kind,head)
@@ -401,8 +483,8 @@ export class DexieDraftRepository implements DraftRepository {
       let next:LocalNoteDraft,replacement:Note|undefined
       if(preview.kind==='SERVER_NOTE_DELETED') {
         if(preview.serverMissing!==true)throw new ChangedConflict()
-        if(choice!=='recover'||!folderId)throw new Error('새 원고를 보관할 폴더를 선택해주세요.')
-        replacement=await this.createLocalNote({id:crypto.randomUUID(),folderId,title:preview.mine.title,content:preview.mine.content})
+        if(choice!=='recover')throw new Error('잘못된 복구 선택입니다.')
+        replacement=await this.createLocalNote({id:crypto.randomUUID(),folderId:folderId||null,title:preview.mine.title,content:preview.mine.content})
         next={...current,...snapshot(preview.mine),conflictHistory:history,recoveredAs:replacement.id,
           localRevision:revision,storageToken:crypto.randomUUID(),localSavedAt:now,writerId}
         await this.db.drafts.put(next)

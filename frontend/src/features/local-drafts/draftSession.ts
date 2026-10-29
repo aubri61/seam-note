@@ -1,7 +1,7 @@
 import type { Note } from '@/lib/api/types'
 import { editDraft, isDraftDirty, receiveServerNote } from '@/features/notes/noteDrafts'
 import type { DraftPatch, NoteDraft } from '@/features/notes/noteDrafts'
-import { DRAFT_CHANNEL, LocalDraftConflict } from './localDraftTypes'
+import { DRAFT_CHANNEL, LocalDraftConflict, LocalNoteDeleted } from './localDraftTypes'
 import type { DraftRepository, LocalNoteDraft } from './localDraftTypes'
 
 export type LocalPhase = 'recovering' | 'waiting' | 'saving' | 'saved' | 'failed' | 'conflict'
@@ -15,6 +15,7 @@ export interface DraftEntry {
   serverProtected?: boolean
 }
 interface WorkingEntry extends DraftEntry {
+  deleted?: boolean
   checkpoint?: NoteDraft
   headCheckRequested?: boolean
   casRecoveryUsed?: boolean
@@ -50,6 +51,7 @@ function fromRecord(record: LocalNoteDraft): NoteDraft {
 function failureMessage(error: unknown) {
   const name = error instanceof Error ? error.name : 'UnknownError'
   if (name === 'LocalDraftConflict') return '다른 탭 또는 로컬 원고가 변경되어 저장을 중단했습니다. 현재 입력은 유지됩니다. 이 탭과 다른 탭의 원고가 달라졌거나 저장 기준을 안전하게 확인할 수 없습니다. 현재 입력을 복사하거나 파일로 보관한 뒤 다른 탭을 확인해주세요. 새로고침·탭 종료 시 아직 로컬 저장되지 않은 입력이 사라질 수 있습니다.'
+  if (name === 'MissingDraftRecoveryBlocked') return '로컬 Draft 기록이 삭제됐지만 남은 전송 작업을 안전하게 확인하지 못해 재생성을 중단했습니다. 현재 입력은 메모리에 유지됩니다. 입력을 보관하고 미확정 작업을 확인해주세요.'
   if (name === 'QuotaExceededError') return '브라우저 저장 공간이 부족해 로컬 저장에 실패했습니다. 현재 입력은 메모리에 유지됩니다.'
   if (name === 'InvalidLocalDraft') return '기존 로컬 원고의 형식을 확인할 수 없어 덮어쓰지 않았습니다. 현재 입력을 보관하고 저장소 상태를 확인해주세요.'
   return '로컬 저장소를 읽거나 저장하지 못했습니다. 현재 입력은 메모리에 유지됩니다. 저장소 이용 설정을 확인하고 다시 시도해주세요.'
@@ -96,6 +98,7 @@ export class DraftSession {
   private fail(id: string, error: unknown) {
     const entry = this.entry(id)
     this.stopTimer(entry)
+    if(error instanceof LocalNoteDeleted){entry.deleted=true;entry.draft=null;entry.server=null;entry.ready=true;entry.revision=0;entry.savedRevision=0;entry.error=null;entry.phase='saved';this.publish(id);return}
     entry.phase = error instanceof LocalDraftConflict ? 'conflict' : 'failed'
     entry.error = failureMessage(error)
     // Never log draft bodies, titles, raw error payloads or records.
@@ -113,6 +116,7 @@ export class DraftSession {
     entry.phase = 'recovering'; entry.error = null
     this.publish(id)
     entry.reading = this.repository.read(id).then(record => {
+      if(entry.deleted)return
       const memory = entry.draft
       if (record) {
         entry.serverProtected = !!record.serverOperationPending
@@ -141,6 +145,7 @@ export class DraftSession {
   }
   receive(note: Note) {
     const entry = this.entry(note.id)
+    if(entry.deleted)return
     if (!entry.server || note.version >= entry.server.version) entry.server = note
     if (!entry.acknowledging && (entry.ready || entry.phase === 'failed')) this.applyServer(note.id)
     this.publish(note.id)
@@ -160,6 +165,7 @@ export class DraftSession {
   }
   edit(id: string, patch: DraftPatch) {
     const entry = this.entry(id)
+    if(entry.deleted)return
     if (!entry.draft) return
     const next = editDraft({ [id]: entry.draft }, id, patch)[id]
     if (next === entry.draft) return
@@ -181,13 +187,14 @@ export class DraftSession {
   }
   flush(id: string): Promise<void> {
     const entry = this.entry(id)
-    if (entry.acknowledging || !entry.ready || !entry.draft || entry.phase === 'conflict' || entry.phase === 'failed' || entry.revision <= entry.savedRevision) return Promise.resolve()
+    if (entry.deleted || entry.acknowledging || !entry.ready || !entry.draft || entry.phase === 'conflict' || entry.phase === 'failed' || entry.revision <= entry.savedRevision) return Promise.resolve()
     if (entry.writing) { entry.flushRequested = true; return entry.writing }
     this.stopTimer(entry)
     const draft = entry.draft, revision = entry.revision, expected = entry.token
     entry.phase = 'saving'; entry.firstPendingAt = undefined; entry.flushRequested = false
     this.publish(id)
     entry.writing = this.repository.write(draft, revision, expected, this.writerId).then(record => {
+      if(entry.deleted)return
       entry.checkpoint = fromRecord(record); entry.casRecoveryUsed = false
       entry.token = record.storageToken; entry.savedRevision = revision; entry.savedAt = record.localSavedAt
       entry.phase = entry.revision === revision ? 'saved' : 'waiting'; entry.error = null
@@ -200,7 +207,7 @@ export class DraftSession {
         entry.casRecoveryUsed = true
         try {
           const record = await this.repository.read(id)
-          if (!entry.acknowledging && this.reconcile(id, record)) { entry.flushRequested = true; return }
+          if (!entry.acknowledging && (record ? this.reconcile(id, record) : await this.restoreMissing(id))) { entry.flushRequested = true; return }
         } catch (readError) { this.fail(id, readError); return }
       }
       this.fail(id, error)
@@ -279,7 +286,7 @@ export class DraftSession {
     }
   }
   async applyConflictChoice(id: string, revision: number,
-    commit: (writerId: string, isCurrent:()=>boolean) => Promise<LocalNoteDraft>) {
+    commit: (writerId: string, isCurrent:()=>boolean) => Promise<LocalNoteDraft | null>) {
     const entry=this.entry(id)
     if(!entry.ready||!entry.draft||entry.acknowledging)throw new LocalDraftConflict()
     if(entry.writing)await entry.writing
@@ -287,6 +294,7 @@ export class DraftSession {
     entry.acknowledging=true;this.stopTimer(entry)
     try {
       const record=await commit(this.writerId,()=>entry.revision===revision)
+      if(!record){this.fail(id,new LocalNoteDeleted());return}
       const stored=fromRecord(record),memory=entry.draft!
       entry.draft=entry.revision===revision?stored:{...stored,title:memory.title,content:memory.content}
       entry.checkpoint=stored;entry.token=record.storageToken;entry.savedRevision=record.localRevision
@@ -313,6 +321,25 @@ export class DraftSession {
     entry.phase = 'waiting'; entry.error = null
     this.publish(id)
     await this.flush(id)
+  }
+  private async restoreMissing(id:string):Promise<boolean> {
+    const entry=this.entry(id)
+    if(entry.deleted||entry.acknowledging||!entry.draft||!entry.checkpoint||!entry.token||!this.repository.restoreMissing)return false
+    const memory=entry.draft,memoryRevision=entry.revision,revision=Math.max(memoryRevision,entry.savedRevision+1)
+    entry.acknowledging=true;this.stopTimer(entry);entry.phase='saving';this.publish(id)
+    try{
+      const record=await this.repository.restoreMissing(memory,revision,{draft:entry.checkpoint,revision:entry.savedRevision,storageToken:entry.token},this.writerId)
+      if(entry.deleted)return true
+      const changed=entry.revision!==memoryRevision
+      entry.checkpoint=fromRecord(record);entry.token=record.storageToken;entry.savedRevision=record.localRevision
+      entry.revision=record.localRevision+(changed?1:0);entry.savedAt=record.localSavedAt;entry.casRecoveryUsed=false;entry.error=null
+      entry.phase=changed?'waiting':'saved';this.publish(id)
+      this.channel?.postMessage({noteId:id,writerId:this.writerId})
+      return true
+    }finally{
+      entry.acknowledging=false
+      if(entry.phase==='waiting')this.schedule(id)
+    }
   }
   /** Compare current text with our last committed checkpoint, never with a stale server GET. */
   private reconcile(id: string, record: LocalNoteDraft | undefined) {
@@ -350,7 +377,7 @@ export class DraftSession {
         entry.serverProtected = true; this.publish(id)
       }
       if (record?.storageToken !== token || entry.phase === 'conflict' || retry) {
-        if (!this.reconcile(id, record)) this.fail(id, new LocalDraftConflict())
+        if (!(record ? this.reconcile(id, record) : await this.restoreMissing(id))) this.fail(id, new LocalDraftConflict())
       }
     } catch (error) { this.fail(id, error) }
   }
@@ -359,10 +386,13 @@ export class DraftSession {
       try {
         this.channel = new BroadcastChannel(DRAFT_CHANNEL)
         this.channel.onmessage = event => {
+          if(event.data?.deleted){for(const id of this.entries.keys())void this.checkHead(id);window.dispatchEvent(new Event('seam-note:workspace-deleted'))}
           if (event.data && typeof event.data.noteId === 'string' && event.data.writerId !== this.writerId) void this.checkHead(event.data.noteId)
         }
       } catch { console.warn('[Seam Note] local draft notifications unavailable; transaction checks remain active') }
     }
+    const deleted = () => { for (const id of this.entries.keys()) void this.checkHead(id) }
+    window.addEventListener('seam-note:workspace-deleted', deleted)
     const visible = () => {
       if (document.visibilityState !== 'hidden') for (const id of this.entries.keys()) void this.checkHead(id)
       for (const id of this.entries.keys()) void this.flush(id)
@@ -370,6 +400,7 @@ export class DraftSession {
     window.addEventListener('visibilitychange', visible)
     window.addEventListener('pagehide', visible)
     return () => {
+      window.removeEventListener('seam-note:workspace-deleted', deleted)
       window.removeEventListener('visibilitychange', visible); window.removeEventListener('pagehide', visible)
       this.channel?.close(); this.channel = null
       for (const [id, entry] of this.entries) { this.stopTimer(entry); void this.flush(id) }

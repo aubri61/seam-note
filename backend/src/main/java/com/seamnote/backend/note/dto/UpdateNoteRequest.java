@@ -6,6 +6,7 @@ public class UpdateNoteRequest {
     @NotNull @Size(max = 200)
     private String title;
     @NotNull
+    @com.seamnote.backend.note.validation.TiptapDocument
     private String content;
     @NotNull
     @PositiveOrZero

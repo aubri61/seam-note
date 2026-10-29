@@ -5,13 +5,15 @@ export interface LocalEntity {
   id: string
   kind: 'folder' | 'note'
   confirmed: boolean
+  /** User-confirmed deletion; prevents stale tabs resurrecting a deleted entity. */
+  deleted?: boolean
   confirmedAt?: number
   folder?: Folder
   note?: NoteSummary
 }
 interface Base { failureCode?: string; readonly operationId: string; readonly entityId: string; status: OutboxStatus; readonly createdAt: number; attemptedAt: number | null }
 export type CreationOperation = Base & ({ readonly type: 'FOLDER_CREATE'; readonly payload: Readonly<CreateFolderRequest & { id: string; parentId: string | null }> }
-  | { readonly type: 'NOTE_CREATE'; readonly payload: Readonly<CreateNoteRequest & { id: string }>; readonly localRevision: number })
+  | { readonly type: 'NOTE_CREATE'; readonly payload: Readonly<CreateNoteRequest & { id: string; folderId: string | null }>; readonly localRevision: number })
 export function validateCreation(op: CreationOperation): CreationOperation {
   const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   if(!op||!uuid.test(op.operationId)||!uuid.test(op.entityId)||op.payload?.id!==op.entityId
@@ -21,7 +23,7 @@ export function validateCreation(op: CreationOperation): CreationOperation {
     if(typeof op.payload.name!=='string'||!op.payload.name.trim()||op.payload.name.length>200
       ||op.payload.parentId!==null&&!uuid.test(op.payload.parentId))throw new InvalidLocalDraft()
   }else if(op.type==='NOTE_CREATE'){
-    if(!uuid.test(op.payload.folderId)||typeof op.payload.title!=='string'||op.payload.title.length>200||typeof op.payload.content!=='string'
+    if((op.payload.folderId!==null&&!uuid.test(op.payload.folderId))||typeof op.payload.title!=='string'||op.payload.title.length>200||typeof op.payload.content!=='string'
       ||!Number.isSafeInteger(op.localRevision)||op.localRevision<1)throw new InvalidLocalDraft()
   }else throw new InvalidLocalDraft()
   return op

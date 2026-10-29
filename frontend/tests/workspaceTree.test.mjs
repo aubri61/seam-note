@@ -75,3 +75,12 @@ test('collapse and title search operate locally, retaining matching ancestors', 
   assert.deepEqual(visibleWorkspaceRows(tree, {}, 'target').map(x => x.node.key), ['folder:a', 'folder:b', 'note:target'])
   assert.deepEqual(visibleWorkspaceRows(tree, {}, 'missing'), [])
 })
+
+test('unfiled notes render at depth zero after folders without invented ancestors', () => {
+  const tree=buildWorkspaceTree({folders:[folder('f')],notes:[note('z',null,2),note('a',null,0),note('inside','f')]})
+  assert.deepEqual(tree.rootNotes.map(n=>n.note.id),['a','z'])
+  assert.deepEqual(noteAncestors(tree,'a'),[])
+  assert.deepEqual(visibleWorkspaceRows(tree,{}).map(r=>[r.node.key,r.depth,r.parentKey]),[['folder:f',0,null],['note:a',0,null],['note:z',0,null]])
+  assert.equal(firstNoteId(buildWorkspaceTree({folders:[],notes:[note('root',null)]})),'root')
+  assert.deepEqual(visibleWorkspaceRows(tree,{},'z').map(r=>r.node.key),['note:z'])
+})

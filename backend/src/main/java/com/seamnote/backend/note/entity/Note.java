@@ -10,8 +10,8 @@ import com.seamnote.backend.folder.entity.Folder;
 public class Note {
     @Id
     private UUID id;
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "folder_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "folder_id")
     private Folder folder;
     @Column(nullable = false, length = 200)
     private String title;
