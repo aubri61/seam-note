@@ -349,12 +349,20 @@ export class DexieDraftRepository implements DraftRepository {
     })
     return titles
   }
-  async read(noteId: string) {
+  async read(noteId: string, { initial = false }: { initial?: boolean } = {}) {
     await this.ensureSchema()
     return this.db.transaction('r', [this.db.drafts, this.db.outbox, this.db.localEntities, this.db.creationOutbox,this.db.deletedEntities], async () => {
       if(await this.db.deletedEntities.get(`note:${noteId}`))throw new LocalNoteDeleted()
       const record = await this.db.drafts.get(noteId)
-      if (!record) return undefined
+      if (!record) {
+        if (initial) {
+          const updates = await this.db.outbox.where('noteId').equals(noteId).count()
+          const creates = await this.db.creationOutbox.where('entityId').equals(noteId).filter(op => op.type === 'NOTE_CREATE').count()
+          const local = await this.db.localEntities.get(noteId)
+          if (updates || creates || local && !local.confirmed) throw new MissingDraftRecoveryBlocked()
+        }
+        return undefined
+      }
       validateLocalDraft(record)
       const operations = (await this.db.outbox.where('noteId').equals(noteId).toArray()).map(validateOperation)
       const local = await this.db.localEntities.get(noteId)
@@ -387,10 +395,13 @@ export class DexieDraftRepository implements DraftRepository {
           ||op.payload.content!==old.content||op.localRevision!==checkpoint.revision||draft.baseVersion!==0)throw new MissingDraftRecoveryBlocked()
       }else if(creates.length)throw new MissingDraftRecoveryBlocked()
       // Still uses write's missing-row CAS. A concurrent new row cannot be overwritten.
-      return this.write(draft,revision,undefined,writerId)
+      return this.commitDraft(draft,revision,undefined,writerId,true)
     })
   }
-  async write(draft: NoteDraft, revision: number, expectedToken: string | undefined, writerId: string) {
+  write(draft: NoteDraft, revision: number, expectedToken: string | undefined, writerId: string) {
+    return this.commitDraft(draft, revision, expectedToken, writerId, false)
+  }
+  private async commitDraft(draft: NoteDraft, revision: number, expectedToken: string | undefined, writerId: string, restoringMissing: boolean) {
     await this.ensureSchema()
     // The returned promise resolves only after the entire transaction commits.
     return this.db.transaction('rw', [this.db.drafts, this.db.outbox, this.db.localEntities, this.db.creationOutbox,this.db.deletedEntities], async () => {
@@ -410,6 +421,13 @@ export class DexieDraftRepository implements DraftRepository {
       validateLocalDraft(next)
       const operations = await this.db.outbox.where('noteId').equals(draft.noteId).toArray()
       const local=await this.db.localEntities.get(draft.noteId)
+      // A new session cannot replace an orphan queue with a fresh server snapshot.
+      // Only restoreMissing's checkpoint/queue validation may authorize this case,
+      // in the same transaction. A concurrent row is still fenced by the CAS above.
+      if (!current && !restoringMissing) {
+        const creates = await this.db.creationOutbox.where('entityId').equals(draft.noteId).filter(op => op.type === 'NOTE_CREATE').count()
+        if (operations.length || creates || local && !local.confirmed) throw new MissingDraftRecoveryBlocked()
+      }
       if(local&&!local.confirmed){
         if(local.kind!=='note'||operations.length)throw new LocalDraftConflict()
         const creates=(await this.db.creationOutbox.where('entityId').equals(draft.noteId).toArray()).map(validateCreation)

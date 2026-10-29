@@ -16,7 +16,7 @@ export const localDraftRepository: DraftRepository = {
     if (!storage.restoreMissing) throw new MissingDraftRecoveryBlocked()
     return storage.restoreMissing(draft, revision, checkpoint, writerId)
   },
-  read: async id => (await repository()).read(id),
+  read: async (id, options) => (await repository()).read(id, options),
   write: async (draft, revision, token, writerId) => (await repository()).write(draft, revision, token, writerId),
 }
 

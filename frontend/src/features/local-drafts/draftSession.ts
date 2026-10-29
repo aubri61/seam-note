@@ -115,7 +115,7 @@ export class DraftSession {
     if (entry.reading) return entry.reading
     entry.phase = 'recovering'; entry.error = null
     this.publish(id)
-    entry.reading = this.repository.read(id).then(record => {
+    entry.reading = this.repository.read(id, { initial: !entry.checkpoint && !entry.token && entry.savedRevision === 0 }).then(record => {
       if(entry.deleted)return
       const memory = entry.draft
       if (record) {
@@ -371,11 +371,16 @@ export class DraftSession {
     if (entry.acknowledging || entry.writing) { entry.headCheckRequested = true; return }
     const token = entry.token
     try {
-      const record = await this.repository.read(id)
+      const initial = !entry.checkpoint && !token && entry.savedRevision === 0
+      const record = await this.repository.read(id, { initial })
       if (entry.acknowledging || entry.writing || token !== entry.token) { entry.headCheckRequested = true; return }
       if (record?.serverOperationPending && !entry.serverProtected) {
         entry.serverProtected = true; this.publish(id)
       }
+      // No committed checkpoint has existed in this session. A slow first GET,
+      // or input awaiting its first CAS write, is not a deleted local record.
+      // The repository verifies the absence of orphan queues on read and write.
+      if (!record && initial && entry.phase !== 'conflict') return
       if (record?.storageToken !== token || entry.phase === 'conflict' || retry) {
         if (!(record ? this.reconcile(id, record) : await this.restoreMissing(id))) this.fail(id, new LocalDraftConflict())
       }

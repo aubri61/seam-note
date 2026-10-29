@@ -19,7 +19,8 @@ export interface LocalNoteDraft extends NoteDraft {
 export interface MissingDraftCheckpoint { draft: NoteDraft; revision: number; storageToken: string }
 export interface DraftRepository {
   restoreMissing?(draft: NoteDraft, revision: number, checkpoint: MissingDraftCheckpoint, writerId: string): Promise<LocalNoteDraft>
-  read(noteId: string): Promise<LocalNoteDraft | undefined>
+  /** Initial absence is safe only if no orphan update/create operation or unconfirmed entity exists. */
+  read(noteId: string, options?: { initial?: boolean }): Promise<LocalNoteDraft | undefined>
   write(draft: NoteDraft, revision: number, expectedToken: string | undefined, writerId: string): Promise<LocalNoteDraft>
 }
 export class LocalDraftConflict extends Error {

@@ -1,0 +1,989 @@
+{
+  "environment": {
+    "noteId": "5f22f426-b55d-422e-bf10-7d7af0ccaa31",
+    "folderId": "6427076e-c784-408e-8572-9016816fe37b",
+    "origin": "http://127.0.0.1:25179",
+    "apiOrigin": "http://127.0.0.1:18819",
+    "dbPort": 25519,
+    "dbName": "seam_note_manual_lab",
+    "workDirectory": "/private/tmp/seam-note-manual-sync-7vl7zcbs"
+  },
+  "results": [
+    {
+      "name": "startup-initializes-local-and-pulls-only-selected-server-note",
+      "passed": true,
+      "unselectedBodyGets": 0,
+      "startupPuts": 0,
+      "triggerBurstEvents": 60
+    },
+    {
+      "name": "server-only-selection-GET-and-clean-local-latest-version",
+      "passed": true
+    },
+    {
+      "name": "focus-visibility-burst-coalesced-clean-pull",
+      "passed": true,
+      "bodyGets": 1
+    },
+    {
+      "name": "dirty-GET-protection-server-409-and-no-retry-loop",
+      "passed": true
+    },
+    {
+      "name": "existing-Diff-choice-and-immediate-manual-save-regression",
+      "passed": true
+    },
+    {
+      "name": "35-fast-inputs-one-PUT-stable-editor-and-caret",
+      "passed": true,
+      "insertTextCalls": 35,
+      "setupFillCalls": 1,
+      "putCount": 1
+    },
+    {
+      "name": "input-during-PUT-preserved-rebased-and-followup-auto-ACK",
+      "passed": true
+    },
+    {
+      "name": "online-reconnect-response-loss-same-operation-and-snapshot",
+      "passed": true,
+      "attempts": 2,
+      "distinctPayloadHashes": 1
+    },
+    {
+      "name": "PWA-offline-close-relaunch-local-workspace-edit-and-online-auto-sync",
+      "passed": true
+    },
+    {
+      "name": "rapid-A-B-A-cancels-stale-pull-keeps-auto-sync-running",
+      "passed": true
+    },
+    {
+      "name": "two-tabs-auto-sync-WebLock-one-server-application",
+      "passed": true,
+      "putCount": 1
+    },
+    {
+      "name": "real-two-tab-local-CAS-keeps-conflicting-input",
+      "passed": true
+    },
+    {
+      "name": "cold-start-recovery-barrier-uncertain-A-successor-B-false",
+      "passed": true,
+      "finalVersion": 4,
+      "serverHadAlreadyAppliedA": false
+    },
+    {
+      "name": "cold-start-recovery-barrier-uncertain-A-successor-B-true",
+      "passed": true,
+      "finalVersion": 4,
+      "serverHadAlreadyAppliedA": true
+    },
+    {
+      "name": "server-NOTE_NOT_FOUND-keeps-local-and-does-not-recreate",
+      "passed": true
+    },
+    {
+      "name": "permanent-401-no-auto-retry-manual-retry-works",
+      "passed": true
+    },
+    {
+      "name": "permanent-400-no-auto-retry-manual-retry-works",
+      "passed": true
+    },
+    {
+      "name": "persistent-503-bounded-backoff-focus-storm-no-PUT-flood",
+      "passed": true,
+      "failedAttempts": 4,
+      "intervalsMs": [
+        5096,
+        15076,
+        30129
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292123159,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/932756de-43bf-41bf-b7d2-b9990a50c52b",
+      "at": 1793292123161,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292124172,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/932756de-43bf-41bf-b7d2-b9990a50c52b",
+      "at": 1793292124185,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292124293,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/932756de-43bf-41bf-b7d2-b9990a50c52b",
+      "at": 1793292124294,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292124378,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292124616,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292124631,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292129095,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292129112,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292129131,
+      "operationId": "ddd6e8d0-fb82-49ad-a989-4584088a0bfd",
+      "hash": "de2a9937616960fa1a144f5d86b1179c10284e1479ec36df3dafdca237b27d07",
+      "expectedVersion": 2,
+      "status": 409
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292129483,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292135473,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292135497,
+      "operationId": "b67422dd-b034-4655-ae9c-ec205f79083e",
+      "hash": "951cec9054ae448cb1f175de832fa7a1cd28f71cf58c1b571762ba2f0ddca21c",
+      "expectedVersion": 3,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292135515,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292135521,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292140069,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292140086,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292140104,
+      "operationId": "bd87f24a-73ae-4ca7-96f6-384e2436e999",
+      "hash": "7b0b5184f00bed757fef1a7ff6bab9eb88c9c4f4c8f6850c3de25e955ccdbf82",
+      "expectedVersion": 4,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292140123,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292144575,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292144587,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292144599,
+      "operationId": "9229e33e-6761-47ff-83b6-ad9fb2cbbf8c",
+      "hash": "801abc561de9bea696b0c8b685fb823f58a122b874eacb2f34702fb3a9e7b871",
+      "expectedVersion": 5,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292145073,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292149105,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292149117,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292149131,
+      "operationId": "70133101-6199-4392-b74b-0c9c38d42915",
+      "hash": "64dcf81257603113d4df97341fab2d0aef679442e459c295693cd63bad0e7b81",
+      "expectedVersion": 6,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292149153,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292153597,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292153610,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292153624,
+      "operationId": "ac99eb2d-bb74-46dd-b8b2-36f297d0b33c",
+      "hash": "a4ff4a18f96322d404a3ea226f623f96ea91ac8bd207c3eb2b0da6855ce9a481",
+      "expectedVersion": 7,
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292154061,
+      "operationId": "ac99eb2d-bb74-46dd-b8b2-36f297d0b33c",
+      "hash": "a4ff4a18f96322d404a3ea226f623f96ea91ac8bd207c3eb2b0da6855ce9a481",
+      "expectedVersion": 7,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292158087,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292158103,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292158117,
+      "operationId": "f2390346-f788-477d-94b4-1e009e35618b",
+      "hash": "d18b7f9ed4e2e25f22a54d833c70b6d37622936c2c4cead72f00ab31e193ab2a",
+      "expectedVersion": 8,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292161234,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292161234,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292161417,
+      "operationId": "10b70544-b24d-4f22-903e-a87f859d6e78",
+      "hash": "9a4579a65216e5e841ff5995d970b2b6aecf3478c95bf9caa9575171664c35d2",
+      "expectedVersion": 9,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292161441,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/932756de-43bf-41bf-b7d2-b9990a50c52b",
+      "at": 1793292161519,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292161615,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292161685,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/932756de-43bf-41bf-b7d2-b9990a50c52b",
+      "at": 1793292161916,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292168253,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/932756de-43bf-41bf-b7d2-b9990a50c52b",
+      "at": 1793292168269,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/932756de-43bf-41bf-b7d2-b9990a50c52b",
+      "at": 1793292168286,
+      "operationId": "2d14d7ab-97de-4d61-92f5-6744a0f63617",
+      "hash": "ba3c41dbd4c686779e5791b6ac289d7c3d9b17bdc2a28a1c64e1d0ee63266949",
+      "expectedVersion": 0,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292168310,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292168552,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/932756de-43bf-41bf-b7d2-b9990a50c52b",
+      "at": 1793292168553,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292173167,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292173473,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/932756de-43bf-41bf-b7d2-b9990a50c52b",
+      "at": 1793292173484,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/932756de-43bf-41bf-b7d2-b9990a50c52b",
+      "at": 1793292173502,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/932756de-43bf-41bf-b7d2-b9990a50c52b",
+      "at": 1793292173517,
+      "operationId": "a5a01b37-c5d8-4ace-bf66-843fc11f7b6c",
+      "hash": "9a736b11088a24fd5522b158af081021cce6cdcc37be9093d795a13bb5732cfc",
+      "expectedVersion": 1,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292173552,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292178561,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/932756de-43bf-41bf-b7d2-b9990a50c52b",
+      "at": 1793292178618,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292180977,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292180980,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292182121,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/3b236cb2-2929-4fdd-b589-a8314f823d33",
+      "at": 1793292182121,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/3b236cb2-2929-4fdd-b589-a8314f823d33",
+      "at": 1793292182300,
+      "operationId": "c2ba3fe9-b74f-4457-92c2-be89a55478ca",
+      "hash": "165e4bd34031e763ac478e3af3b8c0f976b5e71de1159093fa465666fab0c857",
+      "expectedVersion": 2,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292182318,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292186330,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/3b236cb2-2929-4fdd-b589-a8314f823d33",
+      "at": 1793292186338,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/3b236cb2-2929-4fdd-b589-a8314f823d33",
+      "at": 1793292186350,
+      "operationId": "03a72365-f9f3-4b37-aa16-414d25b0eb16",
+      "hash": "d5e9145bb6370486542678524e8d7575ee5693eb87bed730cb755a83994af447",
+      "expectedVersion": 3,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292186367,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/d90b0e84-cfba-4c05-a4eb-cd9bbbe4ce1e",
+      "at": 1793292187617,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292187618,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292188707,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/a207bdab-7003-46cd-9b69-3ca2309fe1c4",
+      "at": 1793292188707,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292193149,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/a207bdab-7003-46cd-9b69-3ca2309fe1c4",
+      "at": 1793292193162,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/a207bdab-7003-46cd-9b69-3ca2309fe1c4",
+      "at": 1793292193178,
+      "operationId": "400f4dfa-844b-4df0-9d7f-d35925819511",
+      "hash": "2a7914d36f93971cbbebbe69932b967171b1e0a31fbc8d64a7de61f28b0e5394",
+      "expectedVersion": 2,
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/a207bdab-7003-46cd-9b69-3ca2309fe1c4",
+      "at": 1793292193199,
+      "operationId": "67b5b95b-90e7-4f4d-b6b5-c770d88d163f",
+      "hash": "4800a437225bd260111316a5a7f989a078d2f46901226516a5e64d808b0d2af8",
+      "expectedVersion": 3,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292193218,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292194414,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/0c5d7617-d0f2-4ee8-a465-f6070d37c792",
+      "at": 1793292194415,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292198899,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/0c5d7617-d0f2-4ee8-a465-f6070d37c792",
+      "at": 1793292198916,
+      "operationId": "0f1e4243-fa1b-403a-b9a9-692d42cf46e8",
+      "hash": "ddbbd158cc5b72fc49b66aaf5c66535881ece519b97cf2bc8166f5cc5b7b1e8e",
+      "expectedVersion": 0,
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/0c5d7617-d0f2-4ee8-a465-f6070d37c792",
+      "at": 1793292199247,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292200363,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/2782e3b6-b6ee-4271-b4eb-cb77cf249151",
+      "at": 1793292200364,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292204986,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/2782e3b6-b6ee-4271-b4eb-cb77cf249151",
+      "at": 1793292205009,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/2782e3b6-b6ee-4271-b4eb-cb77cf249151",
+      "at": 1793292205025,
+      "operationId": "7d655b89-fb9c-45ce-a9a5-c88a7c12be72",
+      "hash": "7c2f347520e6d7d9653afbb310a1510a2dc2f179cfa306747a0d0985c68e6262",
+      "expectedVersion": 0,
+      "status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292211728,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/2782e3b6-b6ee-4271-b4eb-cb77cf249151",
+      "at": 1793292211809,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/2782e3b6-b6ee-4271-b4eb-cb77cf249151",
+      "at": 1793292211868,
+      "operationId": "7d655b89-fb9c-45ce-a9a5-c88a7c12be72",
+      "hash": "7c2f347520e6d7d9653afbb310a1510a2dc2f179cfa306747a0d0985c68e6262",
+      "expectedVersion": 0,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292211962,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/83ba4830-cd36-4b1c-9363-acd5c0684e81",
+      "at": 1793292213229,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292213232,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292217875,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/83ba4830-cd36-4b1c-9363-acd5c0684e81",
+      "at": 1793292217897,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/83ba4830-cd36-4b1c-9363-acd5c0684e81",
+      "at": 1793292217913,
+      "operationId": "b543b0af-46f6-45a4-8c9e-efa9e0e3627d",
+      "hash": "820b16d2cb9e2d4cd5ad55aead00fb5d9d8770f7ff7bad447d25491595eaa780",
+      "expectedVersion": 0,
+      "status": 400
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292224531,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/83ba4830-cd36-4b1c-9363-acd5c0684e81",
+      "at": 1793292224543,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/83ba4830-cd36-4b1c-9363-acd5c0684e81",
+      "at": 1793292224556,
+      "operationId": "b543b0af-46f6-45a4-8c9e-efa9e0e3627d",
+      "hash": "820b16d2cb9e2d4cd5ad55aead00fb5d9d8770f7ff7bad447d25491595eaa780",
+      "expectedVersion": 0,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292224588,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/b6e3f770-b97d-459b-b5cc-9285e563b7f0",
+      "at": 1793292225655,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292225656,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292230296,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/b6e3f770-b97d-459b-b5cc-9285e563b7f0",
+      "at": 1793292230308,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/b6e3f770-b97d-459b-b5cc-9285e563b7f0",
+      "at": 1793292230323,
+      "operationId": "129664b3-414d-4362-8121-6d30e778856a",
+      "hash": "d86638c7c1a03dec800d3b0387944a16aec4abbfd785985055518149c508d5ea",
+      "expectedVersion": 0,
+      "status": 503
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292235359,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/b6e3f770-b97d-459b-b5cc-9285e563b7f0",
+      "at": 1793292235398,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/b6e3f770-b97d-459b-b5cc-9285e563b7f0",
+      "at": 1793292235419,
+      "operationId": "129664b3-414d-4362-8121-6d30e778856a",
+      "hash": "d86638c7c1a03dec800d3b0387944a16aec4abbfd785985055518149c508d5ea",
+      "expectedVersion": 0,
+      "status": 503
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292250454,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/b6e3f770-b97d-459b-b5cc-9285e563b7f0",
+      "at": 1793292250478,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/b6e3f770-b97d-459b-b5cc-9285e563b7f0",
+      "at": 1793292250495,
+      "operationId": "129664b3-414d-4362-8121-6d30e778856a",
+      "hash": "d86638c7c1a03dec800d3b0387944a16aec4abbfd785985055518149c508d5ea",
+      "expectedVersion": 0,
+      "status": 503
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292280541,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/b6e3f770-b97d-459b-b5cc-9285e563b7f0",
+      "at": 1793292280608,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/b6e3f770-b97d-459b-b5cc-9285e563b7f0",
+      "at": 1793292280624,
+      "operationId": "129664b3-414d-4362-8121-6d30e778856a",
+      "hash": "d86638c7c1a03dec800d3b0387944a16aec4abbfd785985055518149c508d5ea",
+      "expectedVersion": 0,
+      "status": 503
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292287718,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/b6e3f770-b97d-459b-b5cc-9285e563b7f0",
+      "at": 1793292287731,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/b6e3f770-b97d-459b-b5cc-9285e563b7f0",
+      "at": 1793292287793,
+      "operationId": "129664b3-414d-4362-8121-6d30e778856a",
+      "hash": "d86638c7c1a03dec800d3b0387944a16aec4abbfd785985055518149c508d5ea",
+      "expectedVersion": 0,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793292287895,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    }
+  ],
+  "developmentDbWrites": 0,
+  "limitations": [
+    "Synthetic fixtures only",
+    "Native OS IME and Safari not tested",
+    "Cold uncertain queue is an explicit crash-state fixture; PWA close/relaunch is a real browser restart"
+  ]
+}
