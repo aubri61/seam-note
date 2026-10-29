@@ -1,3 +1,4 @@
+import { localDraftRepository } from '@/features/local-drafts/localDraftRepository'
 import { queryOptions, skipToken, useQuery } from '@tanstack/react-query'
 import { creationStorage } from '@/features/outbox/creationStorage'
 import { ApiError } from '@/lib/api/client'
@@ -13,13 +14,16 @@ export const noteQueries = {
   detail: (id: UUID | null | undefined) => queryOptions({
     queryKey: noteKeys.detail(id ?? null),
     networkMode: 'always',
-    refetchOnReconnect: true,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
     queryFn: id ? async ({ signal }) => {
       if (typeof navigator !== 'undefined' && navigator.onLine === false) throw new ApiError(0, { code: 'OFFLINE_NOTE', message: '오프라인입니다. 본문이 이 브라우저에 저장된 원고만 열 수 있습니다.', errors: [] })
       if(typeof indexedDB!=='undefined'){
+        await localDraftRepository.read(id)
         let local
         try { local=await creationStorage.local(id) } catch { /* Recovery reports storage errors; keep server reads available. */ }
-        if(local&&!local.confirmed)throw new ApiError(0,{code:'LOCAL_UNPUBLISHED',message:'이 원고는 아직 로컬에만 있습니다. 서버 반영은 수동 저장으로 진행해주세요.',errors:[]})
+        if(local&&!local.confirmed)throw new ApiError(0,{code:'LOCAL_UNPUBLISHED',message:'이 원고는 아직 로컬에만 있습니다. 온라인 연결 후 자동으로 서버에 반영됩니다.',errors:[]})
       }
       return getNote(id, { signal })
     } : skipToken,

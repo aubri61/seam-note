@@ -74,12 +74,13 @@ export function AppHeader({ online, sidebarOpen, isMobile, sidebarId, onToggleSi
         </IconButton>
         <p>Personal{path.map((name, index) => <span key={index} style={{ display: 'contents' }}><Icon name="chevron" size={12} />{name}</span>)}</p>
       </div>
-      <div>
+      <div style={{flexWrap:'wrap'}}>
         {!hasConflict && <SyncStatus status={status} />}
 
         {online ? <Tooltip label={shortcutLabel('동기화', 'S')}><SaveButton data-workspace-sync aria-keyshortcuts="Meta+S Control+S" aria-label="모든 변경사항 동기화" aria-busy={workspaceSync.busy} type="button" disabled={workspaceSync.disabled} onClick={workspaceSync.onSync} aria-describedby="workspace-sync-feedback">
           <Icon name="sync" size={16}/>{workspaceSync.busy?'동기화 중…':'동기화'}
         </SaveButton></Tooltip> : <OfflineStatus role="status">현재 오프라인 작업 중</OfflineStatus>}
+        <span role="status" aria-live="polite" style={{fontSize:11,whiteSpace:'nowrap'}}>{workspaceSync.stateLabel}</span>
         <FolderMenu kind="note" name="현재" tabIndex={0} disabled={!canDelete} onAction={onDelete}/>
 
       </div>

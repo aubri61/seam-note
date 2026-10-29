@@ -1,0 +1,64 @@
+{
+  "branch": "feat/auto-sync",
+  "startingCommit": "1dce669",
+  "nodeTests": {
+    "passed": 202,
+    "failed": 0
+  },
+  "lint": "passed",
+  "typecheck": "passed",
+  "build": "passed",
+  "browserSuites": [
+    {
+      "report": "2026-10-29-auto-sync-live.json",
+      "groups": 18
+    },
+    {
+      "report": "2026-10-29-auto-creation-live.json",
+      "groups": 1
+    },
+    {
+      "report": "2026-10-29-auto-richtext-live.json",
+      "groups": 1
+    },
+    {
+      "report": "2026-10-29-auto-unqueued-live.json",
+      "groups": 1
+    },
+    {
+      "report": "2026-10-29-auto-mobile-live.json",
+      "groups": 1
+    }
+  ],
+  "browserGroups": 22,
+  "actualChromeSigkillConditions": 4,
+  "backoffMs": [
+    5000,
+    15000,
+    30000
+  ],
+  "observedOutageRequestIntervalsMs": [
+    5069,
+    15063,
+    30078
+  ],
+  "offlineTestStorage": "isolated persistent Chrome profile + actual IndexedDB",
+  "serverEnvironment": "isolated Spring/PostgreSQL for successful writes,409,404,ledger; proxy fault injection for401,400,503,response loss",
+  "currentDataScope": "current origin DB + current server Workspace; no account partition/authentication",
+  "sourceHashes": {
+    "frontend/src/features/manual-sync/autoSyncScheduler.ts": "7119d63bbf986515065b805aebb5be2e50cba58918b0cc51588e2e21b7855fd8",
+    "frontend/src/features/manual-sync/useWorkspaceSync.ts": "8392b3317cb12d3f264a277c231cb2814ed98de57c84d677817e94626b986519",
+    "frontend/src/features/manual-sync/SyncCoordinator.ts": "665a3a8f4685428e6988f7585c4c4ed81d4f18442839802c091dd7e1d7687ca0",
+    "frontend/src/features/offline/workspaceCache.ts": "eb58fd9e97d17fc1edb6d44d3cc9467864b2aef3238e106f4c06a54244669de4",
+    "frontend/src/features/notes/noteQueries.ts": "f21df42fb748ffd828823f5defa72ec2c86d9d766d3816ceda9422933bd90f92",
+    "frontend/src/app/AppHeader.tsx": "18471c571f9df5ff6509fadba28e745dad5059df18fb51a2d83548c25abd6b3d",
+    "frontend/src/app/AppLayout.tsx": "7a2a68e1ce1a4448a8101a76c2480e96f9ceac993535baf5a4937da53e6e21b6",
+    "frontend/src/lib/api/client.ts": "ee423cd4624599bc0a4dad1952932e5557e796d467c597937184e5efda8028ef"
+  },
+  "limitations": [
+    "Safari and native OS IME not tested",
+    "Not a power-loss/storage-eviction guarantee",
+    "Manually orphaned Draft is preserved and flagged, not silently enqueued",
+    "No deployment, push, or merge"
+  ]
+}

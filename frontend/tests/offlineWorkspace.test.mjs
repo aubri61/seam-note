@@ -81,3 +81,12 @@ test('note and folder tombstones are scoped by entity kind',async()=>{
  const result=await loadWorkspace({},f.deps)
  assert.equal(result.folders.length,1);assert.equal(result.notes.length,0)
 })
+
+test('workspace initialization barrier completes before HTTP GET',async()=>{
+ const f=fixture(),events=[]
+ f.deps.storage.initialize=async()=>{events.push('local-ready')}
+ f.deps.get=async()=>{events.push('get');return data}
+ await loadWorkspace({},f.deps);assert.deepEqual(events,['local-ready','get'])
+ f.deps.storage.initialize=async()=>{throw Error('blocked storage')}
+ events.length=0;await assert.rejects(()=>loadWorkspace({},f.deps),/blocked storage/);assert.deepEqual(events,[])
+})

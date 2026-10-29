@@ -1,0 +1,80 @@
+{
+  "environment": {
+    "noteId": "4aa580d2-f550-477b-a29e-8ddd9391185d",
+    "folderId": "d460582c-e593-4245-91a4-533dda0d7eaf",
+    "origin": "http://127.0.0.1:25221",
+    "apiOrigin": "http://127.0.0.1:18821",
+    "dbPort": 25521,
+    "dbName": "seam_note_manual_lab",
+    "workDirectory": "/private/tmp/seam-note-manual-sync-urme2dm_"
+  },
+  "results": [
+    {
+      "name": "rich-Korean-format-shortcuts-undo-redo-auto-save-reload-no-echo-PUT",
+      "passed": true,
+      "serverVersion": 1,
+      "putCount": 1
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793270231179,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/a7d50b67-9db8-4414-b337-a68eef54331b",
+      "at": 1793270231180,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793270236518,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/a7d50b67-9db8-4414-b337-a68eef54331b",
+      "at": 1793270236537,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/a7d50b67-9db8-4414-b337-a68eef54331b",
+      "at": 1793270236559,
+      "operationId": "9c19bf0f-ccfd-4883-afde-b7030546f124",
+      "hash": "d7cd3c5a0d11b2d575cb9cdf82a1e6011563b3244168911ca4185ad943653d2f",
+      "expectedVersion": 0,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793270236585,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793270236674,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/a7d50b67-9db8-4414-b337-a68eef54331b",
+      "at": 1793270236674,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    }
+  ],
+  "developmentDbWrites": 0
+}

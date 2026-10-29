@@ -14,7 +14,7 @@ const Badge = styled.span(({ theme }) => ({
   whiteSpace: 'nowrap',
 }))
 
-/** Local persistence/uncertainty status. Manual server ack has a separate result panel. */
+/** Local persistence status. The adjacent server label reports automatic/manual synchronization. */
 export function SyncStatus({ status }: { status: DraftStatus }) {
   return <Badge role="status" title="로컬 저장 상태이며 서버 동기화 완료를 뜻하지 않습니다" aria-live="polite">
     <Icon name="note" size={18} />{status}

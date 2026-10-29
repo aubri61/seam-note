@@ -1,0 +1,50 @@
+{
+  "environment": {
+    "noteId": "4aa580d2-f550-477b-a29e-8ddd9391185d",
+    "folderId": "d460582c-e593-4245-91a4-533dda0d7eaf",
+    "origin": "http://127.0.0.1:25221",
+    "apiOrigin": "http://127.0.0.1:18821",
+    "dbPort": 25521,
+    "dbName": "seam_note_manual_lab",
+    "workDirectory": "/private/tmp/seam-note-manual-sync-urme2dm_"
+  },
+  "results": [
+    {
+      "name": "manually-orphaned-dirty-Draft-preserved-without-fake-completion",
+      "passed": true,
+      "orphanPutCount": 0,
+      "inactiveBodyGets": 0
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/notes/5d2c6534-f8f2-418b-982d-5868ddd24be8",
+      "at": 1793270628271,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793270628272,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/5d2c6534-f8f2-418b-982d-5868ddd24be8",
+      "at": 1793270628441,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793270628443,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    }
+  ],
+  "developmentDbWrites": 0
+}

@@ -1,0 +1,69 @@
+{
+  "environment": {
+    "noteId": "4aa580d2-f550-477b-a29e-8ddd9391185d",
+    "folderId": "d460582c-e593-4245-91a4-533dda0d7eaf",
+    "origin": "http://127.0.0.1:25221",
+    "apiOrigin": "http://127.0.0.1:18821",
+    "dbPort": 25521,
+    "dbName": "seam_note_manual_lab",
+    "workDirectory": "/private/tmp/seam-note-manual-sync-urme2dm_"
+  },
+  "results": [
+    {
+      "name": "mobile-auto-sync-header-no-overflow-drawer-routing",
+      "passed": true,
+      "viewport": [
+        390,
+        844
+      ],
+      "horizontalOverflow": false
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/notes/f99ac589-f8c6-4952-90fb-c8f16aac4744",
+      "at": 1793270801043,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793270801044,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793270805499,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/f99ac589-f8c6-4952-90fb-c8f16aac4744",
+      "at": 1793270805509,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notes/f99ac589-f8c6-4952-90fb-c8f16aac4744",
+      "at": 1793270805523,
+      "operationId": "d4001892-75d7-486c-8120-5e90cf99a0ee",
+      "hash": "5e291c86ea99bf6c136ba9bf78fa3b0d350534a042a3b0618489d9b7bca236d0",
+      "expectedVersion": 0,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "at": 1793270805540,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": 200
+    }
+  ],
+  "developmentDbWrites": 0
+}

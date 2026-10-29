@@ -14,7 +14,7 @@ import { workspaceSyncStorage } from './workspaceSyncStorage'
 import type { WorkspaceSyncSnapshot } from './workspaceSyncStorage'
 
 export type SyncIssueKind = 'conflict' | 'review' | 'deferred' | 'network' | 'failed'
-export interface SyncIssue { operationId: string; entityId: string; kind: SyncIssueKind; message: string; code?: string }
+export interface SyncIssue { operationId: string; entityId: string; kind: SyncIssueKind; message: string; code?: string; status?: number }
 export interface WorkspaceSyncResult {
   acknowledged: string[]; issues: SyncIssue[]; localFailures: {noteId: string; message: string}[]
   initialCount: number; remaining?: number; newOrRebased?: number; readError?: string
@@ -111,10 +111,10 @@ export async function syncWorkspace(session: DraftSession, overrides: Partial<De
       }
       if(phase==='failed'||phase==='conflict')localFailures.set(id,phase==='conflict'?'다른 탭과 로컬 원고 충돌: 현재 입력과 미확정 작업을 보존했습니다.':'로컬 저장 또는 ACK 확인이 필요합니다. 원고를 보존했습니다.')
       if(acknowledged.has(op.operationId)){localFailures.set(id,'서버 ACK 후 후속 작업 또는 로컬 저장 확인이 필요합니다.');return}
-      const network=!!api&&(api.status===0||api.status>=500)
+      const network=!!api&&(api.status===0||api.status>=500||api.status===408||api.status===429)
       if(network){if(++consecutiveNetwork>=2)stopReason='네트워크 장애가 연속되어 나머지 작업을 보류했습니다.'}
       else if(api?.status===401||api?.status===403)stopReason='서버 접근 권한을 확인한 뒤 다시 시도해주세요.'
-      issue({operationId:op.operationId,entityId:id,code:api?.code,kind:network?'network':api?.status===404&&api.code==='NOTE_NOT_FOUND'&&op.type==='NOTE_UPDATE'?'review':api?.status===409?'conflict':api?.status===404&&api.code==='FOLDER_NOT_FOUND'?'deferred':'failed',
+      issue({operationId:op.operationId,entityId:id,code:api?.code,status:api?.status,kind:network?'network':api?.status===404&&api.code==='NOTE_NOT_FOUND'&&op.type==='NOTE_UPDATE'?'review':api?.status===409?'conflict':api?.status===404&&api.code==='FOLDER_NOT_FOUND'?'deferred':'failed',
         message:api?.status===404&&api.code==='NOTE_NOT_FOUND'?'서버에서 원고를 찾지 못했습니다. 자동 재생성 없이 로컬 원고와 작업을 보존했습니다.':error instanceof Error?error.message:'동기화 확인 실패'})
     }
     const safeNote=async(id:string)=>{
