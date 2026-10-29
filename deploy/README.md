@@ -21,6 +21,16 @@
 
 CORS 허용 설정은 필요 없다. 브라우저는 Vercel의 같은 origin `/api`만 호출한다. Spring을 직접 인터넷에 연결하거나 VITE_* 비밀 키를 사용하지 않는다. Vercel 프록시 경유와 API 도메인 직접 접근 모두 Caddy가 검증한다. Origin 검사는 CSRF 방어 보조이며 인증을 대체하지 않는다.
 
+## 2026-10-30 실제 EC2 배포
+
+실제 `seam-note` 프로필 조회 결과 기존 서버는 **ap-southeast-2(시드니), Ubuntu 24.04 ARM64/t4g.small**이다. 신규 리소스 생성이나 서울 이전은 하지 않는다. 현재 서버에서 **Supabase Direct IPv6 + JDBC verify-full**로 Flyway V1–V5와 JPA, DB readiness가 통과했다. 실제 원격 PWA 검사에서는 최초 원고 초기화의 기존 retry 경쟁이 추가 재현돼 자동 동기화는 아직 통과하지 못했다(제품 코드 보존). 이 날짜의 상세 실행 기록과 남은 공개 HTTPS/Vercel 작업은 [실제 배포 기록](../docs/worklogs/2026-10-30-ec2-deployment.md)을 따른다.
+
+Direct Connection은 호스트뿐 아니라 컨테이너에도 IPv6 egress가 필요하다. Docker 27+에서 `deploy/.env`의 `ENABLE_IPV6=true`로 전용 bridge의 private ULA/NAT IPv6를 활성화할 수 있다. Session pooler/기존 로컬 검증은 기본 false를 유지한다. AWS 보안 그룹이나 Docker daemon 전역 설정을 바꾸지 않으며 backend host port는 계속 비공개다. [Docker bridge IPv6](https://docs.docker.com/engine/network/drivers/bridge/)
+
+도메인·Basic hash가 준비되지 않았다면 `./deploy/scripts/manage.sh deploy-backend`로 내부 backend만 시작/검증한다. `.env`에 예제의 Caddy 변수 이름/placeholder는 남겨 Compose를 파싱할 수 있게 하되, 이 모드에서는 Caddy를 시작하지 않는다. `API_HOST`, `ACME_EMAIL`, `VALIDATION_PASSWORD_HASH`와 DNS가 준비된 후 기존 `deploy` 모드로 HTTPS를 시작한다.
+
+CA 파일 이름이나 다운로드 위치만으로 신뢰 체인이 일치한다고 가정하지 않는다. 이번 endpoint의 레거시 체인은 내려받은 Project CA와 달랐으며, 별도 공식 Supabase Root 2021 CA로 검증했다. 실제 endpoint의 체인·hostname 검증을 통과한 CA만 `/run/certs/supabase-ca.crt`에 사용한다. 잘못된 CA를 해결하려고 sslmode를 낮추지 않는다. 인증서와 `.env`는 Git에 넣지 않는다.
+
 ## 1. 비용·리소스 승인 먼저
 
 추천: Supabase와 가까운 AWS 서울 리전, Ubuntu Server 24.04 LTS **arm64**, **t4g.small (2 vCPU / 2 GiB RAM)**, 암호화 gp3 20 GiB, 단일 EC2 + Caddy. Java 컨테이너 1 GiB, Caddy 256 MiB 제한이며 나머지는 OS에 둔다. 빌드는 로컬/CI에서 하고 이미지만 전송한다. x86이 필요하면 t3.small과 linux/amd64 이미지를 선택한다. micro 1 GiB는 JVM/OS 여유가 작아 추천하지 않는다.

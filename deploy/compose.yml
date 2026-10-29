@@ -55,3 +55,9 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+
+# Direct Supabase endpoints need IPv6 from the container as well as the host.
+# Docker 27+ can allocate a private ULA subnet with NAT; no backend port is published.
+networks:
+  default:
+    enable_ipv6: ${ENABLE_IPV6:-false}

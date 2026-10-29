@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-30",
+  "scope": "REAL new EC2 arm64 -> Supabase Direct IPv6 JDBC verify-full; local loopback SSH tunnel, NOT public HTTPS or Vercel",
+  "region": "ap-southeast-2",
+  "instance": "i-0fbbb17cfc43f331c",
+  "image": "seam-note-backend:3a9b7e9-arm64",
+  "checks": [
+    "workspace GET",
+    "folder POST",
+    "note POST and creation ACK",
+    "creation ledger replay",
+    "PUT version and ACK",
+    "update ledger replay",
+    "expectedVersion conflict",
+    "idempotency key payload mismatch",
+    "note GET",
+    "folder notes GET",
+    "folder PATCH",
+    "own synthetic folder cleanup",
+    "cascade note DELETE"
+  ],
+  "passed": true,
+  "publicApiExposed": false,
+  "httpsVercelTested": false,
+  "jdbcMetadata": {
+    "tls": true,
+    "tlsProtocol": "TLSv1.3",
+    "flywayAppliedVersions": 5,
+    "flywayFailedVersions": 0,
+    "anonymousSchemaUsage": false,
+    "authenticatedSchemaUsage": false,
+    "anonymousNoteRead": false,
+    "anonymousNoteWrite": false
+  },
+  "hostPlatform": "Ubuntu 24.04.5 LTS aarch64",
+  "dockerVersion": "29.1.3",
+  "composeVersion": "2.40.3",
+  "backendHealth": "healthy",
+  "backendPublishedPorts": {},
+  "deploymentBridgeIpv6": true,
+  "imageTransferSha256": "a2de7be657f47d19a0eece416ae47b4d7384f81cad31385b6be29dcb78437af0",
+  "localRemoteRootfsLayersIdentical": true,
+  "restartChecks": [
+    "actual EC2 container restart readiness UP",
+    "Supabase synthetic note persists across restart",
+    "idempotency ledger survives actual EC2 restart"
+  ]
+}
