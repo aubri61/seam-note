@@ -1,0 +1,40 @@
+{
+  "environment": {
+    "noteId": "70dd4cc0-e55c-4382-8aa1-cdc4b5336d28",
+    "folderId": "93685207-3076-4bb8-b2dc-aacecc1b671c",
+    "origin": "http://127.0.0.1:25221",
+    "apiOrigin": "http://127.0.0.1:18821",
+    "dbPort": 25521,
+    "dbName": "seam_note_manual_lab",
+    "workDirectory": "/private/tmp/seam-note-manual-sync-zzqmwkxq"
+  },
+  "results": [
+    {
+      "name": "unfiled-detail-tree-update-ack-and-explicit-create",
+      "passed": true,
+      "rootId": "9ff5bd48-8869-4a0a-8793-87e1d1b3d280",
+      "createdId": "0bb0b6bb-44c7-4f08-9d05-61e9da2dffd5"
+    },
+    {
+      "name": "recursive-server-delete-cancel-failure-local-rollback-retry-two-tabs-tombstone",
+      "passed": true,
+      "removedFolders": 3,
+      "removedNotes": 2,
+      "unrelatedRootKept": true,
+      "staleWriteRejected": true
+    },
+    {
+      "name": "offline-pending-folder-child-note-cancellation",
+      "passed": true,
+      "serverCreated": false
+    },
+    {
+      "name": "additive-v4-to-v5-keeps-draft-bytes",
+      "passed": true,
+      "preserved": true,
+      "version": 5,
+      "markers": 0
+    }
+  ],
+  "developmentDbWrites": 0
+}

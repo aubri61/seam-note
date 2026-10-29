@@ -158,25 +158,21 @@ export function AppLayout() {
     pendingCreatedFocus.current = {noteId,reached:false}
     setCreatedFocusRequest(noteId)
   }
-  function create(kind: 'folder' | 'root-folder' | 'document') {
+  function create(kind: 'folder' | 'root-folder' | 'document' | 'unfiled-document') {
     if (folders.busy || folders.pendingFolder) return
     setCreationMessage('')
     if (kind === 'folder' || kind === 'root-folder') {
       folders.beginFolderCreation(kind === 'root-folder')
     } else {
-      void createDocument()
+      void createDocument(kind==='unfiled-document')
     }
   }
-  async function createDocument() {
+  async function createDocument(unfiled=false) {
     if (createDocumentGate.current || !folders.workspace.data) return
     createDocumentGate.current = true
     try {
-      // Keep the selected destination; otherwise use the first root in existing display order.
-      let parentId = folders.creationParentId ?? folders.tree.roots[0]?.folder.id
-      if (!parentId) {
-        parentId = crypto.randomUUID()
-        if (!await folders.createFolder({id:parentId,parentId:null,name:'새 폴더'})) return
-      }
+      // No selection means an unfiled workspace note; never invent a parent folder.
+      const parentId = unfiled ? null : folders.creationParentId
       const createdId = await folders.createEmptyNote(parentId)
       if (createdId) showCreatedNote(createdId)
     } finally { createDocumentGate.current = false }

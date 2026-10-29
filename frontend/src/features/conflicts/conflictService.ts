@@ -35,7 +35,7 @@ export async function inspectConflict(id:string,session:DraftSession):Promise<Co
   preview.blocked??=blockedChoice(preview.kind,head)
   return preview
 }
-export async function chooseConflict(preview:ConflictPreview,choice:'mine'|'other'|'recover',session:DraftSession,folderId?:string) {
+export async function chooseConflict(preview:ConflictPreview,choice:'mine'|'other'|'recover',session:DraftSession,folderId?:string|null) {
   const repo=await repository()
   const execute=async()=>{
     if(session.getSnapshot()[preview.noteId]?.revision!==preview.memoryRevision)throw new ChangedConflict()
@@ -81,5 +81,16 @@ export async function saveChosenNote(noteId:string,session:DraftSession) {
     const canSend=()=>navigator.onLine!==false
     await syncLocalNote(noteId,session,canSend,{lockHeld:true})
     return syncOneNote(noteId,session,{lockHeld:true,storage:outboxRepository,send:sendNoteSnapshot,locks:navigator.locks,canSend})
+  })
+}
+
+/** Does not DELETE or recreate a server note. Revalidate missing state before local discard. */
+export async function discardDeletedNote(preview:ConflictPreview,session:DraftSession) {
+  return withSyncLock(async()=>{
+    if(preview.kind!=='SERVER_NOTE_DELETED'||!preview.serverMissing||preview.blocked)throw new ChangedConflict()
+    try{await getNote(preview.noteId);throw new ChangedConflict()}catch(error){if(!deletedError(error))throw error}
+    const repo=await repository()
+    await session.applyConflictChoice(preview.noteId,preview.memoryRevision,(_writer,current)=>repo.discardDeletedConflict(preview,current))
+    repo.notifyDeleted()
   })
 }

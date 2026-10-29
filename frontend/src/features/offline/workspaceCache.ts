@@ -14,7 +14,7 @@ export type WorkspaceView = WorkspaceTreeResponse & { localSnapshot?: { cachedAt
 export function validateWorkspace(data: WorkspaceTreeResponse) {
   if (!data || !Array.isArray(data.folders) || !Array.isArray(data.notes)
     || !data.folders.every(f => typeof f.id === 'string' && typeof f.name === 'string' && (f.parentId === null || typeof f.parentId === 'string') && Number.isSafeInteger(f.sortOrder) && Number.isSafeInteger(f.version))
-    || !data.notes.every(n => typeof n.id === 'string' && typeof n.folderId === 'string' && typeof n.title === 'string' && Number.isSafeInteger(n.version) && Number.isSafeInteger(n.sortOrder))) {
+    || !data.notes.every(n => typeof n.id === 'string' && (n.folderId === null || typeof n.folderId === 'string') && typeof n.title === 'string' && Number.isSafeInteger(n.version) && Number.isSafeInteger(n.sortOrder))) {
     throw new Error('Workspace 응답 형식을 확인하지 못했습니다. 기존 로컬 목록을 보존했습니다.')
   }
   // Store metadata only, even if a server accidentally includes content or extra response properties.
@@ -41,7 +41,12 @@ async function mergeLocal(view:WorkspaceView,storage:Dependencies['storage']):Pr
   }
   if(!local?.entities.length)return view
   const folders=new Map(view.folders.map(f=>[f.id,f])),notes=new Map(view.notes.map(n=>[n.id,n]))
-  for(const e of local.entities){if(e.folder)folders.set(e.id,e.folder);if(e.note)notes.set(e.id,e.note)}
+  for(const e of local.entities){if(e.deleted){if(e.kind==='folder')folders.delete(e.id);else notes.delete(e.id);continue}if(e.folder)folders.set(e.id,e.folder);if(e.note)notes.set(e.id,e.note)}
+  const deletedFolders=new Set(local.entities.filter(e=>e.deleted&&e.kind==='folder').map(e=>e.id))
+  let changed=true
+  while(changed){changed=false;for(const f of view.folders)if(f.parentId&&deletedFolders.has(f.parentId)&&!deletedFolders.has(f.id)){deletedFolders.add(f.id);changed=true}}
+  for(const id of deletedFolders)folders.delete(id)
+  for(const n of notes.values())if(n.folderId&&deletedFolders.has(n.folderId))notes.delete(n.id)
   return {...view,folders:[...folders.values()],notes:[...notes.values()],localIds:local.pendingIds}
 }
 export async function loadWorkspace(options: RequestOptions = {}, dependencies: Dependencies = {

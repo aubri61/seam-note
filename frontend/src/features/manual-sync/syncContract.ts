@@ -5,7 +5,7 @@ export function verifySyncResponse(operation: NoteUpdateOperation, note: Note, e
   if (typeof echoedId !== 'string' || echoedId.toLowerCase() !== operation.operationId.toLowerCase()
     || !note || note.id !== operation.noteId || note.title !== operation.title || note.content !== operation.content
     || !Number.isSafeInteger(note.version) || note.version !== operation.expectedVersion + 1
-    || typeof note.folderId !== 'string' || !note.folderId || !Number.isSafeInteger(note.sortOrder) || note.sortOrder < 0
+    || note.folderId !== null && (typeof note.folderId !== 'string' || !note.folderId) || !Number.isSafeInteger(note.sortOrder) || note.sortOrder < 0
     || typeof note.createdAt !== 'string' || !Number.isFinite(Date.parse(note.createdAt))
     || typeof note.updatedAt !== 'string' || !Number.isFinite(Date.parse(note.updatedAt))) {
     throw new Error('서버 응답의 작업 ID·원고·버전을 확인하지 못했습니다. 기존 작업을 보존합니다.')

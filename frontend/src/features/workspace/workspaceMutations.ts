@@ -1,9 +1,11 @@
+import { folderSubtree } from './workspaceActions'
 import { mutationOptions, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 import { renameFolderEntry } from '@/features/folders/folderRenaming'
 import { loadWorkspace, workspaceStorage } from '@/features/offline/workspaceCache'
-import { deleteEmptyFolder } from '@/features/folders/folderDeletion'
+import { deleteFolderTree } from '@/features/folders/folderDeletion'
 import { createFolder, renameFolder } from '@/features/folders/folderApi'
+import { deleteNoteEntry } from '@/features/notes/noteDeletion'
 import { createNote, deleteNote } from '@/features/notes/noteApi'
 import { folderKeys, noteKeys, workspaceKeys } from '@/lib/query/queryKeys'
 import type { Folder, Note, UUID, WorkspaceTreeResponse } from '@/lib/api/types'
@@ -45,9 +47,9 @@ export function createNoteMutationOptions(client: QueryClient, onCreated?: (note
   })
 }
 
-export function deleteNoteMutationOptions(client: QueryClient, onDeleted?: (id: UUID, before: WorkspaceTreeResponse | undefined) => void) {
+export function deleteNoteMutationOptions(client: QueryClient, onDeleted?: (id: UUID, before: WorkspaceTreeResponse | undefined) => void, remove: typeof deleteNote = deleteNoteEntry) {
   return mutationOptions({
-    mutationKey: ['notes', 'delete'], mutationFn: deleteNote, retry: false, networkMode: 'always',
+    mutationKey: ['notes', 'delete'], mutationFn: remove, retry: false, networkMode: 'always',
     onSuccess: async (_, id) => {
       await Promise.all([
         client.cancelQueries({ queryKey: workspaceKeys.tree(), exact: true }),
@@ -105,24 +107,29 @@ export function useRenameFolderMutation() {
   })
 }
 
-export function deleteFolderMutationOptions(client: QueryClient, onDeleted?: (id: UUID) => void) {
+export function deleteFolderMutationOptions(client: QueryClient, onDeleted?: (id: UUID, before: WorkspaceTreeResponse | undefined, removed: ReturnType<typeof folderSubtree>) => void) {
   return mutationOptions({
     mutationKey: ['folders', 'delete'], retry: false, networkMode: 'always',
     mutationFn: async (id: UUID) => {
       await Promise.all([client.cancelQueries({queryKey: workspaceKeys.tree(), exact: true}), client.cancelQueries({queryKey: folderKeys.all})])
-      await deleteEmptyFolder(id)
+      const before=client.getQueryData<WorkspaceTreeResponse>(workspaceKeys.tree())
+      const removed=folderSubtree(before,id)
+      await deleteFolderTree(id)
+      return {before,removed}
     },
-    onSuccess: (_, id) => {
+    onSuccess: (result, id) => {
+      const before=result?.before??client.getQueryData<WorkspaceTreeResponse>(workspaceKeys.tree()),removed=result?.removed??folderSubtree(before,id)
       client.setQueryData<WorkspaceTreeResponse>(workspaceKeys.tree(), current => current ? {
-        ...current, folders: current.folders.filter(folder => folder.id !== id),
+        ...current, folders: current.folders.filter(folder => !removed.folderIds.includes(folder.id)),notes:current.notes.filter(note=>!removed.noteIds.includes(note.id)),
       } : undefined)
       client.removeQueries({ queryKey: folderKeys.detail(id), exact: true })
       client.removeQueries({ queryKey: folderKeys.children(id), exact: true })
-      onDeleted?.(id)
+      for(const noteId of removed.noteIds){void client.cancelQueries({queryKey:noteKeys.detail(noteId),exact:true});client.removeQueries({queryKey:noteKeys.detail(noteId),exact:true})}
+      onDeleted?.(id,before,removed)
       void Promise.all([client.invalidateQueries({queryKey: workspaceKeys.tree(), exact: true}), client.invalidateQueries({queryKey: folderKeys.all})])
     },
   })
 }
-export function useDeleteFolderMutation(onDeleted: (id: UUID) => void) {
+export function useDeleteFolderMutation(onDeleted: (id: UUID, before: WorkspaceTreeResponse | undefined, removed: ReturnType<typeof folderSubtree>) => void) {
   return useMutation(deleteFolderMutationOptions(useQueryClient(), onDeleted))
 }

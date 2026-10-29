@@ -14,6 +14,7 @@ export interface WorkspaceNoteNode {
 export type WorkspaceNode = WorkspaceFolderNode | WorkspaceNoteNode
 export interface WorkspaceTreeModel {
   roots: WorkspaceFolderNode[]
+  rootNotes: WorkspaceNoteNode[]
   folders: Map<UUID, WorkspaceFolderNode>
   notes: Map<UUID, WorkspaceNoteNode>
   parents: Map<UUID, UUID | null>
@@ -39,7 +40,7 @@ export function nodeLabel(node: WorkspaceNode) {
 
 /** New view nodes only; never sort or change the response arrays/DTOs in place. */
 export function buildWorkspaceTree(data: WorkspaceTreeResponse): WorkspaceTreeModel {
-  const model: WorkspaceTreeModel = { roots: [], folders: new Map(), notes: new Map(), parents: new Map(), issues: [] }
+  const model: WorkspaceTreeModel = { roots: [], rootNotes: [], folders: new Map(), notes: new Map(), parents: new Map(), issues: [] }
   for (const folder of data.folders) {
     if (model.folders.has(folder.id)) { model.issues.push('중복 폴더 ID'); continue }
     model.folders.set(folder.id, { kind: 'folder', key: `folder:${folder.id}`, folder, children: [] })
@@ -74,20 +75,22 @@ export function buildWorkspaceTree(data: WorkspaceTreeResponse): WorkspaceTreeMo
     else model.folders.get(parentId)!.children.push(node)
   }
   for (const note of data.notes) {
-    const parent = model.folders.get(note.folderId)
-    if (!parent) { model.issues.push('없는 폴더의 원고: 표시 제외'); continue }
+    const parent = note.folderId ? model.folders.get(note.folderId) : undefined
+    if (note.folderId !== null && !parent) { model.issues.push('없는 폴더의 원고: 표시 제외'); continue }
     if (model.notes.has(note.id)) { model.issues.push('중복 원고 ID'); continue }
     const node: WorkspaceNoteNode = { kind: 'note', key: `note:${note.id}`, note }
     model.notes.set(note.id, node)
-    parent.children.push(node)
+    if(parent)parent.children.push(node)
+    else model.rootNotes.push(node)
   }
   model.roots.sort(compare)
+  model.rootNotes.sort(compare)
   for (const node of model.folders.values()) node.children.sort(compare)
   return model
 }
 
 export function firstNoteId(model: WorkspaceTreeModel): UUID | null {
-  const stack: WorkspaceNode[] = [...model.roots].reverse()
+  const stack: WorkspaceNode[] = [...model.roots,...model.rootNotes].reverse()
   while (stack.length) {
     const node = stack.pop()!
     if (node.kind === 'note') return node.note.id
@@ -109,7 +112,7 @@ export function noteAncestors(model: WorkspaceTreeModel, noteId: UUID | null): F
 export function visibleWorkspaceRows(model: WorkspaceTreeModel, open: Record<string, boolean>, search = ''): WorkspaceRow[] {
   const query = search.trim().toLocaleLowerCase()
   const rows: WorkspaceRow[] = []
-  const stack: WorkspaceRow[] = model.roots.map(node => ({ node, depth: 0, parentKey: null })).reverse()
+  const stack: WorkspaceRow[] = [...model.roots,...model.rootNotes].map(node => ({ node, depth: 0, parentKey: null })).reverse()
   while (stack.length) {
     const row = stack.pop()!
     rows.push(row)

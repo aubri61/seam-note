@@ -1,0 +1,39 @@
+{
+  "results": [
+    {
+      "mode": "discard",
+      "width": 520,
+      "height": 380.375,
+      "atomicDiscard": true,
+      "noRecreate": true
+    },
+    {
+      "mode": "quota",
+      "width": 520,
+      "height": 380.375,
+      "atomicDiscard": true,
+      "noRecreate": true
+    },
+    {
+      "mode": "changed",
+      "staleServerCheckPreserved": true
+    },
+    {
+      "mode": "changed-local",
+      "staleLocalCheckPreserved": true
+    },
+    {
+      "mode": "compare",
+      "width": 960,
+      "height": 354.09375
+    },
+    {
+      "mode": "mobile",
+      "width": 358,
+      "height": 424.5625,
+      "atomicDiscard": true,
+      "noRecreate": true
+    }
+  ],
+  "developmentDbWrites": 0
+}

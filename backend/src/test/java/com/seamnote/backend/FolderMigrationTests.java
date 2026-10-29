@@ -38,10 +38,11 @@ class FolderMigrationTests {
             try(var r=c.createStatement().executeQuery("select count(*) from folders")){r.next();assertEquals(populated?1:0,r.getInt(1));}
             try(var r=c.createStatement().executeQuery("select count(*) from notes where version<>0 or sort_order is null")){r.next();assertEquals(0,r.getInt(1));}
             if(populated){
-                assertThrows(SQLException.class,()->c.createStatement().executeUpdate("update notes set folder_id=null"));
                 assertThrows(SQLException.class,()->c.createStatement().executeUpdate("update notes set folder_id='00000000-0000-0000-0000-000000000000'"));
-                assertThrows(SQLException.class,()->c.createStatement().executeUpdate("delete from folders"));
                 assertThrows(SQLException.class,()->c.createStatement().executeUpdate("update notes set sort_order=0"));
+                c.createStatement().executeUpdate("update notes set folder_id=null where sort_order=0");
+                c.createStatement().executeUpdate("delete from folders");
+                try(var rows=c.createStatement().executeQuery("select count(*) from notes")){rows.next();assertEquals(1,rows.getInt(1),"Unfiled note survives folder cascade");}
             }
             assertEquals(0,flyway(schema,"latest").migrate().migrationsExecuted);
         }

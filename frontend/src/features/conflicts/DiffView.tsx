@@ -6,7 +6,7 @@ import { documentText } from '@/features/notes/richTextDocument'
 import { changedRange } from './lineDiff'
 import type { DiffResult } from './lineDiff'
 const Panels=styled.div(({theme})=>({display:'grid',gridTemplateColumns:'1fr 1fr',gap:theme.spacing.md,minWidth:0,[`@media(max-width:${theme.breakpoints.mobile})`]:{gridTemplateColumns:'1fr'}}))
-const Scroll=styled.div(({theme})=>({height:'min(48vh,520px)',overflow:'auto',background:theme.colors.background,position:'relative',font:'13px/24px ui-monospace,monospace',outlineOffset:2,[`@media(max-width:${theme.breakpoints.mobile})`]:{height:'25vh'}}))
+const Scroll=styled.div(({theme})=>({maxHeight:'36vh',overflow:'auto',background:theme.colors.background,position:'relative',font:'13px/24px ui-monospace,monospace',outlineOffset:2,[`@media(max-width:${theme.breakpoints.mobile})`]:{maxHeight:'25vh'}}))
 function Range({value,other,changed}:{value:string;other:string;changed:boolean}) {
   const theme=useTheme()
   if(!changed)return <>{value}</>
@@ -43,7 +43,7 @@ export function DiffView({left,right,leftLabel,rightLabel,leftTitle,rightTitle,l
         <span style={{fontSize:12,color:theme.colors.mutedText}}>제목{leftTitle!==rightTitle?' · 변경됨':''}</span>
         <p style={{whiteSpace:'pre-wrap',minHeight:24,fontSize:20,fontWeight:600,margin:'8px 0 0'}}><Range value={(index?rightTitle:leftTitle)||'제목 없음'} other={(index?leftTitle:rightTitle)||'제목 없음'} changed={leftTitle!==rightTitle}/></p>
       </div>
-      <Scroll ref={index?r:l} tabIndex={0} aria-label={`${index?rightLabel:leftLabel} 본문 비교`} onScroll={event=>scroll(event.currentTarget.scrollTop)}>
+      <Scroll style={{height:Math.max(72,Math.min(320,data.rows.length*24))}} ref={index?r:l} tabIndex={0} aria-label={`${index?rightLabel:leftLabel} 본문 비교`} onScroll={event=>scroll(event.currentTarget.scrollTop)}>
         <div style={{height:data.rows.length*24,position:'relative'}}>
           {data.rows.slice(start,end).map((row,offset)=><div key={start+offset} data-diff-row style={{position:'absolute',top:(start+offset)*24,minWidth:'100%',whiteSpace:'pre',height:24,background:row.changed?(index?theme.colors.diffAdded:theme.colors.diffRemoved):'transparent'}}>
             <span aria-hidden style={{display:'inline-block',width:52,textAlign:'right',paddingRight:12,color:theme.colors.secondary}}>{index?row.rightNumber:row.leftNumber}</span>

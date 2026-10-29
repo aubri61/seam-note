@@ -14,7 +14,7 @@ async function main(){const browser=await chromium.launch({channel:'chrome',head
    writes.push({path:url.pathname,payload:body})
    let data
    if(url.pathname==='/api/folders'){data={...body,parentId:body.parentId??null,version:0,sortOrder:folders.length,createdAt:stamp,updatedAt:stamp};folders.push(data)}
-   else{assert.equal(url.pathname,'/api/notes');assert.ok(folders.some(f=>f.id===body.folderId));assert.equal(body.content,empty);data={...body,version:0,sortOrder:notes.length,createdAt:stamp,updatedAt:stamp};notes.push(data)}
+   else{assert.equal(url.pathname,'/api/notes');assert.ok(body.folderId===null||folders.some(f=>f.id===body.folderId));assert.equal(body.content,empty);data={...body,version:0,sortOrder:notes.length,createdAt:stamp,updatedAt:stamp};notes.push(data)}
    return r.fulfill({status:201,json:data,headers:{'Idempotency-Key':req.headers()['idempotency-key']}})
   }
   assert.equal(req.method(),'GET')
@@ -30,18 +30,18 @@ async function main(){const browser=await chromium.launch({channel:'chrome',head
  const editor=p.getByRole('textbox',{name:'문서 내용',exact:true});await until(()=>editor.isEditable(),'new editor editable');const id=p.url().split('/').at(-1)
  const local=await p.evaluate(async id=>{const db=await new Promise(ok=>{const r=indexedDB.open('seam-note-tiptap-v1');r.onsuccess=()=>ok(r.result)});try{return await new Promise(ok=>{const tx=db.transaction(['drafts','creationOutbox','localEntities'],'readonly'),result={};for(const name of ['drafts','creationOutbox','localEntities']){const r=tx.objectStore(name).getAll();r.onsuccess=()=>result[name]=r.result}tx.oncomplete=()=>ok(result)})}finally{db.close()}},id)
  if(scenario==='offline-no-folders'){
-  assert.equal(writes.length,0);const creation=local.creationOutbox.find(o=>o.type==='NOTE_CREATE');assert.ok(creation);assert.ok(local.creationOutbox.some(o=>o.type==='FOLDER_CREATE'&&o.entityId===creation.payload.folderId))
+  assert.equal(writes.length,0);const creation=local.creationOutbox.find(o=>o.type==='NOTE_CREATE');assert.ok(creation);assert.equal(creation.payload.folderId,null);assert.equal(local.creationOutbox.some(o=>o.type==='FOLDER_CREATE'),false)
  }else{
   await until(()=>writes.some(w=>w.path==='/api/notes'),'note POST')
   assert.equal(writes.filter(w=>w.path==='/api/notes').length,1)
   const note=writes.find(w=>w.path==='/api/notes').payload
-  if(scenario==='root-fallback'||scenario==='mobile-empty')assert.equal(note.folderId,first)
+  if(scenario==='root-fallback'||scenario==='mobile-empty')assert.equal(note.folderId,null)
   if(scenario==='selected-folder')assert.equal(note.folderId,child)
-  if(scenario==='no-folders'){assert.equal(writes[0].path,'/api/folders');assert.equal(note.folderId,writes[0].payload.id);assert.equal(writes[0].payload.parentId,null)}
+  if(scenario==='no-folders'){assert.equal(writes[0].path,'/api/notes');assert.equal(note.folderId,null)}
  }
  if(scenario==='no-folders'){
   const menu=p.getByRole('button',{name:'현재 원고 메뉴',exact:true});await until(()=>menu.isEnabled(),'server creation confirmed before deletion');await menu.click();await p.getByRole('menuitem',{name:'원고 삭제',exact:true}).click();await p.getByRole('dialog',{name:'원고 영구 삭제',exact:true}).getByRole('button',{name:'영구 삭제',exact:true}).click()
-  await p.waitForURL(origin+'/');await central.waitFor();await central.click();await until(()=>p.url().includes('/notes/')&&!p.url().endsWith(id),'recreate after deleting last note');await until(()=>writes.filter(w=>w.path==='/api/notes').length===2,'second created POST');assert.equal(writes.filter(w=>w.path==='/api/folders').length,1)
+  await p.waitForURL(origin+'/');await central.waitFor();await central.click();await until(()=>p.url().includes('/notes/')&&!p.url().endsWith(id),'recreate after deleting last note');await until(()=>writes.filter(w=>w.path==='/api/notes').length===2,'second created POST');assert.equal(writes.filter(w=>w.path==='/api/folders').length,0)
  }
  if(scenario==='root-fallback'){
   const toggle=p.locator('button[aria-controls="folders-sidebar"]');assert.equal(await toggle.getAttribute('aria-expanded'),'true')

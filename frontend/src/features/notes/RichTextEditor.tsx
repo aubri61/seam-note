@@ -1,3 +1,4 @@
+import { shortcutLabel } from '@/lib/keyboard/shortcutLabel'
 import { useEffect, useRef, useState } from 'react'
 import { EditorContent, Extension, useEditor, useEditorState } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -69,12 +70,12 @@ export default function RichTextEditor({content,editable,onChange}:{content:stri
   return <Frame>
     {error&&<p role="alert">{error}</p>}
     <div role="toolbar" aria-label="원고 서식">
-      <IconButton type="button" disabled={disabled} aria-label="굵게" aria-keyshortcuts="Meta+B Control+B" title="굵게 (⌘B / Ctrl+B)" aria-pressed={state?.bold??false} onMouseDown={e=>e.preventDefault()} onClick={()=>editor?.chain().focus().toggleBold().run()}><strong>B</strong></IconButton>
-      <IconButton type="button" disabled={disabled} aria-label="기울임" aria-keyshortcuts="Meta+I Control+I" title="기울임 (⌘I / Ctrl+I)" aria-pressed={state?.italic??false} onMouseDown={e=>e.preventDefault()} onClick={()=>editor?.chain().focus().toggleItalic().run()}><i>I</i></IconButton>
-      <IconButton type="button" disabled={disabled} aria-label="글머리 기호 목록" aria-keyshortcuts="Meta+Shift+8 Control+Shift+8" title="글머리 기호 목록 (⌘Shift+8 / Ctrl+Shift+8)" aria-pressed={state?.bullet??false} onMouseDown={e=>e.preventDefault()} onClick={()=>editor?.chain().focus().toggleBulletList().run()}><Icon name="list" size={19}/></IconButton>
-      <IconButton type="button" disabled={disabled} aria-label="번호 목록" aria-keyshortcuts="Meta+Shift+7 Control+Shift+7" title="번호 목록 (⌘Shift+7 / Ctrl+Shift+7)" aria-pressed={state?.ordered??false} onMouseDown={e=>e.preventDefault()} onClick={()=>editor?.chain().focus().toggleOrderedList().run()}><Icon name="ordered" size={19}/></IconButton>
-      <IconButton type="button" disabled={disabled||!state?.undo} aria-label="실행 취소" aria-keyshortcuts="Meta+Z Control+Z" title="실행 취소 (⌘Z / Ctrl+Z)" onMouseDown={e=>e.preventDefault()} onClick={()=>editor?.chain().focus().undo().run()}><Icon name="undo" size={19}/></IconButton>
-      <IconButton type="button" disabled={disabled||!state?.redo} aria-label="다시 실행" aria-keyshortcuts="Meta+Shift+Z Control+Shift+Z Control+Y" title="다시 실행 (⌘Shift+Z / Ctrl+Shift+Z / Ctrl+Y)" onMouseDown={e=>e.preventDefault()} onClick={()=>editor?.chain().focus().redo().run()}><Icon name="redo" size={19}/></IconButton>
+      <IconButton type="button" disabled={disabled} aria-label="굵게" aria-keyshortcuts="Meta+B Control+B" title={shortcutLabel('굵게', 'B')} aria-pressed={state?.bold??false} onMouseDown={e=>e.preventDefault()} onClick={()=>editor?.chain().focus().toggleBold().run()}><strong>B</strong></IconButton>
+      <IconButton type="button" disabled={disabled} aria-label="기울임" aria-keyshortcuts="Meta+I Control+I" title={shortcutLabel('기울임', 'I')} aria-pressed={state?.italic??false} onMouseDown={e=>e.preventDefault()} onClick={()=>editor?.chain().focus().toggleItalic().run()}><i>I</i></IconButton>
+      <IconButton type="button" disabled={disabled} aria-label="글머리 기호 목록" aria-keyshortcuts="Meta+Shift+8 Control+Shift+8" title={shortcutLabel('글머리 기호 목록', 'Shift+8')} aria-pressed={state?.bullet??false} onMouseDown={e=>e.preventDefault()} onClick={()=>editor?.chain().focus().toggleBulletList().run()}><Icon name="list" size={19}/></IconButton>
+      <IconButton type="button" disabled={disabled} aria-label="번호 목록" aria-keyshortcuts="Meta+Shift+7 Control+Shift+7" title={shortcutLabel('번호 목록', 'Shift+7')} aria-pressed={state?.ordered??false} onMouseDown={e=>e.preventDefault()} onClick={()=>editor?.chain().focus().toggleOrderedList().run()}><Icon name="ordered" size={19}/></IconButton>
+      <IconButton type="button" disabled={disabled||!state?.undo} aria-label="실행 취소" aria-keyshortcuts="Meta+Z Control+Z" title={shortcutLabel('실행 취소', 'Z')} onMouseDown={e=>e.preventDefault()} onClick={()=>editor?.chain().focus().undo().run()}><Icon name="undo" size={19}/></IconButton>
+      <IconButton type="button" disabled={disabled||!state?.redo} aria-label="다시 실행" aria-keyshortcuts="Meta+Shift+Z Control+Shift+Z Control+Y" title={shortcutLabel('다시 실행', 'Shift+Z')} onMouseDown={e=>e.preventDefault()} onClick={()=>editor?.chain().focus().redo().run()}><Icon name="redo" size={19}/></IconButton>
     </div>
     <EditorContent className="editor-content" editor={editor}/>
   </Frame>

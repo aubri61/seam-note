@@ -13,7 +13,7 @@ public class NoteResponse {
     private final Instant createdAt;
     private final Instant updatedAt;
     public NoteResponse(Note entity) {
-        this.folderId = entity.getFolder().getId();
+        this.folderId = entity.getFolder() == null ? null : entity.getFolder().getId();
         this.id = entity.getId();
         this.title = entity.getTitle();
         this.content = entity.getContent();

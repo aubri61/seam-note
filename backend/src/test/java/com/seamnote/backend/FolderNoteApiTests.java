@@ -57,7 +57,6 @@ class FolderNoteApiTests {
         assertEquals(1,call("GET","/folders?parentId="+a,null).body.size());
         error("PATCH","/folders/"+a+"/move",Map.of("targetParentId",a),409,"FOLDER_CYCLE_DETECTED");
         error("PATCH","/folders/"+a+"/move",Map.of("targetParentId",c),409,"FOLDER_CYCLE_DETECTED");
-        error("DELETE","/folders/"+a,null,409,"FOLDER_NOT_EMPTY");
         assertEquals(200,call("PATCH","/folders/"+c,Map.of("name","  renamed  ")).status);
         assertEquals("renamed",call("GET","/folders/"+c,null).body.get("name").asString());
         assertEquals(200,call("PATCH","/folders/"+c+"/move","{\"targetParentId\":null}").status);
@@ -90,7 +89,6 @@ class FolderNoteApiTests {
         assertEquals(200,changed.status); assertEquals("",changed.body.get("title").asString());
         assertTrue(changed.body.get("version").asInt()>0);
         assertEquals(id,call("GET","/folders/"+a+"/notes",null).body.get(0).get("id").asString());
-        error("DELETE","/folders/"+a,null,409,"FOLDER_NOT_EMPTY");
         assertEquals(b,call("PATCH","/notes/"+id+"/move",Map.of("targetFolderId",b)).body.get("folderId").asString());
         assertEquals(1,call("GET","/folders/"+b+"/notes",null).body.size());
         assertTrue(call("GET","/notes",null).body.valueStream().anyMatch(x->x.get("id").asString().equals(id)&&x.has("content")));
@@ -114,7 +112,7 @@ class FolderNoteApiTests {
         error("PUT","/notes/"+id,Map.of("title","x".repeat(201),"content",TiptapFixtures.doc(""),"expectedVersion",0),400,"INVALID_REQUEST");
         error("POST","/notes",Map.of("folderId",UUID.randomUUID().toString(),"title","","content",TiptapFixtures.doc("")),404,"FOLDER_NOT_FOUND");
         error("PATCH","/notes/"+id+"/move",Map.of("targetFolderId",UUID.randomUUID().toString()),404,"FOLDER_NOT_FOUND");
-        error("PATCH","/notes/"+id+"/move","{\"targetFolderId\":null}",400,"INVALID_REQUEST");
+        error("PATCH","/notes/"+id+"/move",Map.of(),400,"INVALID_REQUEST");
         error("GET","/notes/not-a-uuid",null,400,"INVALID_REQUEST");
         error("GET","/folders?parentId=invalid",null,400,"INVALID_REQUEST");
         error("POST","/notes","{",400,"MALFORMED_JSON");
@@ -260,5 +258,24 @@ class FolderNoteApiTests {
         var saved=call("PUT","/notes/"+id,Map.of("title","rich","content",rich,"expectedVersion",0));
         assertEquals(200,saved.status,String.valueOf(saved.body));
         assertEquals(rich,saved.body.get("content").asString());assertEquals(1,saved.body.get("version").asLong());
+    }
+
+    @Test void unfiledNoteCreationMoveSummaryAndUpdate() throws Exception {
+        var root=call("POST","/notes",Map.of("id",UUID.randomUUID().toString(),"title","root","content",TiptapFixtures.doc("root body")));
+        assertEquals(201,root.status,String.valueOf(root.body));assertTrue(root.body.get("folderId").isNull());
+        String id=root.body.get("id").asString(),parent=folder(null);
+        assertTrue(call("GET","/workspace/tree",null).body.get("notes").valueStream().anyMatch(n->n.get("id").asString().equals(id)&&n.get("folderId").isNull()));
+        assertEquals(200,call("PUT","/notes/"+id,Map.of("title","root edit","content",TiptapFixtures.doc("edited"),"expectedVersion",0)).status);
+        assertEquals(parent,call("PATCH","/notes/"+id+"/move",Map.of("targetFolderId",parent)).body.get("folderId").asString());
+        var moved=call("PATCH","/notes/"+id+"/move","{\"targetFolderId\":null}");assertEquals(200,moved.status);assertTrue(moved.body.get("folderId").isNull());
+        assertEquals(204,call("DELETE","/folders/"+parent,null).status);assertEquals(200,call("GET","/notes/"+id,null).status);
+    }
+    @Test void folderDeletionRemovesAllDescendantsButKeepsOtherRoots() throws Exception {
+        String a=folder(null),b=folder(a),c=folder(b),unrelated=folder(null);
+        String one=note(a,"one","a"),two=note(b,"two","b"),three=note(c,"three","c"),keep=note(unrelated,"keep","safe");
+        assertEquals(204,call("DELETE","/folders/"+a,null).status);
+        for(String id:List.of(a,b,c))error("GET","/folders/"+id,null,404,"FOLDER_NOT_FOUND");
+        for(String id:List.of(one,two,three))error("GET","/notes/"+id,null,404,"NOTE_NOT_FOUND");
+        assertEquals(200,call("GET","/notes/"+keep,null).status);
     }
 }

@@ -15,7 +15,7 @@ export interface ConflictPreview {
   noteId: string; kind: ConflictKind; memoryRevision: number; mine: NoteDraft; head: ConflictHead
   server?: Note; serverMissing?: true; blocked?: string
 }
-export class NoConflict extends Error { constructor(){super('현재 확인된 원고 내용 충돌이 없습니다. 보관된 사본이 있다면 아래에서 내려받을 수 있습니다.');this.name='NoConflict'} }
+export class NoConflict extends Error { constructor(){super('현재 확인된 원고 내용 충돌이 없습니다.');this.name='NoConflict'} }
 export class ChangedConflict extends Error {
   constructor() { super('비교 후 원고·작업 또는 버전이 바뀌었습니다. 최신 내용을 다시 비교해주세요.'); this.name = 'ChangedConflict' }
 }

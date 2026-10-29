@@ -14,7 +14,7 @@ export interface Folder {
 
 export interface Note {
   id: UUID
-  folderId: UUID
+  folderId: UUID | null
   title: string
   content: string
   sortOrder: number
@@ -43,7 +43,7 @@ export interface MoveFolderRequest {
 
 export interface CreateNoteRequest {
   id?: UUID | null
-  folderId: UUID
+  folderId: UUID | null
   /** Empty string is allowed; at most 200 characters. */
   title: string
   content: string
@@ -57,7 +57,7 @@ export interface UpdateNoteRequest {
 }
 
 export interface MoveNoteRequest {
-  targetFolderId: UUID
+  targetFolderId: UUID | null
 }
 
 export interface ApiFieldError {

@@ -1,0 +1,71 @@
+{
+  "beforeMissingDraft": {
+    "reproduced": true,
+    "mode": "pending",
+    "draftRecreated": false,
+    "outboxRemained": 1,
+    "memoryInputPreserved": true
+  },
+  "afterMissingDraft": [
+    {
+      "mode": "pending",
+      "recreated": true,
+      "revisionIncreased": true,
+      "pendingMatches": true,
+      "reloadPreserved": true
+    },
+    {
+      "mode": "clean",
+      "recreated": true,
+      "revisionIncreased": true,
+      "pendingMatches": true,
+      "reloadPreserved": true
+    },
+    {
+      "mode": "frozen",
+      "blocked": true,
+      "frozenSnapshotPreserved": true
+    },
+    {
+      "mode": "deleted",
+      "noResurrection": true
+    },
+    {
+      "mode": "local-create",
+      "recreated": true,
+      "revisionIncreased": true,
+      "pendingMatches": true,
+      "reloadPreserved": false
+    }
+  ],
+  "localEntities": {
+    "passed": true,
+    "confirmedRedundantRemoved": 2,
+    "protectedRetained": 5,
+    "pendingAndConflictPreserved": true,
+    "newerAckProtected": true,
+    "missingParentDependencyProtected": true,
+    "noServerWrites": true
+  },
+  "nodeTests": {
+    "passed": 185,
+    "failed": 0
+  },
+  "productionSpringPostgresPwaRegression": {
+    "passed": 13,
+    "report": "2026-10-29-tiptap-live.json"
+  },
+  "lint": "passed",
+  "build": "passed",
+  "sourceHashes": {
+    "frontend/src/features/local-drafts/draftDatabase.ts": "91335b7e2d15b1d2cd7e1a4dd0c75417f5b4fc0aaa9d5ff76d01f3613ea9b2c1",
+    "frontend/src/features/local-drafts/draftSession.ts": "306353808bda186629925a7e4ec2a14b7e800a5a02e60658ed764bf34a6b2c58",
+    "frontend/src/features/local-drafts/localDraftRepository.ts": "e3beca4459e0bf17522f5b9d289d993c87d362e91ff527602dcc7784b7f2f7de"
+  },
+  "developmentDbOrUserProfileDeletion": false,
+  "limits": [
+    "Manual external store edits that invalidate pending snapshots are blocked, not blindly repaired",
+    "Offline local-create test uses IndexedDB commit; its reload is covered separately by the actual PWA regression",
+    "Metadata GC does not delete Drafts or queued operations"
+  ]
+}

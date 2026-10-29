@@ -1,3 +1,4 @@
+import { folderSubtree } from './workspaceActions'
 import { useRef } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import styled from '@emotion/styled'
@@ -28,8 +29,7 @@ export function WorkspaceActionDialog({ action, folders, onClose }: {
   const cancel = useRef<HTMLButtonElement>(null)
   const folder = action.kind === 'delete-folder'
   const error = folder ? folders.deleteFolderMutation.error : folders.deleteNoteMutation.error
-  const node = folder ? folders.tree.folders.get(action.folder.id) : null
-  const notEmpty = !!node?.children.length
+  const removed = folder ? folderSubtree(folders.workspace.data,action.folder.id) : null
   const local = folder && folders.localIds.includes(action.folder.id)
 
   return <Dialog.Root open onOpenChange={open => { if (!open && !folders.busy) onClose() }}>
@@ -40,15 +40,15 @@ export function WorkspaceActionDialog({ action, folders, onClose }: {
         onPointerDownOutside={event => { if (folders.busy) event.preventDefault() }}>
         <Dialog.Title>{folder ? '폴더 삭제' : '원고 영구 삭제'}</Dialog.Title>
         <Dialog.Description>
-          {folder ? `“${action.folder.name}” 폴더를 ${local ? '로컬에서 삭제하고 생성 대기를 취소' : '서버에서 영구 삭제'}합니다. 복구할 수 없습니다. 빈 폴더만 삭제할 수 있습니다.`
-            : `“${action.note.title || '제목 없는 문서'}”를 서버에서 영구 삭제합니다. 물리 삭제되며 복구할 수 없습니다.`}
+          {folder ? `“${action.folder.name}” 폴더를 ${local ? '로컬에서 삭제하고 생성 대기를 취소' : '서버에서 영구 삭제'}합니다. 안의 모든 하위 폴더와 원고도 함께 영구 삭제되며 복구할 수 없습니다.`
+            : `“${action.note.title || '제목 없는 문서'}”를 서버에서 영구 삭제합니다. 이 브라우저의 로컬 원고와 대기 작업도 함께 삭제되며 복구할 수 없습니다.`}
         </Dialog.Description>
         <form onSubmit={async event => {
           event.preventDefault()
-          if (folders.busy || notEmpty) return
+          if (folders.busy) return
           if (await (folder ? folders.deleteFolder(action.folder.id) : folders.deleteNote(action.note.id))) onClose()
         }}>
-          {notEmpty && <p role="alert">원고나 하위 폴더가 있습니다. 먼저 안의 항목을 정리해주세요.</p>}
+          {removed && <p role="alert">하위 폴더 {Math.max(0,removed.folderIds.length-1)}개와 원고 {removed.noteIds.length}개를 포함해 모두 삭제합니다. 미동기화된 로컬 원고와 대기 작업도 삭제됩니다.</p>}
           {error && <div role="alert">
             <p>요청을 완료하지 못했습니다: {error.message}</p>
             {error instanceof ApiError && error.status === 0 && <p>서버에 반영됐지만 응답만 유실됐을 수 있습니다. 재요청 전 목록을 새로고침해 확인해주세요.</p>}
@@ -57,7 +57,7 @@ export function WorkspaceActionDialog({ action, folders, onClose }: {
           {folders.busy && <p role="status">요청을 처리하는 중입니다.</p>}
           <Buttons>
             <button ref={cancel} type="button" disabled={folders.busy} onClick={onClose}>취소</button>
-            <button type="submit" disabled={folders.busy || notEmpty}>영구 삭제</button>
+            <button type="submit" disabled={folders.busy}>영구 삭제</button>
           </Buttons>
         </form>
       </Content>

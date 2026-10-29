@@ -1,3 +1,4 @@
+import { shortcutLabel } from '@/lib/keyboard/shortcutLabel'
 import type { Ref } from 'react'
 import styled from '@emotion/styled'
 import { Tooltip } from '@/components/Tooltip'
@@ -66,7 +67,7 @@ export function AppHeader({ online, sidebarOpen, isMobile, sidebarId, onToggleSi
           aria-expanded={sidebarOpen}
           aria-controls={sidebarId}
           aria-haspopup={isMobile ? 'dialog' : undefined}
-          title={`${sidebarOpen ? '사이드바 접기' : '사이드바 펼치기'} (⌘\\ / Ctrl+\\)`}
+          title={shortcutLabel(sidebarOpen ? '사이드바 접기' : '사이드바 펼치기', '\\')}
           onClick={onToggleSidebar}
         >
           <Icon name="sidebar" size={19} />
@@ -76,20 +77,17 @@ export function AppHeader({ online, sidebarOpen, isMobile, sidebarId, onToggleSi
       <div>
         {!hasConflict && <SyncStatus status={status} />}
 
-        {online ? <Tooltip label="동기화 (⌘S / Ctrl+S)"><SaveButton data-workspace-sync aria-keyshortcuts="Meta+S Control+S" aria-label="모든 변경사항 동기화" aria-busy={workspaceSync.busy} type="button" disabled={workspaceSync.disabled} onClick={workspaceSync.onSync} aria-describedby="workspace-sync-feedback">
+        {online ? <Tooltip label={shortcutLabel('동기화', 'S')}><SaveButton data-workspace-sync aria-keyshortcuts="Meta+S Control+S" aria-label="모든 변경사항 동기화" aria-busy={workspaceSync.busy} type="button" disabled={workspaceSync.disabled} onClick={workspaceSync.onSync} aria-describedby="workspace-sync-feedback">
           <Icon name="sync" size={16}/>{workspaceSync.busy?'동기화 중…':'동기화'}
         </SaveButton></Tooltip> : <OfflineStatus role="status">현재 오프라인 작업 중</OfflineStatus>}
         <FolderMenu kind="note" name="현재" tabIndex={0} disabled={!canDelete} onAction={onDelete}/>
 
       </div>
-      <section aria-label="Workspace 동기화" style={{flexBasis:'100%',minWidth:0}}>
-        <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
-          <span>{workspaceSync.summary}</span>
-        </div>
+      {!hasConflict && workspaceSync.error && <section aria-label="Workspace 동기화" style={{flexBasis:'100%',minWidth:0}}>
         <div id="workspace-sync-feedback" aria-live="polite" style={{overflowWrap:'anywhere',lineHeight:1.7}}>
           {!hasConflict&&workspaceSync.error&&<p role="alert">{workspaceSync.error}</p>}
         </div>
-      </section>
+      </section>}
     </Header>
   )
 }

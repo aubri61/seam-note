@@ -16,7 +16,9 @@ export interface LocalNoteDraft extends NoteDraft {
   storageToken: string
   writerId: string
 }
+export interface MissingDraftCheckpoint { draft: NoteDraft; revision: number; storageToken: string }
 export interface DraftRepository {
+  restoreMissing?(draft: NoteDraft, revision: number, checkpoint: MissingDraftCheckpoint, writerId: string): Promise<LocalNoteDraft>
   read(noteId: string): Promise<LocalNoteDraft | undefined>
   write(draft: NoteDraft, revision: number, expectedToken: string | undefined, writerId: string): Promise<LocalNoteDraft>
 }
@@ -26,3 +28,7 @@ export class LocalDraftConflict extends Error {
 export class InvalidLocalDraft extends Error {
   constructor() { super('Local draft record is not supported'); this.name = 'InvalidLocalDraft' }
 }
+
+export class LocalNoteDeleted extends Error { constructor(){super('사용자가 삭제한 원고입니다.');this.name='LocalNoteDeleted'} }
+
+export class MissingDraftRecoveryBlocked extends Error { constructor(){super('Missing local draft has unresolved operations');this.name='MissingDraftRecoveryBlocked'} }

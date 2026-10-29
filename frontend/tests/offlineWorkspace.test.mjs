@@ -60,3 +60,24 @@ test('local-refresh marker never suppresses a local entity read failure warning'
  const f=fixture();await loadWorkspace({},f.deps);f.deps.online=()=>false;f.deps.localRefresh=true;f.deps.storage.local=async()=>{throw Error('read failed')}
  const result=await loadWorkspace({},f.deps);assert.equal(result.localSnapshot.reason,undefined);assert.match(result.localSnapshot.warning,/읽지 못했습니다/)
 })
+
+test('unfiled metadata remains unfiled in successful GET and offline recovery',async()=>{
+ const f=fixture(),root={...data.notes[0],folderId:null}
+ f.deps.get=async()=>({folders:[],notes:[root]})
+ assert.equal((await loadWorkspace({},f.deps)).notes[0].folderId,null)
+ f.deps.online=()=>false
+ assert.equal((await loadWorkspace({},f.deps)).notes[0].folderId,null)
+})
+test('deletion markers filter a late server subtree without hiding unrelated unfiled notes',async()=>{
+ const f=fixture(),root={...data.notes[0],id:'root',folderId:null}
+ f.deps.get=async()=>({folders:[...data.folders,{...data.folders[0],id:'child',parentId:'f'}],notes:[...data.notes,{...data.notes[0],id:'nested',folderId:'child'},root]})
+ f.deps.storage.local=async()=>({entities:[{id:'f',kind:'folder',confirmed:true,deleted:true}],pendingIds:[]})
+ const result=await loadWorkspace({},f.deps)
+ assert.deepEqual(result.folders,[]);assert.deepEqual(result.notes,[root])
+})
+test('note and folder tombstones are scoped by entity kind',async()=>{
+ const f=fixture();f.deps.get=async()=>({folders:data.folders,notes:[{...data.notes[0],id:'f',folderId:null}]})
+ f.deps.storage.local=async()=>({entities:[{id:'f',kind:'note',confirmed:true,deleted:true}],pendingIds:[]})
+ const result=await loadWorkspace({},f.deps)
+ assert.equal(result.folders.length,1);assert.equal(result.notes.length,0)
+})

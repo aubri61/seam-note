@@ -6,7 +6,8 @@ import { load } from './helpers/loadModules.mjs'
 const { apiClient, ApiError } = await load('lib/api/client')
 const { createFolder } = await load('features/folders/folderApi')
 const { createNote, deleteNote } = await load('features/notes/noteApi')
-const { createFolderMutationOptions, createNoteMutationOptions, deleteNoteMutationOptions } = await load('features/workspace/workspaceMutations')
+const { createFolderMutationOptions, createNoteMutationOptions, deleteNoteMutationOptions: persistentDeleteOptions } = await load('features/workspace/workspaceMutations')
+const deleteNoteMutationOptions = (client, onDeleted) => persistentDeleteOptions(client, onDeleted, deleteNote)
 const { noteQueries } = await load('features/notes/noteQueries')
 // Query contract tests isolate persistence; real IndexedDB is covered by PWA/browser tests.
 const { workspaceStorage } = await load('features/offline/workspaceCache')

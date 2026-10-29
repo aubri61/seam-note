@@ -6,7 +6,6 @@ import jakarta.validation.constraints.*;
 public class CreateNoteRequest {
 
     private UUID id;
-    @NotNull
     private UUID folderId;
     @NotNull @Size(max = 200)
     private String title;

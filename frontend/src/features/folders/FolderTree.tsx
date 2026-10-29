@@ -135,8 +135,8 @@ export function FolderTree({ creatingFolderId, actionsBusy, onFolderAction, onDe
           </Row>
         })}
       </div>
-      {!tree.roots.length && <p role="status">폴더가 없습니다.</p>}
-      {!!tree.roots.length && !rows.length && <p role="status">검색 결과가 없습니다.</p>}
+      {!tree.roots.length && !tree.rootNotes.length && <p role="status">폴더가 없습니다.</p>}
+      {!!(tree.roots.length+tree.rootNotes.length) && !rows.length && <p role="status">검색 결과가 없습니다.</p>}
       {!!tree.issues.length && <p role="status">일부 항목의 폴더 관계가 올바르지 않습니다.</p>}
     </Frame>
   )
