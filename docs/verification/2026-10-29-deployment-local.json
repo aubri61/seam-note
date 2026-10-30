@@ -1,0 +1,26 @@
+{
+  "scope": "LOCAL Docker PostgreSQL 17 + prod profile + Caddy internal test CA; NOT Supabase/EC2/Vercel",
+  "checks": [
+    "production Compose and Caddy config validate",
+    "prod boot, verify-full JDBC TLS and JPA validation",
+    "Flyway V1-V5 in private schema",
+    "no manuscript tables in public schema",
+    "JDBC connection uses database TLS",
+    "HTTPS rejects anonymous GET",
+    "HTTPS rejects anonymous writes",
+    "authenticated health endpoint stays private",
+    "cross-origin authenticated write blocked",
+    "authenticated GET is never cached",
+    "HTTPS Folder POST",
+    "HTTPS creation replay and ACK",
+    "HTTPS PUT replay and ACK",
+    "HTTPS expectedVersion conflict",
+    "backend port has no host binding",
+    "container restart preserves note and ledger",
+    "database failure returns readiness 503",
+    "DB restart preserves data",
+    "invalid DB CA rejects JDBC startup"
+  ],
+  "count": 19,
+  "cloudTestsRun": false
+}

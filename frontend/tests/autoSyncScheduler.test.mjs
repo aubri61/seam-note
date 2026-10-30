@@ -16,9 +16,9 @@ test('startup/focus/online/selection burst coalesces into one run',async()=>{
  await f.clock.tick(149);assert.equal(f.calls.length,0);await f.clock.tick(1);assert.equal(f.calls.length,1);assert.equal(f.calls[0].reasons.length,4)
  await f.clock.tick(100000);assert.equal(f.calls.length,1)
 })
-test('local commit uses four seconds of quiet independently of local debounce',async()=>{
- const f=fixture();f.scheduler.queueChanged(true);await f.clock.tick(3000);f.scheduler.input();await f.clock.tick(500);f.scheduler.queueChanged(true)
- await f.clock.tick(3999);assert.equal(f.calls.length,0);await f.clock.tick(1);assert.equal(f.calls.length,1)
+test('local commit uses 1500ms of quiet independently of local debounce',async()=>{
+ const f=fixture();f.scheduler.queueChanged(true);await f.clock.tick(1000);f.scheduler.input();await f.clock.tick(200);f.scheduler.queueChanged(true)
+ await f.clock.tick(1499);assert.equal(f.calls.length,0);await f.clock.tick(1);assert.equal(f.calls.length,1)
 })
 test('ACK queue changes do not create a success loop',async()=>{
  const f=fixture();f.scheduler.request('startup');await f.clock.tick(150);f.scheduler.queueChanged(false);await f.clock.tick(100000);assert.equal(f.calls.length,1)
@@ -50,7 +50,7 @@ test('exhausted retry budget needs a real event and cooldown or manual retry',as
  const f=fixture(async()=> 'retry');f.scheduler.request('startup');await f.clock.tick(50200);f.scheduler.queueChanged(true);await f.clock.tick(1000);assert.equal(f.calls.length,4)
  f.scheduler.request('manual');await f.clock.tick(0);assert.equal(f.calls.length,5)
 })
-test('authority/permanent halt ignores commits/focus until explicit retry or reconnect',async()=>{
+test('permanent halt ignores commits/focus until explicit retry or reconnect',async()=>{
  let result='halt';const f=fixture(async()=>result);f.scheduler.request('startup');await f.clock.tick(150);f.scheduler.queueChanged(true);f.scheduler.request('focus');await f.clock.tick(100000);assert.equal(f.calls.length,1)
  result='success';f.scheduler.request('online');await f.clock.tick(150);assert.equal(f.calls.length,2)
 })
@@ -74,4 +74,28 @@ test('startup coalesced with focus/reconnect still forces a fresh server pull',(
  assert.equal(needsFreshPull(new Set(['startup'])),false)
  for(const reason of ['manual','focus','online'])assert.equal(needsFreshPull(new Set(['startup',reason])),true)
  assert.equal(needsFreshPull(new Set(['selection'])),false)
+})
+
+test('focus after access is restored wakes an auth halt without an automatic retry loop',async()=>{
+ let result='auth';const f=fixture(async()=>result)
+ f.scheduler.request('startup');await f.clock.tick(150)
+ await f.clock.tick(100000);assert.equal(f.calls.length,1)
+ f.scheduler.queueChanged(true);await f.clock.tick(5000);assert.equal(f.calls.length,1)
+ result='success';f.scheduler.request('focus');await f.clock.tick(150)
+ assert.equal(f.calls.length,2);assert.ok(f.calls[1].reasons.includes('focus'))
+ await f.clock.tick(100000);assert.equal(f.calls.length,2)
+})
+test('returning focus flushes committed input without waiting for the typing quiet interval',async()=>{
+ const f=fixture();f.scheduler.input();f.scheduler.queueChanged(true);await f.clock.tick(100)
+ f.scheduler.request('focus');await f.clock.tick(149);assert.equal(f.calls.length,0)
+ await f.clock.tick(1);assert.equal(f.calls.length,1)
+})
+
+test('focus arriving during a failing auth request is retained as one bounded follow-up',async()=>{
+ let release;const f=fixture(()=>new Promise(ok=>{release=ok}))
+ f.scheduler.request('startup');await f.clock.tick(150)
+ f.scheduler.request('focus');release('auth');await settle()
+ await f.clock.tick(2999);assert.equal(f.calls.length,1)
+ await f.clock.tick(1);assert.equal(f.calls.length,2)
+ release('auth');await settle();await f.clock.tick(100000);assert.equal(f.calls.length,2)
 })

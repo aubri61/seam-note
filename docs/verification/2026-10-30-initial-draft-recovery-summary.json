@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-30",
+  "branch": "fix/initial-draft-recovery",
+  "baseline": "a8905bb",
+  "scope": "LOCAL only; production EC2/Supabase/Vercel not redeployed or modified",
+  "beforeFixFocusedNode": {
+    "tests": 41,
+    "pass": 38,
+    "fail": 3
+  },
+  "afterFixAllNode": {
+    "tests": 210,
+    "pass": 210,
+    "fail": 0
+  },
+  "productionBuild": "PASS (includes TypeScript compilation and service worker generation)",
+  "eslint": "PASS",
+  "realIndexedDbAndPwaSyntheticApi": {
+    "checks": 23,
+    "report": "2026-10-30-initial-draft-recovery-browser.json"
+  },
+  "localSpringPostgresAutomaticSync": {
+    "groups": 18,
+    "allPassed": true,
+    "report": "2026-10-30-initial-draft-auto-sync-live.json",
+    "scope": "Native isolated PostgreSQL 14 + real local Spring + production Chrome/PWA; 401/400/503 and response loss are injected faults"
+  },
+  "limits": [
+    "Chrome only; native power loss and Safari not tested",
+    "Historical cloud failure report retained; no claim of fixed cloud deployment"
+  ]
+}

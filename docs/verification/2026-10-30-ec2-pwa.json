@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-30",
+  "scope": "REAL EC2+Supabase, production PWA in isolated local Chrome over loopback SSH tunnel; NOT Vercel/public HTTPS",
+  "passed": false,
+  "observations": [
+    "GET note and workspace returned 200",
+    "first-open local draft initialization entered conflict before any PUT",
+    "no local draft record / no Outbox operations",
+    "reproduced without forced service-worker reload"
+  ],
+  "reproduction": {
+    "sequence": "empty local record -> startup retry -> delayed server response",
+    "phase": "conflict",
+    "repositoryWrites": 0
+  },
+  "applicationCodeChanged": false,
+  "offlineRecoveryTested": false,
+  "publicHttpsOrVercelTested": false
+}

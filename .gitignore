@@ -18,3 +18,6 @@
 
 # Local troubleshooting notes
 /docs/troubleshooting/
+
+# Local Vercel project metadata
+/.vercel/

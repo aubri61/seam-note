@@ -1,0 +1,344 @@
+{
+  "commit": "d0d49e17baf630879b5d7e686398eb21612fbd0e",
+  "source": "Git HEAD frontend tree only; ignored local files and runtime env excluded",
+  "frontendFiles": 177,
+  "manifestSha256": "44e1f5a4019aaed64e08a9b2ffcdf13e0791e0e5eff2f65a900d6c04971c445b",
+  "project": "dream-in/seam-note",
+  "productionOrigin": "https://seamnote.vercel.app",
+  "upstreamOrigin": "https://seamnote.duckdns.org",
+  "productionDeployStatus": "READY; user explicitly approved deployment; initial release plus routing-only fix deployed",
+  "localNodeTests": 210,
+  "localBuild": "PASS",
+  "checks": {
+    "dnsA": "54.79.67.119",
+    "dnsAAAA": "none",
+    "backendReadiness": "UP",
+    "backendPortsPublished": false,
+    "securityGroupModified": false,
+    "envMode": "0600",
+    "apiHostConfigured": true,
+    "bcryptBodyPreserved": true,
+    "caddyConfigurationValidation": "PASS",
+    "httpsCertificate": "PASS; Let's Encrypt trust and hostname validated over TLSv1.3",
+    "vercelServerEnvNames": [
+      "API_PUBLIC_URL",
+      "FRONTEND_ORIGIN"
+    ],
+    "vercelProductionDeploy": "PASS; READY and original seamnote.vercel.app alias retained",
+    "vercelCurrentApiRouteStatus": 401,
+    "authenticatedApiTests": "NOT RUN; existing Basic login required; plaintext password neither requested nor changed",
+    "cloudPwaAutoSync": "NOT RUN; authenticated browser session unavailable",
+    "acmeEmailConfigured": true,
+    "existingBcryptUnchangedDuringEmailUpdate": true,
+    "caddyService": "RUNNING",
+    "httpToHttps": 308,
+    "anonymousApi": 401,
+    "invalidBasic": 401,
+    "internalCaddyToBackendReadiness": "UP",
+    "backendRestartReadiness": "UP",
+    "caddyRecreated": true,
+    "caddyCertificateAndVolumesPreserved": true,
+    "vercelToCaddy": "PASS with invalid credential: upstream Caddy Basic realm restricted 401 returned through Vercel",
+    "vercelNestedApiRouting": "PASS; workspace/tree and notes/UUID both reach proxy",
+    "vercelCrossOriginWrite": 403,
+    "vercelSpaDirectRoute": 200,
+    "vercelServiceWorker": 200,
+    "proxyNodeTests": "4/4 PASS after routing fix"
+  },
+  "approvalReview": {
+    "vercelPull": "REJECTED; production environment download could include secrets; not executed",
+    "alternative": "Remote Vercel build only after deployment approval; no production env download"
+  },
+  "initialAnonymousPublicProbe": {
+    "origin": "https://seamnote.duckdns.org",
+    "results": [],
+    "error": "ConnectionRefusedError"
+  },
+  "publicHttps": {
+    "origin": "https://seamnote.duckdns.org",
+    "results": [
+      {
+        "name": "trusted TLS certificate and hostname",
+        "passed": true,
+        "protocol": "TLSv1.3",
+        "subjectAltName": [
+          [
+            "DNS",
+            "seamnote.duckdns.org"
+          ]
+        ],
+        "issuer": [
+          [
+            [
+              "countryName",
+              "US"
+            ]
+          ],
+          [
+            [
+              "organizationName",
+              "Let's Encrypt"
+            ]
+          ],
+          [
+            [
+              "commonName",
+              "YE1"
+            ]
+          ]
+        ],
+        "notBefore": "Oct 29 16:24:51 2026 GMT",
+        "notAfter": "Jan 27 16:24:50 2027 GMT"
+      },
+      {
+        "name": "HTTP redirects to the same HTTPS host",
+        "passed": true,
+        "status": 308,
+        "location": "https://seamnote.duckdns.org/api/workspace/tree"
+      },
+      {
+        "name": "anonymous request blocked: /api/workspace/tree",
+        "passed": true,
+        "status": 401
+      },
+      {
+        "name": "response cannot be cached: /api/workspace/tree",
+        "passed": true,
+        "cacheControl": "no-store"
+      },
+      {
+        "name": "anonymous request blocked: /actuator/health/readiness",
+        "passed": true,
+        "status": 401
+      },
+      {
+        "name": "response cannot be cached: /actuator/health/readiness",
+        "passed": true,
+        "cacheControl": "no-store"
+      }
+    ]
+  },
+  "restartChecks": {
+    "caddyRecreated": true,
+    "publicCertificateUnchanged": true,
+    "backendRestartReadiness": "UP",
+    "namedVolumesPreserved": true,
+    "invalidBasicDenied": true,
+    "publicProbeAfterRecreate": {
+      "origin": "https://seamnote.duckdns.org",
+      "results": [
+        {
+          "name": "trusted TLS certificate and hostname",
+          "passed": true,
+          "protocol": "TLSv1.3",
+          "subjectAltName": [
+            [
+              "DNS",
+              "seamnote.duckdns.org"
+            ]
+          ],
+          "issuer": [
+            [
+              [
+                "countryName",
+                "US"
+              ]
+            ],
+            [
+              [
+                "organizationName",
+                "Let's Encrypt"
+              ]
+            ],
+            [
+              [
+                "commonName",
+                "YE1"
+              ]
+            ]
+          ],
+          "notBefore": "Oct 29 16:24:51 2026 GMT",
+          "notAfter": "Jan 27 16:24:50 2027 GMT"
+        },
+        {
+          "name": "HTTP redirects to the same HTTPS host",
+          "passed": true,
+          "status": 308,
+          "location": "https://seamnote.duckdns.org/api/workspace/tree"
+        },
+        {
+          "name": "anonymous request blocked: /api/workspace/tree",
+          "passed": true,
+          "status": 401
+        },
+        {
+          "name": "response cannot be cached: /api/workspace/tree",
+          "passed": true,
+          "cacheControl": "no-store"
+        },
+        {
+          "name": "anonymous request blocked: /actuator/health/readiness",
+          "passed": true,
+          "status": 401
+        },
+        {
+          "name": "response cannot be cached: /actuator/health/readiness",
+          "passed": true,
+          "cacheControl": "no-store"
+        }
+      ]
+    }
+  },
+  "productionDeployment": {
+    "id": "dpl_8dUUz1Nx2iP79JGffnXXmqeMnLTq",
+    "url": "https://seam-note-4wbe04zer-dream-in.vercel.app",
+    "aliases": [
+      "seamnote.vercel.app",
+      "seam-note-dream-in.vercel.app"
+    ],
+    "state": "READY",
+    "baseCommit": "d0d49e17baf630879b5d7e686398eb21612fbd0e",
+    "sourceOverlay": {
+      "file": "frontend/vercel.json",
+      "change": "Explicit /api/:path* rewrite to existing /api/[...path] function"
+    },
+    "runtime": "nodejs22.x",
+    "functionRegion": "iad1"
+  },
+  "initialProductionDeployment": {
+    "id": "dpl_EyTVgNnKL3pqAxBDQeLYkBi3uVzQ",
+    "state": "READY but nested API routes returned Vercel NOT_FOUND; superseded by routing fix"
+  },
+  "vercelPublicChecks": [
+    {
+      "method": "GET",
+      "path": "/",
+      "withInvalidBasic": false,
+      "status": 200,
+      "headers": {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "WWW-Authenticate": null,
+        "x-vercel-error": null
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/notes/00000000-0000-0000-0000-000000000000",
+      "withInvalidBasic": false,
+      "status": 200,
+      "headers": {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "WWW-Authenticate": null,
+        "x-vercel-error": null
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "withInvalidBasic": false,
+      "status": 401,
+      "headers": {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store",
+        "WWW-Authenticate": "Basic realm=\"Seam Note validation\", charset=\"UTF-8\"",
+        "x-vercel-error": null
+      },
+      "errorCode": "VALIDATION_ACCESS_REQUIRED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/00000000-0000-0000-0000-000000000000",
+      "withInvalidBasic": false,
+      "status": 401,
+      "headers": {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store",
+        "WWW-Authenticate": "Basic realm=\"Seam Note validation\", charset=\"UTF-8\"",
+        "x-vercel-error": null
+      },
+      "errorCode": "VALIDATION_ACCESS_REQUIRED"
+    },
+    {
+      "method": "GET",
+      "path": "/api/workspace/tree",
+      "withInvalidBasic": true,
+      "status": 401,
+      "headers": {
+        "Content-Type": null,
+        "Cache-Control": "no-store",
+        "WWW-Authenticate": "Basic realm=\"restricted\"",
+        "x-vercel-error": null
+      },
+      "responseType": "non-JSON"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notes/00000000-0000-0000-0000-000000000000",
+      "withInvalidBasic": true,
+      "status": 401,
+      "headers": {
+        "Content-Type": null,
+        "Cache-Control": "no-store",
+        "WWW-Authenticate": "Basic realm=\"restricted\"",
+        "x-vercel-error": null
+      },
+      "responseType": "non-JSON"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notes",
+      "withInvalidBasic": false,
+      "status": 403,
+      "headers": {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store",
+        "WWW-Authenticate": null,
+        "x-vercel-error": null
+      },
+      "errorCode": "ORIGIN_FORBIDDEN"
+    },
+    {
+      "method": "GET",
+      "path": "/sw.js",
+      "withInvalidBasic": false,
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/javascript; charset=utf-8",
+        "Cache-Control": "no-cache",
+        "WWW-Authenticate": null,
+        "x-vercel-error": null
+      }
+    }
+  ],
+  "lastPublicRecheck": [
+    {
+      "path": "/",
+      "invalidBasic": false,
+      "status": 200,
+      "challenge": null
+    },
+    {
+      "path": "/api/workspace/tree",
+      "invalidBasic": false,
+      "status": 401,
+      "challenge": "Basic realm=\"Seam Note validation\", charset=\"UTF-8\""
+    },
+    {
+      "path": "/api/workspace/tree",
+      "invalidBasic": true,
+      "status": 401,
+      "challenge": "Basic realm=\"restricted\""
+    }
+  ],
+  "browserValidation": {
+    "initialFrontendLoaded": true,
+    "protectedNavigationError": "net::ERR_BLOCKED_BY_CLIENT in Codex in-app browser",
+    "nativeChromeGetAppReportedWallSeconds": 30392.4045,
+    "nativeDelayCause": "unknown; no claim that application API caused delay",
+    "subsequentBrowserControlStopped": true,
+    "existingUserDataModified": false,
+    "authenticatedSuccessClaimed": false
+  }
+}

@@ -1,0 +1,58 @@
+spring:
+  datasource:
+    # Values are copied from Supabase Dashboard > Connect, never guessed.
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?currentSchema=seam_note&sslmode=verify-full&sslrootcert=/run/certs/supabase-ca.crt&connectTimeout=10&socketTimeout=30&tcpKeepAlive=true
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      pool-name: seam-note-prod
+      maximum-pool-size: 3
+      minimum-idle: 1
+      connection-timeout: 10000
+      validation-timeout: 3000
+      initialization-fail-timeout: 10000
+      idle-timeout: 60000
+      max-lifetime: 600000
+      keepalive-time: 120000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: seam_note
+    show-sql: false
+  flyway:
+    # Non-exposed schema: do not add it to Supabase Data API exposed schemas.
+    default-schema: seam_note
+    schemas: seam_note
+    create-schemas: true
+    clean-disabled: true
+    validate-on-migrate: true
+    baseline-on-migrate: false
+  devtools:
+    restart:
+      enabled: false
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+server:
+  port: 8080
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,db
+logging:
+  level:
+    org.hibernate.SQL: WARN
