@@ -1,0 +1,72 @@
+{
+  "scope": "LOCAL changes only; no production deployment",
+  "baseline": "d0d49e1 plus previous uncommitted deployment files preserved",
+  "nodeTests": {
+    "total": 213,
+    "passed": 213
+  },
+  "schedulerTests": {
+    "total": 19,
+    "passed": 19
+  },
+  "build": "PASS",
+  "lint": "PASS",
+  "browser": {
+    "total": 24,
+    "passed": 24,
+    "real": "Chrome/IndexedDB/PWA",
+    "synthetic": "HTTP API including 401 denial; not an OAuth or real Basic password login",
+    "report": "2026-10-30-focus-auth-browser.json"
+  },
+  "quietMs": {
+    "before": 4000,
+    "after": 1500
+  },
+  "focus": "Bypass typing quiet; retain 150ms coalescing and 3s throttle; access halt can retry on a real focus event",
+  "unchanged": [
+    "CAS",
+    "ACK",
+    "expectedVersion",
+    "frozen operationId/payload",
+    "network backoff 5/15/30s",
+    "security and credentials"
+  ],
+  "readOnlyEc2TimingSeconds": {
+    "readiness": [
+      0.51034,
+      0.256158,
+      0.255922
+    ],
+    "workspace": [
+      1.533488,
+      1.770717,
+      1.517294
+    ],
+    "samplesPerPath": 3,
+    "scope": "backend loopback HTTP; full authenticated route unmeasured"
+  },
+  "springPostgresRegression": {
+    "groups": 18,
+    "passed": 18,
+    "report": "2026-10-30-focus-auto-sync-live.json",
+    "scope": "actual isolated local Spring/PostgreSQL; synthetic fixtures only",
+    "outageRetryIntervalsMs": [
+      5049,
+      15045,
+      30223
+    ]
+  },
+  "productionUserSymptomCause": "not fully established; no user session HTTP trace observed",
+  "readOnlyJdbcProbe": {
+    "connectionMs": 2498.801547,
+    "selectOneMs": [
+      269.39724,
+      249.743626,
+      249.573177,
+      249.479675,
+      249.508056
+    ],
+    "scope": "new verify-full JDBC connection; read-only SELECT 1; not Hikari/application latency"
+  },
+  "productionDeployed": false
+}

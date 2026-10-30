@@ -65,12 +65,14 @@ export function useWorkspaceSync(session:DraftSession,online:boolean,workspace:W
         })
         if(disposed)return 'success'
         setResult(outcome)
-        for(const issue of outcome.issues)if(issue.kind==='failed')blocked.add(issue.operationId)
+        // Access can be restored by logging in; keep its original queue key eligible
+        // for the next explicit focus/reconnect/manual attempt, without a retry loop.
+        for(const issue of outcome.issues)if(issue.kind==='failed'&&issue.status!==401&&issue.status!==403)blocked.add(issue.operationId)
         if(outcome.acknowledged.length)await client.fetchQuery({...workspaceTreeQuery(),staleTime:0,retry:false})
         // Only the currently selected detail is refreshed, not every mounted query cache entry.
         try{await pullSelected()}catch(cause){if(!(cause instanceof ApiError&&cause.status===404&&cause.code==='NOTE_NOT_FOUND'))throw cause}
         const final=await read()
-        if(outcome.issues.some(i=>i.status===401||i.status===403)){setError('서버 접근 권한을 확인해주세요. 자동 전송을 중단했습니다.');setServerState('error');return 'halt'}
+        if(outcome.issues.some(i=>i.status===401||i.status===403)){setError('서버 접근 권한을 확인해주세요. 자동 전송을 중단했습니다.');setServerState('error');return 'auth'}
         if(outcome.issues.some(i=>i.kind==='network')){setError('서버 연결 오류입니다. 로컬 원고와 기존 전송 키를 보존하고 다시 시도합니다.');setServerState('error');return 'retry'}
         const queuedNotes=new Set([...final.updates.map(o=>o.noteId),...final.creations.filter(o=>o.type==='NOTE_CREATE').map(o=>o.entityId)])
         const unqueued=final.drafts.some(d=>!d.recoveredAs&&isDraftDirty(d)&&!queuedNotes.has(d.noteId))
@@ -84,6 +86,7 @@ export function useWorkspaceSync(session:DraftSession,online:boolean,workspace:W
         if(isCancelledError(cause)||axios.isCancel(cause)){setServerState('pending');return 'success'}
         if(cause instanceof Error&&cause.message.includes('다른 탭 또는 저장 작업')){setError('');setServerState('pending');return 'retry'}
         setError(cause instanceof Error?cause.message:'자동 동기화 상태를 확인하지 못했습니다. 로컬 원고를 보존합니다.');setServerState('error')
+        if(cause instanceof ApiError&&(cause.status===401||cause.status===403))return 'auth'
         if(cause instanceof ApiError&&(cause.status===0||cause.status>=500||cause.status===408||cause.status===429))return 'retry'
         return 'halt'
       }finally{if(!disposed)setBusy(false)}

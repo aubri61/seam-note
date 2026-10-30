@@ -1,0 +1,102 @@
+{
+  "scope": "LOCAL real Chromium/IndexedDB + production PWA with synthetic HTTP API; no EC2/Supabase/Vercel changes",
+  "results": [
+    {
+      "name": "empty IndexedDB is a normal first-open state",
+      "passed": true
+    },
+    {
+      "name": "orphan pending queue blocks initial recovery",
+      "passed": true
+    },
+    {
+      "name": "orphan pending queue blocks first write atomically",
+      "passed": true
+    },
+    {
+      "name": "orphan pending operation payload and key survive",
+      "passed": true
+    },
+    {
+      "name": "known missing checkpoint still restores matching pending queue",
+      "passed": true
+    },
+    {
+      "name": "orphan inFlight queue blocks initial recovery",
+      "passed": true
+    },
+    {
+      "name": "orphan inFlight queue blocks first write atomically",
+      "passed": true
+    },
+    {
+      "name": "orphan inFlight operation payload and key survive",
+      "passed": true
+    },
+    {
+      "name": "frozen inFlight checkpoint cannot overwrite unresolved queue",
+      "passed": true
+    },
+    {
+      "name": "orphan conflict queue blocks initial recovery",
+      "passed": true
+    },
+    {
+      "name": "orphan conflict queue blocks first write atomically",
+      "passed": true
+    },
+    {
+      "name": "orphan conflict operation payload and key survive",
+      "passed": true
+    },
+    {
+      "name": "frozen conflict checkpoint cannot overwrite unresolved queue",
+      "passed": true
+    },
+    {
+      "name": "queue appearing after initial read still blocks the write",
+      "passed": true
+    },
+    {
+      "name": "first-write CAS preserves a competing tab record",
+      "passed": true
+    },
+    {
+      "name": "orphan creation and unconfirmed local entity are preserved",
+      "passed": true
+    },
+    {
+      "name": "explicit tombstone cannot be initialized again",
+      "passed": true
+    },
+    {
+      "name": "late GET preserves a dirty IndexedDB draft and original version fence",
+      "passed": true
+    },
+    {
+      "name": "1800ms first GET no longer causes initial LocalDraftConflict",
+      "passed": true
+    },
+    {
+      "name": "first edit automatically PUTs with version and ACK",
+      "passed": true
+    },
+    {
+      "name": "offline close and reopen retain draft and Outbox",
+      "passed": true
+    },
+    {
+      "name": "online recovery applies automatic ACK after delayed GET",
+      "passed": true
+    },
+    {
+      "name": "focus after restored access resumes the same frozen key and version without a manual click or retry loop",
+      "passed": true
+    },
+    {
+      "name": "A to B during first GET preserves B input and sends no A update",
+      "passed": true
+    }
+  ],
+  "count": 24
+}

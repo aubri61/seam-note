@@ -93,7 +93,7 @@ async function main() {
   const { createServer } = await import('vite')
   let vite, server
   const notes = new Map(), ledger = new Map(), puts = [], gets = new Set()
-  let heldId, release
+  let heldId, release, deniedPutId
   const stamp = '2026-10-30T00:00:00Z'
   const seed = name => { const note = { id: randomUUID(), folderId: null, title: name, content: rich(name + ' server'), version: 0, sortOrder: notes.size, createdAt: stamp, updatedAt: stamp }; notes.set(note.id, note); return note }
   try {
@@ -116,6 +116,7 @@ async function main() {
         let raw = ''; for await (const chunk of req) raw += chunk
         const body = JSON.parse(raw), key = req.headers['idempotency-key']; assert.ok(key)
         puts.push({ id, key, version: body.expectedVersion })
+        if (id === deniedPutId) return json(401, { code: 'UNAUTHORIZED', message: 'Synthetic access denial', errors: [] })
         if (ledger.has(key)) return json(200, ledger.get(key), { 'Idempotency-Key': key })
         if (body.expectedVersion !== note.version) return json(409, { code: 'VERSION_CONFLICT', message: 'synthetic', errors: [] })
         const saved = { ...note, title: body.title, content: body.content, version: note.version + 1 }; notes.set(id, saved); ledger.set(key, saved)
@@ -143,6 +144,18 @@ async function main() {
     context = await launch('first', true); page = await context.newPage(); await page.goto(origin + '/notes/' + first.id); await editor(page).waitFor()
     assert.ok((await editor(page).innerText()).includes('offline recovery input')); pass('offline close and reopen retain draft and Outbox')
     await context.setOffline(false); await acked(page, first.id, 'offline recovery input'); assert.equal(notes.get(first.id).version, 2); pass('online recovery applies automatic ACK after delayed GET'); await close(context)
+    const access = seed('access recovery'); context = await launch('access'); page = await context.newPage()
+    await page.goto(origin + '/notes/' + access.id); await editor(page).waitFor()
+    await until(async () => !!(await state(page, access.id)).draft, 'access initial snapshot')
+    deniedPutId = access.id; await editor(page).fill('input retained after denied PUT')
+    await until(() => page.getByText('서버 접근 권한을 확인해주세요. 자동 전송을 중단했습니다.', { exact: true }).count(), 'auth halt shown')
+    await pause(3100); assert.equal(puts.filter(p => p.id === access.id).length, 1)
+    deniedPutId = undefined
+    await page.evaluate(() => { window.dispatchEvent(new Event('focus')); document.dispatchEvent(new Event('visibilitychange')) })
+    await acked(page, access.id, 'input retained after denied PUT')
+    const accessPuts = puts.filter(p => p.id === access.id); assert.equal(accessPuts.length, 2)
+    assert.equal(accessPuts[0].key, accessPuts[1].key); assert.equal(accessPuts[0].version, accessPuts[1].version)
+    pass('focus after restored access resumes the same frozen key and version without a manual click or retry loop'); await close(context)
     const a = seed('late A'), b = seed('selected B'); heldId = a.id
     context = await launch('switch'); page = await context.newPage(); await page.goto(origin + '/notes/' + a.id)
     await until(() => gets.has(a.id) && !!release, 'held A request')
