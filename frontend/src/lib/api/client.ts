@@ -1,9 +1,11 @@
 import axios from 'axios'
 import type { ApiErrorResponse, ApiFieldError } from './types'
+import { accessTokenStore } from '@/features/auth/accessTokenStore'
 
 export interface RequestOptions {
   signal?: AbortSignal
   idempotencyKey?: string
+  csrfToken?: string
 }
 
 export class ApiError extends Error {
@@ -28,6 +30,16 @@ export const apiClient = axios.create({
   headers: { Accept: 'application/json' },
 })
 
+apiClient.interceptors.request.use(config => {
+  const path = config.url ?? ''
+  // Never attach a credential to an absolute URL, another baseURL, or protocol-relative URL.
+  const localApi = config.baseURL === '/api' && path.startsWith('/') && !path.startsWith('//') && !path.includes('\\')
+  const publicAuth = /^\/auth\/(?:csrf|signup|login)(?:\?|$)/.test(path)
+  const token = accessTokenStore.get()
+  if (localApi && !publicAuth && token) config.headers.set('Authorization', `Bearer ${token}`)
+  return config
+}, undefined, { synchronous: true })
+
 function isApiErrorResponse(value: unknown): value is ApiErrorResponse {
   if (typeof value !== 'object' || value === null) return false
   const payload = value as Record<string, unknown>
@@ -37,21 +49,23 @@ function isApiErrorResponse(value: unknown): value is ApiErrorResponse {
       && typeof error.field === 'string' && typeof error.message === 'string')
 }
 
-async function request<T>(method: 'get' | 'post' | 'put' | 'patch' | 'delete', path: string, data: unknown, { signal, idempotencyKey }: RequestOptions): Promise<{ data: T; status: number; operationId?: string }> {
+async function request<T>(method: 'get' | 'post' | 'put' | 'patch' | 'delete', path: string, data: unknown, { signal, idempotencyKey, csrfToken }: RequestOptions): Promise<{ data: T; status: number; operationId?: string }> {
   try {
     const response = await apiClient.request<T>({ method, url: path, data, signal,
-      ...(idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey }, timeout: 15_000 } : {}) })
+      headers: { ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
+        ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}) } })
     return { data: response.data, status: response.status,
       operationId: typeof response.headers['idempotency-key'] === 'string' ? response.headers['idempotency-key'] : undefined }
   } catch (cause) {
-    if (axios.isCancel(cause) || signal?.aborted) throw cause
+    if (axios.isCancel(cause) || signal?.aborted) throw new axios.CanceledError('요청이 취소되었습니다.')
     if (!axios.isAxiosError(cause)) throw cause
     if (!cause.response) {
-      throw new ApiError(0, { code: 'NETWORK_ERROR', message: 'API 서버에 연결할 수 없습니다.', errors: [] }, undefined, cause)
+      // AxiosError retains request headers/body: never keep it as an error cause.
+      throw new ApiError(0, { code: 'NETWORK_ERROR', message: 'API 서버에 연결할 수 없습니다.', errors: [] })
     }
     const payload = isApiErrorResponse(cause.response.data) ? cause.response.data
       : { code: 'HTTP_ERROR', message: `API 요청에 실패했습니다. (HTTP ${cause.response.status})`, errors: [] }
-    throw new ApiError(cause.response.status, payload, cause.response.data, cause)
+    throw new ApiError(cause.response.status, payload, cause.response.data)
   }
 }
 

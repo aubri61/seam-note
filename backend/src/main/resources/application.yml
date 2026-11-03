@@ -22,3 +22,11 @@ spring:
 server:
   port: 18765
 
+seam:
+  auth:
+    jwt:
+      secret-base64: ${AUTH_JWT_SECRET_BASE64:}
+      issuer: ${AUTH_JWT_ISSUER:urn:seam-note:local}
+      audience: ${AUTH_JWT_AUDIENCE:seam-note-local-api}
+      access-ttl-seconds: ${AUTH_JWT_ACCESS_TTL_SECONDS:300}
+

@@ -6,3 +6,10 @@ spring:
   devtools:
     restart:
       enabled: false
+
+seam:
+  auth:
+    jwt:
+      secret-base64: ${TEST_JWT_SECRET_BASE64:}
+      issuer: urn:seam-note:test
+      audience: seam-note-test-api

@@ -3,7 +3,7 @@
 Requires Docker Compose v2, openssl, and a locally built seam-note-backend:deploy-validation.
 Never uses deploy/.env or a cloud connection. Removes only its own project/volumes.
 """
-import base64, json, os, socket, ssl, subprocess, tempfile, time, urllib.request, urllib.error, uuid
+import base64, secrets, json, os, socket, ssl, subprocess, tempfile, time, urllib.request, urllib.error, uuid
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 work = Path(tempfile.mkdtemp(prefix='seam-deploy-stack-'))
@@ -44,6 +44,8 @@ try:
     run('openssl','x509','-req','-in',str(certs/'server.csr'),'-CA',str(certs/'supabase-ca.crt'),'-CAkey',str(certs/'ca.key'),'-CAcreateserial','-out',str(certs/'server.crt'),'-days','1','-extfile',str(certs/'ext.cnf'))
     password_hash=run('docker','run','--rm','caddy:2.10.2-alpine','caddy','hash-password','--plaintext','synthetic-only')
     (work/'.env').write_text("BACKEND_IMAGE=seam-note-backend:deploy-validation\nDB_HOST=postgres\nDB_PORT=5432\nDB_NAME=seam_deploy_test\nDB_USERNAME=postgres\nDB_PASSWORD=synthetic-only\nAPI_HOST=localhost\nFRONTEND_ORIGIN=https://seam.example.test\nACME_EMAIL=local@example.test\nVALIDATION_USERNAME=reviewer\nVALIDATION_PASSWORD_HASH='"+password_hash+"'\n")
+    with (work/'.env').open('a') as f:
+        f.write('AUTH_JWT_SECRET_BASE64=' + base64.b64encode(secrets.token_bytes(32)).decode() + '\nAUTH_JWT_ISSUER=urn:seam-note:stack-test\nAUTH_JWT_AUDIENCE=seam-note-stack-test-api\n')
     os.chmod(work/'.env',0o600)
     text=(ROOT/'deploy/compose.yml').read_text().replace("'80:80'",f"'127.0.0.1:{http_port}:80'").replace("'443:443'",f"'127.0.0.1:{https_port}:443'")
     text=text.replace('  caddy:\n', '''  postgres:
@@ -70,7 +72,7 @@ try:
     wait(ready,'production readiness')
     check('prod boot, verify-full JDBC TLS and JPA validation',True)
     sql=lambda query: compose('exec','-T','postgres','psql','-U','postgres','-d','seam_deploy_test','-Atc',query)
-    check('Flyway V1-V5 in private schema',sql('SELECT count(*) FROM seam_note.flyway_schema_history WHERE success AND version IS NOT NULL')=='5')
+    check('Flyway V1-V6 in private schema',sql('SELECT count(*) FROM seam_note.flyway_schema_history WHERE success AND version IS NOT NULL')=='6')
     check('no manuscript tables in public schema',sql("SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('notes','folders','creation_operations','note_update_operations')")=='0')
     check('JDBC connection uses database TLS',int(sql("SELECT count(*) FROM pg_stat_ssl WHERE ssl AND pid IN (SELECT pid FROM pg_stat_activity WHERE application_name LIKE 'PostgreSQL JDBC%')"))>0)
     compose('up','-d','caddy')

@@ -1,5 +1,7 @@
 # EC2 + Supabase + Vercel 배포
 
+2026-11-03 개발 브랜치에는 V6 계정 migration, 비밀번호 인증 및 Phase 2 HS256 JWT 발급·검증이 추가됐다. 아래 V1–V5 배포 기록은 당시 상태다. 현재 변경은 격리 로컬 DB에서만 검증했고 운영에는 배포하지 않았다. 새 이미지에는 환경별 AUTH_JWT_SECRET_BASE64·AUTH_JWT_ISSUER·AUTH_JWT_AUDIENCE가 필수다. 사용자 소유권·Refresh·프록시 Bearer/Cookie 연결이 미완료이므로 일반 사용자 인증 완료로 배포하지 않는다.
+
 이 구성은 **공유 검증자만 사용하는 배포**다. 실제 공개 서비스 운영과 실제 사용자 원고 저장은 Google 로그인·사용자별 권한 구현까지 보류한다. 공유 Basic 인증은 OAuth나 사용자별 데이터 분리가 아니며, 자격증명을 아는 검증자는 모든 테스트 원고에 접근할 수 있다. 합성 데이터만 사용한다.
 
 ## 조사 결과와 구성
@@ -153,6 +155,7 @@ Preview 호스트에서 쓰기를 하려면 FRONTEND_ORIGIN과 Caddy를 해당 �
 | 이름 | 설정 위치 |
 | --- | --- |
 | DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD | EC2 deploy/.env, 실제 Connect 화면에서 입력 |
+| AUTH_JWT_SECRET_BASE64, AUTH_JWT_ISSUER, AUTH_JWT_AUDIENCE | EC2 deploy/.env; 환경별 별도 난수 키와 issuer/audience, 실제 값 Git/로그 금지 |
 | SPRING_PROFILES_ACTIVE | Compose가 prod로 고정; 로컬 기본 profile 유지 |
 | BACKEND_IMAGE | EC2 deploy/.env, 검증한 불변 tag |
 | API_HOST, ACME_EMAIL | EC2 deploy/.env |

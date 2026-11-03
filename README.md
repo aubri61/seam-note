@@ -147,8 +147,11 @@ docker compose up -d postgres
 
 # 백엔드: localhost:18765
 cd backend
-./gradlew bootRun
+# .env.local 로딩 + 누락된 로컬 JWT 키 최초 생성·저장
+python3 run-local.py
 ```
+
+로컬 실행 스크립트에는 Python 3이 필요합니다. `backend/.env.local`의 `KEY=value`와 따옴표 값을 읽으며 셸 명령·변수 치환은 실행하지 않습니다. 이미 설정한 셸 환경변수가 우선합니다. 파일과 비밀키는 Git에 포함되지 않습니다. 일반 `./gradlew bootRun`이나 IDE 직접 실행은 이 파일을 자동으로 읽지 않으므로 환경변수를 별도로 전달해야 합니다. 운영·테스트에는 이 스크립트를 사용하지 않습니다.
 
 다른 터미널에서 프론트엔드를 실행합니다.
 
@@ -168,7 +171,7 @@ pnpm build
 pnpm preview
 ```
 
-백엔드 테스트에는 별도의 테스트 PostgreSQL을 준비하고 `TEST_DB_URL`, `TEST_DB_USERNAME`, `TEST_DB_PASSWORD`를 설정한 뒤 `backend`에서 `./gradlew test`를 실행합니다. 개발·운영 데이터를 사용하는 DB와 분리합니다.
+백엔드 테스트에는 별도의 테스트 PostgreSQL을 준비하고 `TEST_DB_URL`, `TEST_DB_USERNAME`, `TEST_DB_PASSWORD`를 설정합니다. `TEST_JWT_SECRET_BASE64`에도 `openssl rand -base64 64`로 생성한 테스트 전용 난수 키를 설정한 뒤 `backend`에서 `./gradlew test`를 실행합니다. 키 값은 출력·커밋하지 않고, 개발·운영 키와 DB를 재사용하지 않습니다.
 
 ## 현재 한계와 다음 과제
 

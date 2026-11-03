@@ -9,6 +9,9 @@ services:
       DB_NAME: ${DB_NAME:?Set the database name}
       DB_USERNAME: ${DB_USERNAME:?Set the exact Connect username}
       DB_PASSWORD: ${DB_PASSWORD:?Set the database password locally}
+      AUTH_JWT_SECRET_BASE64: ${AUTH_JWT_SECRET_BASE64:?Set a separate random JWT secret locally}
+      AUTH_JWT_ISSUER: ${AUTH_JWT_ISSUER:?Set the production JWT issuer}
+      AUTH_JWT_AUDIENCE: ${AUTH_JWT_AUDIENCE:?Set the production JWT audience}
       SPRING_PROFILES_ACTIVE: prod
       JAVA_TOOL_OPTIONS: '-XX:MaxRAMPercentage=65 -XX:+ExitOnOutOfMemoryError'
     volumes:

@@ -56,3 +56,10 @@ management:
 logging:
   level:
     org.hibernate.SQL: WARN
+
+seam:
+  auth:
+    jwt:
+      # Prod requires explicit issuer/audience as well as a separate secret.
+      issuer: ${AUTH_JWT_ISSUER:}
+      audience: ${AUTH_JWT_AUDIENCE:}

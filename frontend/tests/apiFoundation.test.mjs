@@ -93,11 +93,11 @@ test('HTML/empty/null/primitive success cannot masquerade as DTO data', async t 
   }
 })
 
-test('Axios connection failure is a NETWORK_ERROR with original cause', async t => {
+test('Axios connection failure is a NETWORK_ERROR without credential-bearing cause', async t => {
   const cause = new AxiosError('connection refused', AxiosError.ERR_NETWORK)
   stub(t, async () => { throw cause })
   await assert.rejects(getRootFolders(), error => error instanceof ApiError && error.status === 0
-    && error.code === 'NETWORK_ERROR' && error.cause === cause)
+    && error.code === 'NETWORK_ERROR' && error.cause === undefined)
 })
 
 test('Axios transport failure without a response is distinct from HTTP errors', async t => {

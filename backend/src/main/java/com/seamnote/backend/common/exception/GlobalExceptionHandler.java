@@ -14,6 +14,11 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> authenticationFailed(Exception exception) {
+        return createResponse(ErrorCode.AUTH_INVALID_CREDENTIALS, List.of());
+    }
+
 
     //비즈니스 에러
     @ExceptionHandler(BusinessException.class)
@@ -71,9 +76,10 @@ public class GlobalExceptionHandler {
                 errors
         );
 
-        return ResponseEntity
-                .status(errorCode.getStatus())
-                .body(response);
+        var result = ResponseEntity.status(errorCode.getStatus());
+        if (errorCode == ErrorCode.AUTH_RATE_LIMITED) result.header("Retry-After", "60");
+        if (errorCode == ErrorCode.AUTHENTICATION_REQUIRED) result.header("WWW-Authenticate", "Bearer");
+        return result.body(response);
     }
 
 
