@@ -1,9 +1,10 @@
+import { jwtProxy } from '../server/jwtProxy.js'
 // Server-only same-origin proxy. Caddy verifies the browser's Basic credentials.
 // Do not inject a shared credential: an anonymous Vercel caller must remain anonymous.
 const noStore = { 'Cache-Control': 'no-store', 'CDN-Cache-Control': 'no-store', 'Vercel-CDN-Cache-Control': 'no-store' }
 const failure = (status, code) => Response.json({ code, message: '배포 API 연결 또는 검증용 접근 권한을 확인해주세요.', errors: [] }, { status, headers: noStore })
 
-export async function proxy(request, env = process.env, send = fetch) {
+async function basicProxy(request, env = process.env, send = fetch) {
   let upstream
   try {
     upstream = new URL(env.API_PUBLIC_URL)
@@ -44,4 +45,9 @@ export async function proxy(request, env = process.env, send = fetch) {
   } catch { return failure(502, 'UPSTREAM_UNAVAILABLE') }
 }
 
+export async function proxy(request, env = process.env, send = fetch) {
+  if (env.PROXY_AUTH_MODE === 'jwt') return jwtProxy(request, env, send)
+  if (env.PROXY_AUTH_MODE && env.PROXY_AUTH_MODE !== 'basic') return failure(503, 'DEPLOYMENT_NOT_CONFIGURED')
+  return basicProxy(request, env, send)
+}
 export default { fetch: request => proxy(request) }

@@ -1,7 +1,13 @@
+import { readFileSync } from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
 import { VitePWA } from 'vite-plugin-pwa'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+
+const deploymentHeaders = JSON.parse(readFileSync(new URL('./vercel.json', import.meta.url), 'utf8')) as {
+  headers: { source: string; headers: { key: string; value: string }[] }[]
+}
+const previewHeaders = Object.fromEntries(deploymentHeaders.headers.find(rule => rule.source === '/(.*)')!.headers.map(header => [header.key, header.value]))
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -36,6 +42,7 @@ export default defineConfig({
       },
     },
   },
+  preview: { port: 5175, strictPort: true, headers: previewHeaders },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

@@ -1,8 +1,36 @@
 # EC2 + Supabase + Vercel 배포
 
-2026-11-03 개발 브랜치에는 V6 계정 migration, 비밀번호 인증 및 Phase 2 HS256 JWT 발급·검증이 추가됐다. 아래 V1–V5 배포 기록은 당시 상태다. 현재 변경은 격리 로컬 DB에서만 검증했고 운영에는 배포하지 않았다. 새 이미지에는 환경별 AUTH_JWT_SECRET_BASE64·AUTH_JWT_ISSUER·AUTH_JWT_AUDIENCE가 필수다. 사용자 소유권·Refresh·프록시 Bearer/Cookie 연결이 미완료이므로 일반 사용자 인증 완료로 배포하지 않는다.
+2026-11-04 `feat/jwt-auth`는 Spring 자체 인증·JWT/Refresh·사용자 소유권·계정별 로컬 저장소·Google OIDC를 구현했다. backend 69개/frontend 233개, 로컬 production-profile TLS/HTTPS 검사 24개 및 실제 Google localhost 로그인을 검증했다. **EC2/Vercel 운영 인증 전환은 수행하지 않았다.** 아래 초기 공유 Basic 배포 조사·이력은 당시 상태다.
 
-이 구성은 **공유 검증자만 사용하는 배포**다. 실제 공개 서비스 운영과 실제 사용자 원고 저장은 Google 로그인·사용자별 권한 구현까지 보류한다. 공유 Basic 인증은 OAuth나 사용자별 데이터 분리가 아니며, 자격증명을 아는 검증자는 모든 테스트 원고에 접근할 수 있다. 합성 데이터만 사용한다.
+## JWT 인증 전환 시 맞출 설정
+
+이 브랜치의 backend/Vercel/Caddy는 함께 전환한다. 기존 배포 이미지·프론트 배포 ID·환경 설정과 DB 백업을 먼저 기록한다. V8은 기존 원고/폴더/Ledger를 disabled 보관 owner에 귀속하고 삭제하지 않는다. 이전 사용자에게 자동 이전하지 않으므로 기존 공유 원고는 새 로그인 목록에 나타나지 않는다.
+
+- EC2 `deploy/.env`: DB/TLS 값 유지, 환경별 별도 `AUTH_JWT_SECRET_BASE64`, `AUTH_JWT_ISSUER`, `AUTH_JWT_AUDIENCE`, 정확한 HTTPS `FRONTEND_ORIGIN`.
+- Google 사용 시 서버에만 `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI=https://실제-프론트-호스트/api/auth/oauth2/callback/google`. Google Console에도 같은 callback을 등록한다. 로컬 client/secret과 운영은 분리하는 것을 권장한다.
+- Caddy는 `CADDY_CONFIG=./Caddyfile.jwt`. 기존 `Caddyfile`과 기본 모드는 공유 Basic 검증을 유지한다. JWT 설정은 Bearer를 Spring으로 전달하며 public host의 Actuator/기타 경로는 404다. backend host port는 계속 공개하지 않는다.
+- Vercel **서버 환경변수**: `API_PUBLIC_URL=https://실제-API-호스트`, 동일 `FRONTEND_ORIGIN`, `PROXY_AUTH_MODE=jwt`. 기본은 기존 Basic이며 잘못된 모드는 503으로 거절한다. JWT/Google secret을 VITE_ 변수로 만들지 않는다.
+- JWT proxy는 인증 경로의 JSESSIONID/seam_refresh 및 CSRF를 전달하고, Secure/HttpOnly/host-only/Lax Cookie만 여러 Set-Cookie로 보존한다. OAuth redirect는 Google authorization 또는 고정 frontend 완료/실패 경로만 허용한다. API no-store, UI CSP/Referrer-Policy를 적용한다.
+- 환경변수 반영은 `./deploy/scripts/manage.sh deploy`의 Compose 재생성 경로를 사용한다. `restart`는 변경된 환경변수를 적용하지 않는다. 실제 수행 전 전환 창과 rollback을 정하고 HTTPS 익명 차단·로그인·refresh/logout·Google·사용자 A/B 격리를 확인한다.
+
+Rollback은 기존 backend 이미지·프론트 배포·Caddy/프록시 모드를 함께 복원한다. V8 이후 기존 이미지는 owner를 이해하지 못하므로 인증된 신규 다중 사용자 데이터를 이전 전역 API에 노출시키지 않도록 접근을 중단한 상태에서 판단한다. 운영 migration은 clean/reset하지 않는다.
+
+## 로컬 배포 구성 검증
+
+운영 `.env`/DB를 읽지 않는 일회성 환경이다. Node 22·Docker Compose·OpenSSL이 필요하다.
+
+```bash
+docker build -t seam-note-backend:deploy-validation backend
+python3 deploy/tests/local-stack.py
+```
+
+새 테스트는 production profile + PostgreSQL verify-full TLS + Caddy HTTPS + 실제 Vercel proxy 함수를 검증한다. 결과는 로컬 `docs/verification/2026-11-04-auth-deployment-local.json`에 기록한다. 실제 Vercel 인프라에서 실행한 결과와 구분한다.
+
+메일 소유권 검증·비밀번호 재설정·복구/유출 대응·운영 HTTPS 전체 검증 전에는 일반 공개 준비 완료로 판단하지 않는다. 평문 로컬 원고는 공유 OS/DevTools/XSS에 대한 암호화 보관소가 아니다.
+
+## 초기 공유 검증 배포 이력
+
+기존 배포는 공유 Basic 검증 환경이며 합성 데이터만 사용했다. 아래 내용은 2026-10-29 조사·구축 기록이다.
 
 ## 조사 결과와 구성
 

@@ -1,0 +1,30 @@
+{
+    email {$ACME_EMAIL}
+    admin off
+}
+
+{$API_HOST} {
+    header {
+        Cache-Control "no-store"
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "no-referrer"
+    }
+    route {
+        @crossOriginWrite {
+            method POST PUT PATCH DELETE
+            header Origin *
+            not header Origin {$FRONTEND_ORIGIN}
+        }
+        respond @crossOriginWrite 403
+        handle /api/* {
+            request_body {
+                max_size 2MB
+            }
+            # Spring Security validates Bearer JWT and cookie/CSRF auth endpoints.
+            reverse_proxy backend:8080
+        }
+        # Backend/Actuator remain inaccessible on the public API host.
+        respond 404
+    }
+}

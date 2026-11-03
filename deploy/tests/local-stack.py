@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Disposable production-profile TLS/HTTPS test. Uses synthetic credentials and loopback ports only.
-Requires Docker Compose v2, openssl, and a locally built seam-note-backend:deploy-validation.
+Requires Docker Compose v2, openssl, Node 22, and a locally built seam-note-backend:deploy-validation.
 Never uses deploy/.env or a cloud connection. Removes only its own project/volumes.
 """
-import base64, secrets, json, os, socket, ssl, subprocess, tempfile, time, urllib.request, urllib.error, uuid
+import base64, secrets, http.cookiejar, json, os, socket, ssl, subprocess, tempfile, time, urllib.request, urllib.error, uuid
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 work = Path(tempfile.mkdtemp(prefix='seam-deploy-stack-'))
@@ -45,7 +45,7 @@ try:
     password_hash=run('docker','run','--rm','caddy:2.10.2-alpine','caddy','hash-password','--plaintext','synthetic-only')
     (work/'.env').write_text("BACKEND_IMAGE=seam-note-backend:deploy-validation\nDB_HOST=postgres\nDB_PORT=5432\nDB_NAME=seam_deploy_test\nDB_USERNAME=postgres\nDB_PASSWORD=synthetic-only\nAPI_HOST=localhost\nFRONTEND_ORIGIN=https://seam.example.test\nACME_EMAIL=local@example.test\nVALIDATION_USERNAME=reviewer\nVALIDATION_PASSWORD_HASH='"+password_hash+"'\n")
     with (work/'.env').open('a') as f:
-        f.write('AUTH_JWT_SECRET_BASE64=' + base64.b64encode(secrets.token_bytes(32)).decode() + '\nAUTH_JWT_ISSUER=urn:seam-note:stack-test\nAUTH_JWT_AUDIENCE=seam-note-stack-test-api\n')
+        f.write('CADDY_CONFIG=./Caddyfile.jwt\nAUTH_JWT_SECRET_BASE64=' + base64.b64encode(secrets.token_bytes(32)).decode() + '\nAUTH_JWT_ISSUER=urn:seam-note:stack-test\nAUTH_JWT_AUDIENCE=seam-note-stack-test-api\n')
     os.chmod(work/'.env',0o600)
     text=(ROOT/'deploy/compose.yml').read_text().replace("'80:80'",f"'127.0.0.1:{http_port}:80'").replace("'443:443'",f"'127.0.0.1:{https_port}:443'")
     text=text.replace('  caddy:\n', '''  postgres:
@@ -61,7 +61,7 @@ try:
   caddy:
 ''')
     (work/'compose.yml').write_text(text)
-    (work/'Caddyfile').write_text((ROOT/'deploy/Caddyfile').read_text().replace('{$API_HOST} {','{$API_HOST} {\n\ttls internal'))
+    (work/'Caddyfile.jwt').write_text((ROOT/'deploy/Caddyfile.jwt').read_text().replace('{$API_HOST} {','{$API_HOST} {\n\ttls internal'))
     compose('config','--quiet')
     compose('run','--rm','--no-deps','caddy','caddy','validate','--config','/etc/caddy/Caddyfile','--adapter','caddyfile')
     check('production Compose and Caddy config validate',True)
@@ -72,7 +72,7 @@ try:
     wait(ready,'production readiness')
     check('prod boot, verify-full JDBC TLS and JPA validation',True)
     sql=lambda query: compose('exec','-T','postgres','psql','-U','postgres','-d','seam_deploy_test','-Atc',query)
-    check('Flyway V1-V6 in private schema',sql('SELECT count(*) FROM seam_note.flyway_schema_history WHERE success AND version IS NOT NULL')=='6')
+    check('Flyway V1-V9 in private schema',sql('SELECT count(*) FROM seam_note.flyway_schema_history WHERE success AND version IS NOT NULL')=='9')
     check('no manuscript tables in public schema',sql("SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('notes','folders','creation_operations','note_update_operations')")=='0')
     check('JDBC connection uses database TLS',int(sql("SELECT count(*) FROM pg_stat_ssl WHERE ssl AND pid IN (SELECT pid FROM pg_stat_activity WHERE application_name LIKE 'PostgreSQL JDBC%')"))>0)
     compose('up','-d','caddy')
@@ -80,19 +80,34 @@ try:
     wait(lambda: run('docker','cp',cid+':/data/caddy/pki/authorities/local/root.crt',str(work/'https-ca.crt')) is not None,'Caddy CA')
     context=ssl.create_default_context(cafile=str(work/'https-ca.crt'))
     origin=f'https://localhost:{https_port}'
-    auth='Basic '+base64.b64encode(b'reviewer:synthetic-only').decode()
+    auth=None
+    csrf=None
+    opener=urllib.request.build_opener(urllib.request.HTTPSHandler(context=context),urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
     def call(method,path,body=None,key=None,anonymous=False,headers=None):
-        h={'Content-Type':'application/json',**({} if anonymous else {'Authorization':auth}),**(headers or {})}
+        h={'Content-Type':'application/json',**({} if anonymous or not auth else {'Authorization':auth}),**(headers or {})}
         if key: h['Idempotency-Key']=key
+        if csrf and method=='POST' and path.startswith('/api/auth/'): h['X-CSRF-TOKEN']=csrf
         req=urllib.request.Request(origin+path,headers=h,method=method,data=None if body is None else json.dumps(body).encode())
-        try: response=urllib.request.urlopen(req,context=context,timeout=15)
+        try: response=opener.open(req,timeout=15)
         except urllib.error.HTTPError as error: response=error
         with response:
-            raw=response.read();return response.status,json.loads(raw) if raw else None,response.headers
+            raw=response.read()
+            try: data=json.loads(raw) if raw else None
+            except json.JSONDecodeError: data=None
+            return response.status,data,response.headers
     check('HTTPS rejects anonymous GET',call('GET','/api/workspace/tree',anonymous=True)[0]==401)
     check('HTTPS rejects anonymous writes',call('POST','/api/notes',{},anonymous=True)[0]==401)
     check('authenticated health endpoint stays private',call('GET','/actuator/health')[0]==404)
     check('cross-origin authenticated write blocked',call('POST','/api/folders',{},headers={'Origin':'https://evil.example'})[0]==403)
+    csrf=call('GET','/api/auth/csrf')[1]['token']
+    email=str(uuid.uuid4())+'@example.test'
+    password='synthetic-stack-password-only'
+    check('HTTPS signup requires CSRF and succeeds with valid token',call('POST','/api/auth/signup',{'email':email,'password':password,'nickname':'TLS 테스트'})[0]==202)
+    login=call('POST','/api/auth/login',{'email':email,'password':password})
+    check('HTTPS login sets Secure HttpOnly host-only refresh cookie',login[0]==200 and any('seam_refresh=' in c and 'Secure' in c and 'HttpOnly' in c and 'Domain=' not in c for c in login[2].get_all('Set-Cookie',[])))
+    auth='Bearer '+login[1]['accessToken']
+    check('refresh cookie alone cannot read business data',call('GET','/api/workspace/tree',anonymous=True)[0]==401)
+    check('HTTPS refresh rotation succeeds',call('POST','/api/auth/refresh',{})[0]==200)
     status,_,headers=call('GET','/api/workspace/tree')
     check('authenticated GET is never cached',status==200 and headers.get('Cache-Control')=='no-store')
     folder,note,key,update_key=[str(uuid.uuid4()) for _ in range(4)]
@@ -107,6 +122,9 @@ try:
     replay=call('PUT','/api/notes/'+note,update,update_key)
     check('HTTPS PUT replay and ACK',first[0]==200 and first[1]==replay[1] and replay[2].get('Idempotency-Key')==update_key)
     check('HTTPS expectedVersion conflict',call('PUT','/api/notes/'+note,update,str(uuid.uuid4()))[0]==409)
+    proxy_env={**os.environ,'NODE_EXTRA_CA_CERTS':str(work/'https-ca.crt'),'TEST_API_URL':origin}
+    run('node',str(ROOT/'deploy/tests/jwt-proxy-live.mjs'),env=proxy_env)
+    check('real Vercel proxy function forwards secure Cookie/CSRF/Bearer through Caddy HTTPS',True)
     check('backend port has no host binding',run('docker','inspect','--format','{{json .HostConfig.PortBindings}}',compose('ps','-q','backend')) in ('{}','null'))
     compose('restart','backend');wait(ready,'readiness after restart')
     check('container restart preserves note and ledger',call('GET','/api/notes/'+note)[1]['version']==1 and call('PUT','/api/notes/'+note,update,update_key)[1]==first[1])
@@ -126,7 +144,7 @@ try:
     check('invalid DB CA rejects JDBC startup',True)
     ca.write_bytes(original)
     report={'scope':'LOCAL Docker PostgreSQL 17 + prod profile + Caddy internal test CA; NOT Supabase/EC2/Vercel','checks':results,'count':len(results),'cloudTestsRun':False}
-    output=ROOT/'docs/verification/2026-10-29-deployment-local.json';output.parent.mkdir(parents=True,exist_ok=True)
+    output=ROOT/'docs/verification/2026-11-04-auth-deployment-local.json';output.parent.mkdir(parents=True,exist_ok=True)
     output.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print('Report:',output,flush=True)
 finally:
