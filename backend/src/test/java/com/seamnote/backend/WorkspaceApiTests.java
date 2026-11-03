@@ -23,10 +23,16 @@ import static org.junit.jupiter.api.Assertions.*;
 })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class WorkspaceApiTests {
+    @org.springframework.beans.factory.annotation.Autowired org.springframework.jdbc.core.JdbcTemplate authJdbc;
+    @org.springframework.beans.factory.annotation.Autowired com.seamnote.backend.auth.token.AccessTokenIssuer authTokens;
+    String authToken;
+    @org.junit.jupiter.api.BeforeEach void authenticatedFixture() { authToken=TestAccounts.create(authJdbc,authTokens).token(); }
+
     static final String SCHEMA = "workspace_api_" + UUID.randomUUID().toString().replace("-", "");
     @DynamicPropertySource
     static void isolatedSchema(DynamicPropertyRegistry properties) {
         properties.add("spring.jpa.properties.hibernate.default_schema", () -> SCHEMA);
+        properties.add("spring.datasource.hikari.connection-init-sql", () -> "SET search_path TO " + SCHEMA);
         properties.add("spring.flyway.default-schema", () -> SCHEMA);
         properties.add("spring.flyway.schemas", () -> SCHEMA);
     }
@@ -37,7 +43,7 @@ class WorkspaceApiTests {
     final HttpClient client = HttpClient.newHttpClient();
     JsonNode call(String method, String path, Object body, int status) throws Exception {
         var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api" + path))
-            .header("Content-Type", "application/json")
+            .header("Content-Type", "application/json").header("Authorization", "Bearer "+authToken)
             .method(method, body == null ? HttpRequest.BodyPublishers.noBody()
                 : HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body))).build();
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());

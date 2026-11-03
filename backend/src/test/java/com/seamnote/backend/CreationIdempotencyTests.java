@@ -13,11 +13,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CreationIdempotencyTests {
+    @org.springframework.beans.factory.annotation.Autowired org.springframework.jdbc.core.JdbcTemplate authJdbc;
+    @org.springframework.beans.factory.annotation.Autowired com.seamnote.backend.auth.token.AccessTokenIssuer authTokens;
+    String authToken;
+    @org.junit.jupiter.api.BeforeEach void authenticatedFixture() { authToken=TestAccounts.create(authJdbc,authTokens).token(); }
+
  @LocalServerPort int port;@Autowired JdbcTemplate jdbc;
  final JsonMapper json=JsonMapper.builder().build();final HttpClient client=HttpClient.newHttpClient();
  record Reply(int status,JsonNode body,String key){}
  Reply call(String method,String path,Object body,String key)throws Exception{
-  var b=HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+"/api"+path)).header("Content-Type","application/json");
+  var b=HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+"/api"+path)).header("Content-Type","application/json").header("Authorization","Bearer "+authToken);
   if(key!=null)b.header("Idempotency-Key",key);
   var r=client.send(b.method(method,body==null?HttpRequest.BodyPublishers.noBody():HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body))).build(),HttpResponse.BodyHandlers.ofString());
   return new Reply(r.statusCode(),r.body().isEmpty()?null:json.readTree(r.body()),r.headers().firstValue("Idempotency-Key").orElse(null));

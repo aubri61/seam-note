@@ -1,6 +1,7 @@
 package com.seamnote.backend.folder.service;
 
 import com.seamnote.backend.common.exception.*;
+import com.seamnote.backend.auth.password.CurrentActor;
 import com.seamnote.backend.folder.dto.*;
 import com.seamnote.backend.folder.entity.Folder;
 import com.seamnote.backend.folder.repository.FolderRepository;
@@ -17,20 +18,22 @@ public class FolderService {
     private final NoteRepository notes;
     private final FolderStructureLock lock;
     private final EntityManager em;
-    public FolderService(FolderRepository folders, NoteRepository notes, FolderStructureLock lock, EntityManager em) {
+    private final CurrentActor actor;
+    public FolderService(FolderRepository folders, NoteRepository notes, FolderStructureLock lock, EntityManager em, CurrentActor actor) {
+        this.actor=actor;
         this.folders=folders;
         this.notes=notes;
         this.lock=lock;
         this.em=em;
     }
-    // Future workspace/owner authorization belongs at this resource lookup boundary.
+    // All resource lookups include the validated caller owner.
     public Folder requireFolder(UUID id) {
-        return folders.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.FOLDER_NOT_FOUND));
+        return folders.findByIdAndOwnerId(id, actor.id()).orElseThrow(() -> new BusinessException(ErrorCode.FOLDER_NOT_FOUND));
     }
     public FolderResponse get(UUID id) { return new FolderResponse(requireFolder(id)); }
     public List<FolderResponse> list(UUID parentId) {
         if (parentId != null) requireFolder(parentId);
-        return (parentId == null ? folders.findByParentIsNullOrderBySortOrderAscIdAsc() : folders.findByParentIdOrderBySortOrderAscIdAsc(parentId))
+        return (parentId == null ? folders.findByOwnerIdAndParentIsNullOrderBySortOrderAscIdAsc(actor.id()) : folders.findByOwnerIdAndParentIdOrderBySortOrderAscIdAsc(actor.id(), parentId))
             .stream().map(FolderResponse::new).toList();
     }
     @Transactional
@@ -39,7 +42,7 @@ public class FolderService {
         UUID id = request.getId() == null ? UUID.randomUUID() : request.getId();
         if (folders.existsById(id)) throw new BusinessException(ErrorCode.DUPLICATE_ENTITY_ID);
         Folder parent = request.getParentId() == null ? null : requireFolder(request.getParentId());
-        Folder folder = new Folder(id, parent, request.getName().strip(), Math.addExact(folders.maxOrder(request.getParentId()), 1));
+        Folder folder = new Folder(actor.id(), id, parent, request.getName().strip(), Math.addExact(folders.maxOrder(actor.id(), request.getParentId()), 1));
         em.persist(folder);
         em.flush();
         return new FolderResponse(folder);
@@ -62,7 +65,7 @@ public class FolderService {
         }
         UUID oldParent = folder.getParent() == null ? null : folder.getParent().getId();
         if (!Objects.equals(oldParent, request.getTargetParentId())) {
-            folder.move(parent, Math.addExact(folders.maxOrder(request.getTargetParentId()), 1));
+            folder.move(parent, Math.addExact(folders.maxOrder(actor.id(), request.getTargetParentId()), 1));
         em.flush();
         }
         return new FolderResponse(folder);

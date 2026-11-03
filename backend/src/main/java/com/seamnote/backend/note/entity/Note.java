@@ -8,6 +8,9 @@ import com.seamnote.backend.folder.entity.Folder;
 @Entity
 @Table(name = "notes")
 public class Note {
+    @Column(name = "owner_id", nullable = false, updatable = false)
+    private UUID ownerId;
+    public UUID getOwnerId() { return ownerId; }
     @Id
     private UUID id;
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
@@ -26,7 +29,8 @@ public class Note {
     @Column(nullable = false)
     private Instant updatedAt;
     protected Note() {}
-    public Note(UUID id, Folder folder, String title, String content, long sortOrder) {
+    public Note(UUID ownerId, UUID id, Folder folder, String title, String content, long sortOrder) {
+        this.ownerId = ownerId;
         this.id = id;
         this.folder = folder;
         this.title = title;

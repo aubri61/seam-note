@@ -60,14 +60,19 @@ public class SecurityConfig {
     }
     @Bean @Order(2)
     SecurityFilterChain existingSharedValidationApi(HttpSecurity http, SecurityResponses responses) throws Exception {
-        // Transitional existing contract only. No per-user authorization until Phase 4.
+        // Business API accepts only the validated Access JWT; cookie alone grants no data access.
         http.authorizeHttpRequests(rules -> rules
                 .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                 .requestMatchers("/api/notes", "/api/notes/**", "/api/folders", "/api/folders/**",
-                    "/api/workspace/tree", "/api/hello", "/actuator/health", "/actuator/health/**").permitAll()
+                    "/api/workspace/tree", "/api/hello").hasRole("USER")
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 .anyRequest().denyAll())
             .csrf(csrf -> csrf.ignoringRequestMatchers("/api/notes", "/api/notes/**", "/api/folders", "/api/folders/**"))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.oauth2ResourceServer(resource -> resource
+            .jwt(jwt -> jwt.jwtAuthenticationConverter(token -> new JwtAuthenticationToken(token,
+                List.of(new SimpleGrantedAuthority("ROLE_USER")), token.getSubject())))
+            .authenticationEntryPoint((req, res, ex) -> responses.error(res, 401, "AUTHENTICATION_REQUIRED", "인증이 필요합니다.")));
         errors(http, responses);
         return http.build();
     }

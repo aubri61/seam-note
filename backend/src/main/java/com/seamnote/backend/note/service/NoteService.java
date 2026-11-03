@@ -1,6 +1,7 @@
 package com.seamnote.backend.note.service;
 
 import com.seamnote.backend.common.exception.*;
+import com.seamnote.backend.auth.password.CurrentActor;
 import com.seamnote.backend.folder.entity.Folder;
 import com.seamnote.backend.folder.service.*;
 import com.seamnote.backend.note.dto.*;
@@ -18,27 +19,29 @@ public class NoteService {
     private final FolderService folders;
     private final FolderStructureLock lock;
     private final EntityManager em;
-    public NoteService(NoteRepository notes, FolderService folders, FolderStructureLock lock, EntityManager em) {
+    private final CurrentActor actor;
+    public NoteService(NoteRepository notes, FolderService folders, FolderStructureLock lock, EntityManager em, CurrentActor actor) {
+        this.actor=actor;
         this.notes=notes;
         this.folders=folders;
         this.lock=lock;
         this.em=em;
     }
-    private Note requireNote(UUID id) { return notes.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.NOTE_NOT_FOUND)); }
+    private Note requireNote(UUID id) { return notes.findByIdAndOwnerId(id, actor.id()).orElseThrow(() -> new BusinessException(ErrorCode.NOTE_NOT_FOUND)); }
     @Transactional
     public NoteResponse createNote(CreateNoteRequest request) {
         lock.acquire();
         UUID id = request.getId() == null ? UUID.randomUUID() : request.getId();
         if (notes.existsById(id)) throw new BusinessException(ErrorCode.DUPLICATE_ENTITY_ID);
         Folder folder = request.getFolderId() == null ? null : folders.requireFolder(request.getFolderId());
-        Note note = new Note(id, folder, request.getTitle(), request.getContent(), Math.addExact(notes.maxOrder(request.getFolderId()), 1));
+        Note note = new Note(actor.id(), id, folder, request.getTitle(), request.getContent(), Math.addExact(notes.maxOrder(actor.id(), request.getFolderId()), 1));
         em.persist(note);
         em.flush();
         return new NoteResponse(note);
     }
     public NoteResponse getNote(UUID id) { return new NoteResponse(requireNote(id)); }
-    public List<NoteResponse> getAllNotes() { return notes.findAll().stream().map(NoteResponse::new).toList(); }
-    public List<NoteSummaryResponse> listByFolder(UUID folderId) { folders.requireFolder(folderId); return notes.summaries(folderId); }
+    public List<NoteResponse> getAllNotes() { return notes.findAllByOwnerId(actor.id()).stream().map(NoteResponse::new).toList(); }
+    public List<NoteSummaryResponse> listByFolder(UUID folderId) { folders.requireFolder(folderId); return notes.summaries(actor.id(), folderId); }
     @Transactional
     public NoteResponse updateNote(UUID id, UpdateNoteRequest request) {
         Note note = requireNote(id);
@@ -55,7 +58,7 @@ public class NoteService {
         Note note = requireNote(id);
         Folder target = request.getTargetFolderId() == null ? null : folders.requireFolder(request.getTargetFolderId());
         if (!Objects.equals(note.getFolder() == null ? null : note.getFolder().getId(), request.getTargetFolderId())) {
-            note.move(target, Math.addExact(notes.maxOrder(request.getTargetFolderId()), 1));
+            note.move(target, Math.addExact(notes.maxOrder(actor.id(), request.getTargetFolderId()), 1));
         em.flush();
         }
         return new NoteResponse(note);

@@ -8,6 +8,9 @@ import java.util.UUID;
 @Entity
 @Table(name = "folders")
 public class Folder {
+    @Column(name = "owner_id", nullable = false, updatable = false)
+    private UUID ownerId;
+    public UUID getOwnerId() { return ownerId; }
     @Id
     private UUID id;
     @ManyToOne(fetch = FetchType.LAZY)
@@ -24,7 +27,8 @@ public class Folder {
     @Column(nullable = false)
     private Instant updatedAt;
     protected Folder() {}
-    public Folder(UUID id, Folder parent, String name, long sortOrder) {
+    public Folder(UUID ownerId, UUID id, Folder parent, String name, long sortOrder) {
+        this.ownerId = ownerId;
         this.id = id;
         this.parent = parent;
         this.name = name;
