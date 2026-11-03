@@ -1,6 +1,7 @@
+import { businessAccess, subscribeBusinessAccess } from '@/features/auth/authRuntime'
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import type { ComponentProps } from 'react'
-import { lazy, Suspense, useEffect, useEffectEvent, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react'
 import { useConflictList } from '@/features/conflicts/useConflictList'
 import { useTheme } from '@emotion/react'
 import styled from '@emotion/styled'
@@ -54,7 +55,9 @@ export function AppLayout() {
   const [previousMode, setPreviousMode] = useState(isMobile)
   const previousFocusMode = useRef(isMobile)
   const toggleRef = useRef<HTMLButtonElement>(null)
-  const online = useConnectivity()
+  const connected = useConnectivity()
+  const verified = useSyncExternalStore(subscribeBusinessAccess, businessAccess)
+  const online = connected && verified
   const folders = useFolders()
   const drafts = useNoteDrafts(folders.selectedNoteId, folders.activeNote)
   const editorLoading = !drafts.draft && !folders.routeError && (folders.workspace.isPending || !!folders.selectedNoteId && folders.noteQuery.isFetching)

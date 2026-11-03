@@ -15,7 +15,7 @@ public final class AuthRequests {
         public Login { if (email != null) email = email.strip(); }
         @Override public String toString() { return "Login[REDACTED]"; }
     }
-    public record VerifiedUser(UUID id, String email, String nickname, boolean emailVerified) {}
+    public record VerifiedUser(UUID id, String email, String nickname, boolean emailVerified, String issuer, String audience) {}
     public record LoginResponse(VerifiedUser user, String accessToken, String tokenType, long expiresIn) {
         @Override public String toString() { return "LoginResponse[REDACTED]"; }
     }

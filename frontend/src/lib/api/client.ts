@@ -1,6 +1,7 @@
 import axios from 'axios'
 import type { ApiErrorResponse, ApiFieldError } from './types'
 import { accessTokenStore } from '@/features/auth/accessTokenStore'
+import { businessAccess } from '@/features/auth/authRuntime'
 
 export interface RequestOptions {
   signal?: AbortSignal
@@ -53,12 +54,14 @@ function isApiErrorResponse(value: unknown): value is ApiErrorResponse {
 }
 
 async function request<T>(method: 'get' | 'post' | 'put' | 'patch' | 'delete', path: string, data: unknown, { signal, idempotencyKey, csrfToken }: RequestOptions, retry = true): Promise<{ data: T; status: number; operationId?: string }> {
+  if (!path.startsWith('/auth/') && !businessAccess()) throw new ApiError(0, { code: 'AUTH_OFFLINE', message: '인증을 확인하기 전에는 서버 동기화를 중단합니다. 로컬 원고는 유지됩니다.', errors: [] })
   const generation = accessTokenStore.generation()
   const sentToken = accessTokenStore.get()
   try {
     const response = await apiClient.request<T>({ method, url: path, data, signal,
       headers: { ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
         ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}) } })
+    if (!path.startsWith('/auth/') && generation !== accessTokenStore.generation()) throw new ApiError(401, { code: 'AUTH_ACCOUNT_CHANGED', message: '이전 계정의 응답을 적용하지 않았습니다.', errors: [] })
     return { data: response.data, status: response.status,
       operationId: typeof response.headers['idempotency-key'] === 'string' ? response.headers['idempotency-key'] : undefined }
   } catch (cause) {

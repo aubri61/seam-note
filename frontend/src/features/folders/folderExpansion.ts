@@ -1,5 +1,6 @@
+import { scopedName } from '@/features/auth/authRuntime'
 // UI preferences only. Manuscripts remain in the Draft/IndexedDB repositories.
-export const folderExpansionKey = 'seam-note:expanded-folders:v1'
+export const folderExpansionKey = scopedName('seam-note:expanded-folders:v1')
 
 export function readFolderExpansion(): Record<string, boolean> | null {
   try {

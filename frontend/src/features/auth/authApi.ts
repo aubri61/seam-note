@@ -1,13 +1,15 @@
 import { ApiError, getJson, postJson, postEmpty } from '@/lib/api/client'
 import { accessTokenStore } from './accessTokenStore'
 import { createRefreshCoordinator, withAuthLock } from './refreshCoordinator'
+import { documentAccount, sameAccount } from './authRuntime'
 
-export interface AuthUser { id: string; email: string; nickname: string; emailVerified: boolean }
+export interface AuthUser { id: string; email: string; nickname: string; emailVerified: boolean; issuer: string; audience: string }
 interface LoginResponse { user: AuthUser; accessToken: string; tokenType: 'Bearer'; expiresIn: number }
 function validUser(value: unknown): value is AuthUser {
   if (!value || typeof value !== 'object') return false
   const user = value as Record<string, unknown>
   return typeof user.id === 'string' && /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(user.id)
+    && typeof user.issuer === 'string' && user.issuer.length > 0 && typeof user.audience === 'string' && user.audience.length > 0
     && typeof user.email === 'string' && typeof user.nickname === 'string' && typeof user.emailVerified === 'boolean'
 }
 function invalidResponse(): ApiError {
@@ -45,6 +47,10 @@ export const refreshAuthentication = createRefreshCoordinator(async (): Promise<
   const generation = accessTokenStore.generation()
   const result = await postJson<LoginResponse>('/auth/refresh', {}, { csrfToken: await csrfToken() })
   if (result.tokenType !== 'Bearer' || typeof result.accessToken !== 'string' || !validUser(result.user)) throw invalidResponse()
+  if (documentAccount && !sameAccount(documentAccount, result.user)) {
+    accessTokenStore.clear()
+    throw new ApiError(401, { code: 'AUTH_ACCOUNT_CHANGED', message: '계정 또는 서버 환경이 변경되었습니다. 원고를 보존하고 다시 로그인해주세요.', errors: [] })
+  }
   accessTokenStore.complete(generation, result.accessToken, result.expiresIn)
   return result.user
 })

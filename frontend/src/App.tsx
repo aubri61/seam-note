@@ -1,3 +1,4 @@
+import { AuthBoundary } from '@/features/auth/AuthBoundary'
 import type { ComponentProps } from 'react'
 import { Route, Routes, useOutletContext } from 'react-router-dom'
 import { AppLayout } from '@/app/AppLayout'
@@ -9,11 +10,11 @@ function WorkspaceEditor() {
 }
 
 export default function App() {
-  return <Routes>
+  return <AuthBoundary><Routes>
     <Route path="/" element={<AppLayout />}>
       <Route index element={<WorkspaceEditor />} />
       <Route path="notes/:noteId" element={<WorkspaceEditor />} />
       <Route path="*" element={<WorkspaceEditor />} />
     </Route>
-  </Routes>
+  </Routes></AuthBoundary>
 }

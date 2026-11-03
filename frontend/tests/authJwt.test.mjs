@@ -6,7 +6,7 @@ const { createAccessTokenStore, accessTokenStore } = await load('features/auth/a
 const { apiClient, getJson, ApiError } = await load('lib/api/client')
 const { loginWithPassword, getCurrentUser } = await load('features/auth/authApi')
 const adapter = apiClient.defaults.adapter
-const user = { id: '00000000-0000-4000-8000-000000000001', email: 'test@example.test', nickname: '테스트', emailVerified: false }
+const user = { id: '00000000-0000-4000-8000-000000000001', email: 'test@example.test', nickname: '테스트', emailVerified: false, issuer: 'urn:seam-note:test', audience: 'test-api' }
 const token = 'testHeader.testPayload.testSignature'
 const reply = (config, data) => ({ config, data, status: 200, statusText: '', headers: {} })
 afterEach(() => { apiClient.defaults.adapter = adapter; accessTokenStore.clear() })

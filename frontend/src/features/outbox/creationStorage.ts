@@ -1,8 +1,9 @@
+import { scopedName } from '@/features/auth/authRuntime'
 import type { CreateFolderRequest, CreateNoteRequest, Note, Folder } from '@/lib/api/types'
 import type { CreationOperation } from './creationModel'
 // Serialize child creation against manual creation/deletion across tabs.
 async function withCreationLock<T>(action: () => Promise<T>) {
-  if (typeof navigator !== 'undefined' && navigator.locks) return navigator.locks.request('seam-note:creation-sync', action)
+  if (typeof navigator !== 'undefined' && navigator.locks) return navigator.locks.request(scopedName('seam-note:creation-sync'), action)
   return action()
 }
 const repository=async()=>(await import('@/features/local-drafts/draftDatabase')).draftRepository

@@ -1,3 +1,4 @@
+import { scopedName } from '@/features/auth/authRuntime'
 import { LocalDraftConflict } from '@/features/local-drafts/localDraftTypes'
 import type { DraftSession } from '@/features/local-drafts/draftSession'
 import { getNote } from '@/features/notes/noteApi'
@@ -61,7 +62,7 @@ export async function chooseConflict(preview:ConflictPreview,choice:'mine'|'othe
   }
   if(preview.kind!=='LOCAL_DRAFT_CONFLICT')return withSyncLock(execute)
   if(!navigator.locks)throw new Error('탭 간 잠금을 지원하지 않아 선택을 적용하지 않았습니다.')
-  return navigator.locks.request(`seam-note:conflict-choice:${preview.noteId}`,{mode:'exclusive',ifAvailable:true},lock=>{
+  return navigator.locks.request(scopedName(`seam-note:conflict-choice:${preview.noteId}`),{mode:'exclusive',ifAvailable:true},lock=>{
     if(!lock)throw new Error('다른 탭에서 버전을 선택 중입니다. 다시 비교해주세요.')
     return execute()
   })

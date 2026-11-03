@@ -8,7 +8,7 @@ import ts from 'typescript'
 // Exercise real TypeScript modules using the project's existing test tools.
 const temporary = mkdtempSync(join(tmpdir(), 'seam-note-api-tests-'))
 for (const name of [
-  'features/auth/accessTokenStore', 'features/auth/refreshCoordinator', 'features/auth/authApi',
+  'features/auth/authRuntime', 'features/auth/accessTokenStore', 'features/auth/refreshCoordinator', 'features/auth/authApi',
   'features/notes/richTextDocument', 'features/conflicts/conflictModel', 'features/conflicts/conflictService', 'features/conflicts/lineDiff',
   'features/manual-sync/autoSyncScheduler', 'features/manual-sync/autoCreationSync', 'features/manual-sync/SyncCoordinator', 'features/manual-sync/workspaceSyncStorage', 'features/manual-sync/syncLock', 'features/manual-sync/creationSync',
   'features/outbox/creationStorage', 'features/outbox/creationModel', 'features/offline/workspaceCache', 'features/manual-sync/syncContract', 'features/manual-sync/manualSync', 'features/outbox/outboxRepository', 'features/outbox/outboxModel', 'features/local-drafts/localDraftRepository', 'features/local-drafts/localDraftTypes', 'features/local-drafts/draftDatabase', 'features/local-drafts/draftSession', 'features/local-drafts/localDraftStatus',

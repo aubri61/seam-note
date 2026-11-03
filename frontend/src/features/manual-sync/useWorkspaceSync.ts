@@ -1,3 +1,4 @@
+import { businessAccess } from '@/features/auth/authRuntime'
 import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react'
 import axios from 'axios'
 import { isCancelledError, useQueryClient } from '@tanstack/react-query'
@@ -25,7 +26,7 @@ export function useWorkspaceSync(session:DraftSession,online:boolean,workspace:W
     let disposed=false,subscription:{unsubscribe:()=>void}|undefined
     const blocked=new Set<string>()
     const read=async()=>{const value=await workspaceSyncStorage.read();const ids=new Set([...value.updates,...value.creations].map(o=>o.operationId));for(const id of blocked)if(!ids.has(id))blocked.delete(id);if(!disposed)setCount({value:value.updates.length+value.creations.length,error:false});return value}
-    const isOnline=()=>navigator.onLine!==false
+    const isOnline=()=>navigator.onLine!==false&&businessAccess()
     const pullSelected=async(force=false)=>{
       const id=selected.current,data=client.getQueryData<WorkspaceTreeResponse>(workspaceKeys.tree())
       if(!id||!data?.notes.some(n=>n.id===id))return
@@ -91,7 +92,7 @@ export function useWorkspaceSync(session:DraftSession,online:boolean,workspace:W
         return 'halt'
       }finally{if(!disposed)setBusy(false)}
     }
-    const scheduler=new AutoSyncScheduler({online:()=>navigator.onLine!==false,run});runner.current=scheduler
+    const scheduler=new AutoSyncScheduler({online:()=>navigator.onLine!==false&&businessAccess(),run});runner.current=scheduler
     let queueSignature:string|undefined,inputSignature=''
     const onMemory=()=>{
       const next=Object.entries(session.getSnapshot()).filter(([,e])=>e.draft&&e.revision>e.savedRevision&&isDraftDirty(e.draft)).map(([id,e])=>`${id}:${e.revision}`).join('|')
