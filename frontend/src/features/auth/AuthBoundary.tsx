@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import styled from '@emotion/styled'
-import { ApiError, configureAuthRecovery } from '@/lib/api/client'
+import { ApiError, configureAuthRecovery, getJson } from '@/lib/api/client'
 import { queryClient } from '@/lib/query/queryClient'
 import { accessTokenStore } from './accessTokenStore'
 import { loginWithPassword, logoutOnServer, refreshAuthentication, signupWithPassword } from './authApi'
@@ -27,12 +27,14 @@ async function finishPendingLogout() {
 }
 export function AuthBoundary({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<'checking' | 'login' | 'workspace'>('checking')
-  const [message, setMessage] = useState('')
+  const [message, setMessage] = useState(() => location.search === '?oauth=failed' ? 'Google 로그인을 완료하지 못했습니다. 기존 이메일 계정이 있다면 이메일로 로그인해주세요.' : '')
   const [busy, setBusy] = useState(false)
   const [signup, setSignup] = useState(false)
+  const [googleEnabled, setGoogleEnabled] = useState(false)
   const [frozen, setFrozen] = useState(false)
   useEffect(() => {
     let active = true
+    void getJson<{googleEnabled: boolean}>('/auth/config').then(config => { if (active) setGoogleEnabled(config.googleEnabled === true) }).catch(() => {})
     configureAuthRecovery(async () => {
       try {
         await finishPendingLogout()
@@ -124,6 +126,9 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
       <p>비밀번호는 15자 이상, UTF-8 기준 72바이트 이내로 입력해주세요.</p>
       <button type="submit" disabled={busy}>{busy ? '처리 중…' : signup ? '가입 요청' : '로그인'}</button>
     </form>
+    {googleEnabled && <p><button type="button" disabled={busy} onClick={() => void act(async () => {
+      await prepareAuthChange(); await finishPendingLogout(); localStorage.removeItem(ACTIVE_ACCOUNT); location.assign('/api/auth/oauth2/authorization/google')
+    })}>Google로 계속하기</button></p>}
     <p><button type="button" disabled={busy} onClick={() => setSignup(value => !value)}>{signup ? '로그인으로 돌아가기' : '이메일로 가입하기'}</button></p>
     {readAccount(LAST_ACCOUNT) && <button type="button" onClick={offline} disabled={busy}>이 기기의 로컬 원고 열기</button>}
     <p>로컬 원고는 기기에 평문으로 보관됩니다. 공유 기기에서는 다른 사용자가 접근할 수 있습니다.</p>

@@ -66,6 +66,9 @@ logging:
 seam:
   auth:
     cookie-secure: true
+    frontend-origin: ${FRONTEND_ORIGIN:}
+    google:
+      redirect-uri: ${GOOGLE_REDIRECT_URI:}
     jwt:
       # Prod requires explicit issuer/audience as well as a separate secret.
       issuer: ${AUTH_JWT_ISSUER:}

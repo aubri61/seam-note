@@ -21,6 +21,10 @@ public class AuthController {
     public AuthController(PasswordAuthService auth, RefreshSessions sessions, RefreshCookie cookies, CurrentUserService users) {
         this.auth = auth; this.sessions = sessions; this.cookies = cookies; this.users = users;
     }
+    @org.springframework.beans.factory.annotation.Autowired
+    org.springframework.beans.factory.ObjectProvider<org.springframework.security.oauth2.client.registration.ClientRegistrationRepository> oauthClients;
+    public record AuthConfig(boolean googleEnabled) {}
+    @GetMapping("/config") public AuthConfig config() { return new AuthConfig(oauthClients.getIfAvailable()!=null); }
     public record CsrfResponse(String headerName, String token) {}
     public record Accepted(String message) {}
     @GetMapping("/csrf")

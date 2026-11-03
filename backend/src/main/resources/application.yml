@@ -24,6 +24,11 @@ server:
 
 seam:
   auth:
+    frontend-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
+      client-secret: ${GOOGLE_CLIENT_SECRET:}
+      redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:5173/api/auth/oauth2/callback/google}
     jwt:
       secret-base64: ${AUTH_JWT_SECRET_BASE64:}
       issuer: ${AUTH_JWT_ISSUER:urn:seam-note:local}

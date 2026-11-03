@@ -16,6 +16,14 @@
     {
       "source": "/notes/:id",
       "destination": "/index.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/auth/complete",
+      "destination": "/index.html"
     }
   ],
   "headers": [

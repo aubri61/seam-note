@@ -21,12 +21,14 @@ export default defineConfig({
     workbox: {
       globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
       navigateFallback: 'index.html',
-      navigateFallbackAllowlist: [/^\/$/, /^\/notes\/[^/]+\/?$/],
+      navigateFallbackAllowlist: [/^\/$/, /^\/notes\/[^/]+\/?$/, /^\/login\/?$/, /^\/auth\/complete\/?$/],
       navigateFallbackDenylist: [/^\/api(?:\/|$)/],
       runtimeCaching: [], cleanupOutdatedCaches: true, skipWaiting: false, clientsClaim: false,
     },
   })],
   server: {
+    port: 5173,
+    strictPort: true,
     proxy: {
       '/api': {
         target: process.env.SEAM_NOTE_API_TARGET || 'http://127.0.0.1:18765',

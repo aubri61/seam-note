@@ -37,7 +37,7 @@ public class SecurityConfig {
     SecurityFilterChain auth(HttpSecurity http, AuthRateLimiter limiter, SecurityResponses responses) throws Exception {
         http.securityMatcher("/api/auth/**")
             .authorizeHttpRequests(rules -> rules
-                .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/auth/csrf", "/api/auth/config").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/signup", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/auth/me").hasRole("USER")
                 .anyRequest().denyAll())
@@ -46,7 +46,7 @@ public class SecurityConfig {
             .addFilterBefore(new AuthRequestFilter(limiter, responses), CsrfFilter.class);
         var bearer = new DefaultBearerTokenResolver();
         http.oauth2ResourceServer(resource -> resource
-            .bearerTokenResolver(request -> Set.of("/api/auth/csrf", "/api/auth/signup", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout")
+            .bearerTokenResolver(request -> Set.of("/api/auth/config", "/api/auth/csrf", "/api/auth/signup", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout")
                 .contains(request.getServletPath()) ? null : bearer.resolve(request))
             .jwt(jwt -> jwt.jwtAuthenticationConverter(token -> new JwtAuthenticationToken(token,
                 List.of(new SimpleGrantedAuthority("ROLE_USER")), token.getSubject())))
