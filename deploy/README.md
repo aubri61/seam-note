@@ -23,7 +23,7 @@ CORS 허용 설정은 필요 없다. 브라우저는 Vercel의 같은 origin `/a
 
 ## 2026-10-30 실제 EC2 배포
 
-실제 `seam-note` 프로필 조회 결과 기존 서버는 **ap-southeast-2(시드니), Ubuntu 24.04 ARM64/t4g.small**이다. 신규 리소스 생성이나 서울 이전은 하지 않는다. 현재 서버에서 **Supabase Direct IPv6 + JDBC verify-full**로 Flyway V1–V5와 JPA, DB readiness가 통과했다. 실제 원격 PWA 검사에서는 최초 원고 초기화의 기존 retry 경쟁이 추가 재현돼 자동 동기화는 아직 통과하지 못했다(제품 코드 보존). 이 날짜의 상세 실행 기록과 남은 공개 HTTPS/Vercel 작업은 [실제 배포 기록](../docs/worklogs/2026-10-30-ec2-deployment.md)을 따른다.
+실제 `seam-note` 프로필 조회 결과 기존 서버는 **ap-southeast-2(시드니), Ubuntu 24.04 ARM64/t4g.small**이다. 신규 리소스 생성이나 서울 이전은 하지 않는다. 현재 서버에서 **Supabase Direct IPv6 + JDBC verify-full**로 Flyway V1–V5와 JPA, DB readiness가 통과했다. 실제 원격 PWA 검사에서는 최초 원고 초기화의 기존 retry 경쟁이 추가 재현돼 자동 동기화는 아직 통과하지 못했다(제품 코드 보존). 이 날짜의 상세 실행 기록은 로컬 문서로 별도 보관한다.
 
 Direct Connection은 호스트뿐 아니라 컨테이너에도 IPv6 egress가 필요하다. Docker 27+에서 `deploy/.env`의 `ENABLE_IPV6=true`로 전용 bridge의 private ULA/NAT IPv6를 활성화할 수 있다. Session pooler/기존 로컬 검증은 기본 false를 유지한다. AWS 보안 그룹이나 Docker daemon 전역 설정을 바꾸지 않으며 backend host port는 계속 비공개다. [Docker bridge IPv6](https://docs.docker.com/engine/network/drivers/bridge/)
 
@@ -190,4 +190,4 @@ docker build -t seam-note-backend:deploy-validation backend
 python3 deploy/tests/local-stack.py
 ```
 
-`local-stack.py`는 임시 Compose project/loopback port/합성 비밀번호/전용 PostgreSQL/테스트 CA만 사용한다. 클라우드 및 deploy/.env를 읽지 않는다. 종료 시 자기 project와 volume만 정리한다. 실제 클라우드 검증 현황은 [검증 기록](../docs/worklogs/2026-10-29-deploy-infra.md)에 구분해서 남긴다.
+`local-stack.py`는 임시 Compose project/loopback port/합성 비밀번호/전용 PostgreSQL/테스트 CA만 사용한다. 클라우드 및 deploy/.env를 읽지 않는다. 종료 시 자기 project와 volume만 정리한다. 실제 클라우드 검증 현황은 로컬 문서로 별도 보관한다.
