@@ -1,5 +1,6 @@
-import { ApiError, getJson, postJson } from '@/lib/api/client'
+import { ApiError, getJson, postJson, postEmpty } from '@/lib/api/client'
 import { accessTokenStore } from './accessTokenStore'
+import { createRefreshCoordinator, withAuthLock } from './refreshCoordinator'
 
 export interface AuthUser { id: string; email: string; nickname: string; emailVerified: boolean }
 interface LoginResponse { user: AuthUser; accessToken: string; tokenType: 'Bearer'; expiresIn: number }
@@ -38,4 +39,22 @@ export async function getCurrentUser(): Promise<AuthUser> {
   const user = await getJson<unknown>('/auth/me')
   if (!validUser(user)) throw invalidResponse()
   return user
+}
+
+export const refreshAuthentication = createRefreshCoordinator(async (): Promise<AuthUser> => {
+  const generation = accessTokenStore.generation()
+  const result = await postJson<LoginResponse>('/auth/refresh', {}, { csrfToken: await csrfToken() })
+  if (result.tokenType !== 'Bearer' || typeof result.accessToken !== 'string' || !validUser(result.user)) throw invalidResponse()
+  accessTokenStore.complete(generation, result.accessToken, result.expiresIn)
+  return result.user
+})
+export async function logoutOnServer(): Promise<void> {
+  accessTokenStore.clear()
+  await withAuthLock(async () => {
+    // Logout returns 204; use the API's no-body helper.
+    await logoutRequest(await csrfToken())
+  })
+}
+async function logoutRequest(csrf: string): Promise<void> {
+  await postEmpty('/auth/logout', {}, { csrfToken: csrf })
 }

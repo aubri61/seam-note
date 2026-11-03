@@ -37,6 +37,12 @@ spring:
 server:
   port: 8080
   shutdown: graceful
+  servlet:
+    session:
+      cookie:
+        secure: true
+        http-only: true
+        same-site: lax
   error:
     include-message: never
     include-stacktrace: never
@@ -59,6 +65,7 @@ logging:
 
 seam:
   auth:
+    cookie-secure: true
     jwt:
       # Prod requires explicit issuer/audience as well as a separate secret.
       issuer: ${AUTH_JWT_ISSUER:}

@@ -3,6 +3,7 @@ export function createAccessTokenStore(now: () => number = Date.now) {
   let generation = 0
   let current: { token: string; expiresAt: number } | undefined
   return {
+    generation() { return generation },
     begin() { current = undefined; return ++generation },
     clear() { current = undefined; generation++ },
     complete(expectedGeneration: number, token: string, expiresIn: number) {

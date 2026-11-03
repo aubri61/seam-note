@@ -15,7 +15,7 @@ public class AuthRequestFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         response.setHeader("Cache-Control", "no-store");
         String path = request.getServletPath();
-        if (!"POST".equals(request.getMethod()) || !(path.equals("/api/auth/signup") || path.equals("/api/auth/login"))) {
+        if (!"POST".equals(request.getMethod()) || !(path.equals("/api/auth/signup") || path.equals("/api/auth/login") || path.equals("/api/auth/refresh") || path.equals("/api/auth/logout"))) {
             chain.doFilter(request, response); return;
         }
         try { limiter.address(request.getRemoteAddr()); }

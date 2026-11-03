@@ -65,7 +65,7 @@ class PasswordAuthApiTests {
         assertEquals("글쓴이", login.body().get("user").get("nickname").asString()); assertFalse(login.body().get("user").get("emailVerified").asBoolean());
         assertTrue(login.body().get("user").has("id")); assertFalse(login.body().has("password")); assertFalse(login.body().has("passwordHash"));
         assertTrue(login.body().has("accessToken")); assertTrue(login.headers().firstValue("cache-control").orElse("").contains("no-store"));
-        assertFalse(login.headers().firstValue("set-cookie").isPresent(), "Login must not issue an authentication cookie");
+        assertTrue(login.headers().allValues("set-cookie").stream().anyMatch(c -> c.startsWith("seam_refresh=") && c.contains("HttpOnly")));
         assertEquals(401, b.call("GET", "/api/auth/private", null, false).status(), "CSRF session is not authenticated");
     }
     @Test void concurrentDuplicatesCreateOneCredentialAndDoNotResetIt() throws Exception {
@@ -132,4 +132,22 @@ class PasswordAuthApiTests {
         assertEquals(0, jdbc.queryForObject("select count(*) from app_users where email_normalized=?", Integer.class, email));
     }
     @Autowired UserRegistration registration;
+    @Test void cookieRefreshAndLogoutRequireCsrfAndRotate() throws Exception {
+        var b=new Browser();var email=email();b.signup(email,"쿠키 테스트");var login=b.login(email,PASSWORD);
+        var cookie=login.headers().allValues("set-cookie").stream().filter(c->c.startsWith("seam_refresh=")).findFirst().orElseThrow();
+        assertTrue(cookie.contains("Path=/api/auth"));assertTrue(cookie.contains("HttpOnly"));assertTrue(cookie.contains("SameSite=Lax"));assertFalse(cookie.contains("Domain="));
+        assertEquals(403,b.call("POST","/api/auth/refresh",Map.of(),false).status());
+        var bearer=HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+"/api/auth/refresh"))
+            .header("Authorization","Bearer "+login.body().get("accessToken").asString())
+            .POST(HttpRequest.BodyPublishers.noBody()).build();
+        assertEquals(403,b.client.send(bearer,HttpResponse.BodyHandlers.discarding()).statusCode());
+        var refreshed=b.call("POST","/api/auth/refresh",Map.of(),true);assertEquals(200,refreshed.status());
+        assertNotEquals(cookie,refreshed.headers().firstValue("set-cookie").orElseThrow());
+        assertEquals(403,b.call("POST","/api/auth/logout",Map.of(),false).status());
+        var logout=b.call("POST","/api/auth/logout",Map.of(),true);assertEquals(204,logout.status());
+        assertTrue(logout.headers().allValues("set-cookie").stream().anyMatch(c->c.contains("Max-Age=0")));
+        assertEquals(401,b.call("POST","/api/auth/refresh",Map.of(),true).status());
+        assertEquals(204,b.call("POST","/api/auth/logout",Map.of(),true).status());
+    }
+
 }

@@ -38,7 +38,7 @@ public class SecurityConfig {
         http.securityMatcher("/api/auth/**")
             .authorizeHttpRequests(rules -> rules
                 .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/auth/signup", "/api/auth/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/signup", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/auth/me").hasRole("USER")
                 .anyRequest().denyAll())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -46,13 +46,15 @@ public class SecurityConfig {
             .addFilterBefore(new AuthRequestFilter(limiter, responses), CsrfFilter.class);
         var bearer = new DefaultBearerTokenResolver();
         http.oauth2ResourceServer(resource -> resource
-            .bearerTokenResolver(request -> Set.of("/api/auth/csrf", "/api/auth/signup", "/api/auth/login")
+            .bearerTokenResolver(request -> Set.of("/api/auth/csrf", "/api/auth/signup", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout")
                 .contains(request.getServletPath()) ? null : bearer.resolve(request))
             .jwt(jwt -> jwt.jwtAuthenticationConverter(token -> new JwtAuthenticationToken(token,
                 List.of(new SimpleGrantedAuthority("ROLE_USER")), token.getSubject())))
             .authenticationEntryPoint((req, res, ex) -> responses.error(res, 401, "AUTHENTICATION_REQUIRED", "인증이 필요합니다."))
             .accessDeniedHandler((req, res, ex) -> responses.error(res, 403, "ACCESS_DENIED", "요청 권한을 확인해주세요.")));
-        // Keep standard session-backed CSRF protection. CSRF session is not a login session.
+        http.csrf(csrf -> csrf.requireCsrfProtectionMatcher(request ->
+            !Set.of("GET", "HEAD", "OPTIONS", "TRACE").contains(request.getMethod())));
+        // CSRF session is not an authenticated login session.
         errors(http, responses);
         return http.build();
     }
