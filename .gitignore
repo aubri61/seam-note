@@ -21,3 +21,6 @@
 
 # Local Vercel project metadata
 /.vercel/
+
+# Keep project documents local
+/docs/
