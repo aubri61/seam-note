@@ -5,6 +5,7 @@ import { lazy, Suspense, useEffect, useEffectEvent, useRef, useState, useSyncExt
 import { useConflictList } from '@/features/conflicts/useConflictList'
 import { useTheme } from '@emotion/react'
 import styled from '@emotion/styled'
+import { actionStyle } from '@/styles/controls'
 import { AppHeader } from '@/app/AppHeader'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { Sidebar } from '@/app/sidebar/Sidebar'
@@ -27,6 +28,11 @@ const ManualSyncDelayPanel = import.meta.env.DEV && import.meta.env.VITE_SYNC_DE
   ? lazy(() => import('../dev/ManualSyncDelayPanel')) : null
 
 const ConflictDialog=lazy(()=>import('@/features/conflicts/ConflictDialog'))
+
+const CreationActions = styled.div(({ theme }) => ({
+  display: 'flex', flexWrap: 'wrap', gap: theme.spacing.sm, marginTop: theme.spacing.sm,
+  '& button': actionStyle(theme, 'secondary', true),
+}))
 
 const Shell = styled.div(({ theme }) => ({
   display: 'flex',
@@ -216,8 +222,10 @@ export function AppLayout() {
           {creationError && <>
             {creationError instanceof ApiError && creationError.status === 0 && <p>서버에 반영됐지만 응답만 유실됐을 수 있습니다. 목록을 먼저 확인해주세요.</p>}
             {creationError instanceof ApiError && creationError.code === 'DUPLICATE_ENTITY_ID' && <p>이전 요청이 반영됐을 수 있습니다. 목록에서 확인해주세요.</p>}
-            <button type="button" disabled={folders.busy} onClick={() => void folders.workspace.refetch()}>목록 새로고침</button>
-            <button type="button" disabled={folders.busy} onClick={() => void retryCreation()}>같은 요청 다시 시도</button>
+            <CreationActions>
+              <button type="button" disabled={folders.busy} onClick={() => void folders.workspace.refetch()}>목록 새로고침</button>
+              <button type="button" disabled={folders.busy} onClick={() => void retryCreation()}>같은 요청 다시 시도</button>
+            </CreationActions>
           </>}
         </div>
 

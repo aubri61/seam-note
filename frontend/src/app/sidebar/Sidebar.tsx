@@ -2,6 +2,7 @@ import { shortcutLabel } from '@/lib/keyboard/shortcutLabel'
 import { useRef } from 'react'
 import type { ReactNode } from 'react'
 import styled from '@emotion/styled'
+import { actionStyle, controlFocus } from '@/styles/controls'
 import { Icon } from '@/components/Icon'
 import { WorkspacePicker } from '@/features/workspaces/WorkspacePicker'
 import { Eyebrow, IconButton } from '@/components/primitives'
@@ -18,6 +19,8 @@ const Panel = styled.aside(({ theme }) => ({
   borderRight: `1px solid ${theme.colors.border}`,
   background: theme.colors.sidebar,
 }))
+
+const Retry = styled.button(({ theme }) => actionStyle(theme, 'secondary', true))
 
 const Brand = styled.header(({ theme }) => ({
   display: 'flex',
@@ -63,7 +66,7 @@ const Search = styled.label(({ theme }) => ({
   borderRadius: theme.radii.pill,
   transition: `border-color ${theme.motion.duration[100]} ${theme.motion.easing.standard}, background ${theme.motion.duration[100]} ${theme.motion.easing.standard}`,
   '&:hover, &:focus-within': { background: theme.colors.surface },
-  '&:focus-within': { outline: 'none' },
+  '&:focus-within': controlFocus(theme),
   color: theme.colors.mutedText,
   input: {
     width: '100%',
@@ -136,7 +139,7 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
 
       <Search>
         <Icon name="search" size={17} />
-        <input aria-label="노트 검색" placeholder="Search notes" value={folders.search} onChange={event => folders.setSearch(event.target.value)} type="search" />
+        <input aria-label="노트 검색" placeholder="원고 검색" value={folders.search} onChange={event => folders.setSearch(event.target.value)} type="search" />
       </Search>
 
       <nav aria-label="폴더 탐색">
@@ -157,7 +160,7 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
         {folders.workspace.isPending && <p role="status">폴더와 원고를 불러오는 중입니다.</p>}
         {folders.workspace.isError && <div role="alert">
           <p>{folders.workspace.data ? '목록 갱신에 실패했습니다' : '목록을 불러오지 못했습니다'}: {folders.workspace.error.message}</p>
-          <button type="button" onClick={() => void folders.workspace.refetch()}>다시 시도</button>
+          <Retry type="button" onClick={() => void folders.workspace.refetch()}>다시 시도</Retry>
         </div>}
         {folders.workspace.data && <FolderTree
           actionsBusy={folders.busy || !!folders.pendingFolder} onFolderAction={onFolderAction} onDeleteNote={onDeleteNote} canDeleteNote={canDeleteNote}

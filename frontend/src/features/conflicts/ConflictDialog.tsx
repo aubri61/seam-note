@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import styled from '@emotion/styled'
-import { useTheme } from '@emotion/react'
+import { fieldStyle } from '@/styles/controls'
 import { Link } from 'react-router-dom'
 import { notePath } from '@/app/routing/noteRoutes'
 import type { Folder } from '@/lib/api/types'
@@ -19,10 +19,11 @@ const Overlay=styled(Dialog.Overlay)({position:'fixed',inset:0,background:'rgba(
 const Content=styled(Dialog.Content)<{compact:boolean}>(({theme,compact})=>({position:'fixed',left:'50%',top:'50%',transform:'translate(-50%,-50%)',width:`min(${compact?520:960}px, calc(100vw - 32px))`,maxHeight:'85dvh',zIndex:41,overflowY:'auto',padding:theme.spacing.lg,
   borderRadius:theme.radii.panel,background:theme.colors.surface,color:theme.colors.text,boxShadow:theme.shadow,
   'button:focus-visible, select:focus-visible':{outline:`2px solid ${theme.colors.text}`,outlineOffset:2},
-  h2:{fontSize:20},h3:{fontSize:14,margin:'12px 0 8px'},p:{fontSize:13,lineHeight:1.7,overflowWrap:'anywhere'},select:{padding:8,maxWidth:'100%'},
+  h2:{fontSize:20},h3:{fontSize:14,margin:'12px 0 8px'},p:{fontSize:13,lineHeight:1.7,overflowWrap:'anywhere'},'& select': fieldStyle(theme),
+  '& textarea': {...fieldStyle(theme),width:'100%',minHeight:120,resize:'vertical',lineHeight:1.7},
+  '& label': {display:'grid',gap:theme.spacing.sm,marginTop:theme.spacing.md,fontSize:13},
 }))
 export default function ConflictDialog({id,session,folders,initialFolderId,onClose,onResolved}:{id:string;session:DraftSession;folders:Folder[];initialFolderId:string;onClose:()=>void;onResolved:(newId?:string)=>void}) {
-  const theme=useTheme()
   const client=useQueryClient()
   const [pendingSave,setPendingSave]=useState<{noteId:string;newId?:string;choice:'mine'|'other'|'recover'}|null>(null)
   const [notice,setNotice]=useState('')
@@ -115,7 +116,7 @@ export default function ConflictDialog({id,session,folders,initialFolderId,onClo
       leftTitle={preview.mine.title} rightTitle={other.title} onReady={onDiffReady}
       leftAction={<SyncButton type="button" disabled={disabled||!!pendingSave&&pendingSave.choice!=='mine'} onClick={()=>{void choose('mine')}}>{pendingSave?.choice==='mine'?'현재 원고 서버 저장 재시도':'현재 원고 선택'}</SyncButton>}
       rightAction={<SyncButton type="button" disabled={disabled||!!pendingSave&&pendingSave.choice!=='other'} onClick={()=>{void choose('other')}}>{pendingSave?.choice==='other'?'선택한 원고 서버 저장 재시도':preview.server?'서버 원고 선택':'다른 탭 원고 선택'}</SyncButton>}/>}
-    {deleted&&<><h3>복구할 로컬 원고</h3><p><strong>{mine?.title||'제목 없음'}</strong></p><textarea aria-label="복구할 로컬 원고 본문" readOnly value={mine ? documentText(mine.content,true) : ''} rows={5} style={{width:'100%',resize:'vertical',background:theme.colors.background}}/><p>서버가 NOTE_NOT_FOUND를 반환했습니다. 기존 UUID로 재생성하지 않고 새 UUID와 NOTE_CREATE로 복구합니다.</p>
+    {deleted&&<><h3>복구할 로컬 원고</h3><p><strong>{mine?.title||'제목 없음'}</strong></p><textarea aria-label="복구할 로컬 원고 본문" readOnly value={mine ? documentText(mine.content,true) : ''} rows={5}/><p>서버가 NOTE_NOT_FOUND를 반환했습니다. 기존 UUID로 재생성하지 않고 새 UUID와 NOTE_CREATE로 복구합니다.</p>
       <label>새 원고를 보관할 폴더 <select value={folderId} onChange={e=>setFolderId(e.target.value)} disabled={busy}><option value="">폴더 없이 생성</option>{folders.map(f=><option key={f.id} value={f.id}>{f.name}</option>)}</select></label></>}
     {deleted&&<><p>로컬 원고를 삭제하면 이 브라우저의 원고와 대기 작업도 제거되며 복구할 수 없습니다.</p><div style={{marginTop:16,display:'flex',flexWrap:'wrap',gap:12}}><SyncButton type="button" disabled={disabled} onClick={()=>{void choose('recover')}}>새 원고로 복구</SyncButton><SyncButton type="button" disabled={disabled||!!pendingSave} onClick={()=>{void discard()}}>로컬 원고 삭제</SyncButton></div></>}
   </Content></Dialog.Portal></Dialog.Root>

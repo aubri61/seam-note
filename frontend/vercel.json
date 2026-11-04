@@ -22,6 +22,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/register",
+      "destination": "/index.html"
+    },
+    {
       "source": "/auth/complete",
       "destination": "/index.html"
     }
