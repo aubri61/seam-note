@@ -18,6 +18,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class NoteIdempotencyTests {
+    @org.springframework.beans.factory.annotation.Autowired org.springframework.jdbc.core.JdbcTemplate authJdbc;
+    @org.springframework.beans.factory.annotation.Autowired com.seamnote.backend.auth.token.AccessTokenIssuer authTokens;
+    String authToken;
+    @org.junit.jupiter.api.BeforeEach void authenticatedFixture() { authToken=TestAccounts.create(authJdbc,authTokens).token(); }
+
     @LocalServerPort int port;
     @Autowired javax.sql.DataSource dataSource;
     @Autowired JdbcTemplate jdbc;
@@ -26,7 +31,7 @@ class NoteIdempotencyTests {
     record Reply(int status, JsonNode body) {}
     Reply call(String method, String path, Object body, String key) throws Exception {
         var builder = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/api" + path))
-            .header("Content-Type", "application/json");
+            .header("Content-Type", "application/json").header("Authorization", "Bearer "+authToken);
         if (key != null) builder.header("Idempotency-Key", key);
         var request = builder.method(method, body == null ? HttpRequest.BodyPublishers.noBody()
             : HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body))).build();

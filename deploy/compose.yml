@@ -9,6 +9,13 @@ services:
       DB_NAME: ${DB_NAME:?Set the database name}
       DB_USERNAME: ${DB_USERNAME:?Set the exact Connect username}
       DB_PASSWORD: ${DB_PASSWORD:?Set the database password locally}
+      AUTH_JWT_SECRET_BASE64: ${AUTH_JWT_SECRET_BASE64:?Set a separate random JWT secret locally}
+      AUTH_JWT_ISSUER: ${AUTH_JWT_ISSUER:?Set the production JWT issuer}
+      AUTH_JWT_AUDIENCE: ${AUTH_JWT_AUDIENCE:?Set the production JWT audience}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:?Set the exact HTTPS frontend origin}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
       SPRING_PROFILES_ACTIVE: prod
       JAVA_TOOL_OPTIONS: '-XX:MaxRAMPercentage=65 -XX:+ExitOnOutOfMemoryError'
     volumes:
@@ -42,7 +49,7 @@ services:
       - '80:80'
       - '443:443'
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${CADDY_CONFIG:-./Caddyfile}:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:

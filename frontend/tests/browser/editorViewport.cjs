@@ -26,7 +26,7 @@ async function main(){
  await input.evaluate(el=>{el.scrollTop=el.scrollHeight})
  assert.ok(await input.evaluate(el=>el.scrollTop>0&&el.scrollTop+el.clientHeight>=el.scrollHeight-2))
  await ctx.setOffline(true)
- const offline=page.getByRole('status').filter({hasText:'현재 오프라인 작업 중'})
+ const offline=page.getByRole('status').filter({hasText:/^오프라인$/})
  await offline.waitFor();assert.equal(await offline.evaluate(el=>getComputedStyle(el).color),'rgb(180, 35, 24)')
  assert.equal(await page.getByRole('button',{name:'모든 변경사항 동기화',exact:true}).count(),0)
  await ctx.setOffline(false);await page.getByRole('button',{name:'모든 변경사항 동기화',exact:true}).waitFor()

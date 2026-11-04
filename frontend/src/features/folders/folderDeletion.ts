@@ -1,9 +1,10 @@
+import { scopedName } from '@/features/auth/authRuntime'
 import { ApiError } from '@/lib/api/client'
 import { deleteFolder } from './folderApi'
 
 export async function deleteFolderTree(id: string): Promise<void> {
   if (!navigator.locks) throw new Error('탭 간 잠금을 사용할 수 없어 폴더 삭제를 중단했습니다.')
-  await navigator.locks.request('seam-note:creation-sync', { mode: 'exclusive', ifAvailable: true }, async lock => {
+  await navigator.locks.request(scopedName('seam-note:creation-sync'), { mode: 'exclusive', ifAvailable: true }, async lock => {
     if (!lock) throw new Error('다른 탭에서 생성 또는 서버 반영 중입니다. 완료 후 다시 시도해주세요.')
     const { draftRepository } = await import('@/features/local-drafts/draftDatabase')
     // A purely pending local folder is atomically canceled without any HTTP call.

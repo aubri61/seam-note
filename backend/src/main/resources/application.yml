@@ -22,3 +22,16 @@ spring:
 server:
   port: 18765
 
+seam:
+  auth:
+    frontend-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
+      client-secret: ${GOOGLE_CLIENT_SECRET:}
+      redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:5173/api/auth/oauth2/callback/google}
+    jwt:
+      secret-base64: ${AUTH_JWT_SECRET_BASE64:}
+      issuer: ${AUTH_JWT_ISSUER:urn:seam-note:local}
+      audience: ${AUTH_JWT_AUDIENCE:seam-note-local-api}
+      access-ttl-seconds: ${AUTH_JWT_ACCESS_TTL_SECONDS:300}
+

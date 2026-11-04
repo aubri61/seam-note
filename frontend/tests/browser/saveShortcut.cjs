@@ -33,7 +33,7 @@ async function main(){const browser=await chromium.launch({channel:'chrome',head
  await body.fill('Immediate before debounce B');await p.keyboard.press('Control+s')
  await until(()=>puts.length===2,'Control S sends');await until(()=>sync.isEnabled(),'second ACK completed')
  assert.equal(server.content,'Immediate before debounce B');assert.equal(server.version,2);assert.equal(puts[1].payload.expectedVersion,1);assert.notEqual(puts[0].key,puts[1].key)
- await ctx.setOffline(true);await p.getByText('현재 오프라인 작업 중',{exact:true}).waitFor();await body.fill('Offline retained C');await p.keyboard.press('Control+s');await pause(150);assert.equal(puts.length,2);assert.equal(await body.inputValue(),'Offline retained C')
+ await ctx.setOffline(true);await p.getByText('오프라인',{exact:true}).waitFor();await body.fill('Offline retained C');await p.keyboard.press('Control+s');await pause(150);assert.equal(puts.length,2);assert.equal(await body.inputValue(),'Offline retained C')
  await ctx.setOffline(false);await sync.waitFor();await until(()=>sync.isEnabled(),'online again')
  await p.evaluate(()=>{const el=document.createElement('div');el.id='synthetic-modal';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');document.body.append(el)})
  await p.keyboard.press('Meta+s');await pause(150);assert.equal(puts.length,2)

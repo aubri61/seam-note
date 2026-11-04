@@ -1,9 +1,11 @@
+import { businessAccess, subscribeBusinessAccess } from '@/features/auth/authRuntime'
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import type { ComponentProps } from 'react'
-import { lazy, Suspense, useEffect, useEffectEvent, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react'
 import { useConflictList } from '@/features/conflicts/useConflictList'
 import { useTheme } from '@emotion/react'
 import styled from '@emotion/styled'
+import { actionStyle } from '@/styles/controls'
 import { AppHeader } from '@/app/AppHeader'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { Sidebar } from '@/app/sidebar/Sidebar'
@@ -26,6 +28,11 @@ const ManualSyncDelayPanel = import.meta.env.DEV && import.meta.env.VITE_SYNC_DE
   ? lazy(() => import('../dev/ManualSyncDelayPanel')) : null
 
 const ConflictDialog=lazy(()=>import('@/features/conflicts/ConflictDialog'))
+
+const CreationActions = styled.div(({ theme }) => ({
+  display: 'flex', flexWrap: 'wrap', gap: theme.spacing.sm, marginTop: theme.spacing.sm,
+  '& button': actionStyle(theme, 'secondary', true),
+}))
 
 const Shell = styled.div(({ theme }) => ({
   display: 'flex',
@@ -54,7 +61,9 @@ export function AppLayout() {
   const [previousMode, setPreviousMode] = useState(isMobile)
   const previousFocusMode = useRef(isMobile)
   const toggleRef = useRef<HTMLButtonElement>(null)
-  const online = useConnectivity()
+  const connected = useConnectivity()
+  const verified = useSyncExternalStore(subscribeBusinessAccess, businessAccess)
+  const online = connected && verified
   const folders = useFolders()
   const drafts = useNoteDrafts(folders.selectedNoteId, folders.activeNote)
   const editorLoading = !drafts.draft && !folders.routeError && (folders.workspace.isPending || !!folders.selectedNoteId && folders.noteQuery.isFetching)
@@ -156,22 +165,20 @@ export function AppLayout() {
     pendingCreatedFocus.current = {noteId,reached:false}
     setCreatedFocusRequest(noteId)
   }
-  function create(kind: 'folder' | 'root-folder' | 'document' | 'unfiled-document') {
+  function create(kind: 'folder' | 'root-folder' | 'document') {
     if (folders.busy || folders.pendingFolder) return
     setCreationMessage('')
     if (kind === 'folder' || kind === 'root-folder') {
       folders.beginFolderCreation(kind === 'root-folder')
     } else {
-      void createDocument(kind==='unfiled-document')
+      void createDocument()
     }
   }
-  async function createDocument(unfiled=false) {
+  async function createDocument() {
     if (createDocumentGate.current || !folders.workspace.data) return
     createDocumentGate.current = true
     try {
-      // No selection means an unfiled workspace note; never invent a parent folder.
-      const parentId = unfiled ? null : folders.creationParentId
-      const createdId = await folders.createEmptyNote(parentId)
+      const createdId = await folders.createEmptyNote(folders.selectedFolderId)
       if (createdId) showCreatedNote(createdId)
     } finally { createDocumentGate.current = false }
   }
@@ -213,8 +220,10 @@ export function AppLayout() {
           {creationError && <>
             {creationError instanceof ApiError && creationError.status === 0 && <p>서버에 반영됐지만 응답만 유실됐을 수 있습니다. 목록을 먼저 확인해주세요.</p>}
             {creationError instanceof ApiError && creationError.code === 'DUPLICATE_ENTITY_ID' && <p>이전 요청이 반영됐을 수 있습니다. 목록에서 확인해주세요.</p>}
-            <button type="button" disabled={folders.busy} onClick={() => void folders.workspace.refetch()}>목록 새로고침</button>
-            <button type="button" disabled={folders.busy} onClick={() => void retryCreation()}>같은 요청 다시 시도</button>
+            <CreationActions>
+              <button type="button" disabled={folders.busy} onClick={() => void folders.workspace.refetch()}>목록 새로고침</button>
+              <button type="button" disabled={folders.busy} onClick={() => void retryCreation()}>같은 요청 다시 시도</button>
+            </CreationActions>
           </>}
         </div>
 
@@ -252,12 +261,7 @@ export function AppLayout() {
         <PwaStatus />
         {ManualSyncDelayPanel && <Suspense fallback={null}><ManualSyncDelayPanel noteId={folders.selectedNoteId}/></Suspense>}
         {conflicts.error&&<p role="alert">{conflicts.error}</p>}
-        {(!online || folders.workspace.data?.localSnapshot && folders.workspace.data.localSnapshot.reason !== 'local-refresh') && <aside role="status" style={{ padding: '8px 24px', fontSize: 12 }}>
-          {!online ? '오프라인 편집 · 변경사항은 이 브라우저에 로컬 저장됩니다.' : '저장된 로컬 목록을 표시합니다. 서버 변경사항을 아직 확인하지 못했습니다.'}
-          <p>{folders.workspace.data?.localSnapshot?.warning ?? '이 브라우저에 본문이 로컬 저장된 원고만 열 수 있습니다.'}</p>
-          <p>서버 반영·삭제는 온라인에서만 가능합니다. 생성과 원고 편집은 오프라인에서도 가능합니다. 브라우저 저장소 삭제·회수 시 로컬 데이터가 사라질 수 있습니다.</p>
-        </aside>}
-        {!drafts.recovering && !drafts.draft && offlineDetail && <p role="alert" style={{ padding: '8px 24px' }}>이 원고의 본문은 이 브라우저에 저장되어 있지 않아 오프라인에서 열 수 없습니다. 온라인에서 먼저 열어주세요.</p>}
+        {folders.selectedNoteId && !drafts.recovering && !drafts.draft && offlineDetail && <p role="alert" style={{ padding: '8px 24px' }}>오프라인에서 이 원고를 열 수 없습니다. 인터넷에 연결한 뒤 다시 열어주세요.</p>}
         {(!isMobile || !sidebarOpen) && creationFeedback}
         {drafts.backgroundIssues.filter(id=>!conflicts.items.some(item=>item.noteId===id)).map(id => <div key={id} role="alert" style={{ padding: '8px 24px', fontSize: 13 }}>
           <p>다른 원고의 로컬 저장을 완료하지 못했습니다. 입력은 메모리에 유지됩니다.</p>

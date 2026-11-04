@@ -6,7 +6,7 @@ export const theme = {
     accent: '#F3DE9E', selected: '#EEEADD', mutedText: '#6F695F', success: '#59654C',
   },
   // Shared spacing scale; use these tokens for margins, padding, gaps, and offsets.
-  spacing: { xxs: '2px', xs: '4px', sm: '8px', md: '16px', lg: '24px', xl: '32px', xxl: '48px', xxxl: '64px' },
+  spacing: { xxs: '2px', xs: '4px', sm: '8px', control: '12px', md: '16px', lg: '24px', xl: '32px', xxl: '48px', xxxl: '64px' },
   radii: { sm: '8px', md: '12px', panel: '16px', lg: '20px', pill: '999px' },
   shadow: '0 4px 24px rgba(36, 35, 32, 0.025)',
   motion: {

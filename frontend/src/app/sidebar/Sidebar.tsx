@@ -1,7 +1,9 @@
+import { SidebarAccount } from './SidebarAccount'
 import { shortcutLabel } from '@/lib/keyboard/shortcutLabel'
 import { useRef } from 'react'
 import type { ReactNode } from 'react'
 import styled from '@emotion/styled'
+import { actionStyle, controlFocus } from '@/styles/controls'
 import { Icon } from '@/components/Icon'
 import { WorkspacePicker } from '@/features/workspaces/WorkspacePicker'
 import { Eyebrow, IconButton } from '@/components/primitives'
@@ -12,12 +14,22 @@ import type { useFolders } from '@/features/folders/useFolders'
 const Panel = styled.aside(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  minHeight: '100%',
-  height: '100%',
+  height: `calc(100svh - 2 * ${theme.spacing.xs} - 2px)`,
+  [`@media (max-width: ${theme.breakpoints.tablet})`]: { height: '100%' },
   padding: `${theme.spacing.lg} ${theme.spacing.md} ${theme.spacing.md}`,
   borderRight: `1px solid ${theme.colors.border}`,
   background: theme.colors.sidebar,
 }))
+
+const SidebarBody = styled.div({
+  flex: 1,
+  minHeight: 0,
+  overflowY: 'auto',
+  padding: '2px',
+  margin: '-2px',
+})
+
+const Retry = styled.button(({ theme }) => actionStyle(theme, 'secondary', true))
 
 const Brand = styled.header(({ theme }) => ({
   display: 'flex',
@@ -63,7 +75,7 @@ const Search = styled.label(({ theme }) => ({
   borderRadius: theme.radii.pill,
   transition: `border-color ${theme.motion.duration[100]} ${theme.motion.easing.standard}, background ${theme.motion.duration[100]} ${theme.motion.easing.standard}`,
   '&:hover, &:focus-within': { background: theme.colors.surface },
-  '&:focus-within': { outline: 'none' },
+  '&:focus-within': controlFocus(theme),
   color: theme.colors.mutedText,
   input: {
     width: '100%',
@@ -111,7 +123,7 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
   folders: ReturnType<typeof useFolders>
   draftTitles: Readonly<Partial<Record<string, string>>>
   onSelectNote: (id: string) => void
-  onCreate: (kind: 'folder' | 'root-folder' | 'document' | 'unfiled-document') => void
+  onCreate: (kind: 'folder' | 'root-folder' | 'document') => void
   onFolderAction: (id: string, action: FolderAction) => void
   onDeleteNote:(id:string)=>void
   canDeleteNote:(id:string)=>boolean
@@ -121,6 +133,7 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
 
   return (
     <Panel aria-label="폴더 사이드바">
+      <SidebarBody>
       <Brand>
         <img src="/seam-note-icon.png" alt="" width={42} height={42} />
         <div>
@@ -136,7 +149,7 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
 
       <Search>
         <Icon name="search" size={17} />
-        <input aria-label="노트 검색" placeholder="Search notes" value={folders.search} onChange={event => folders.setSearch(event.target.value)} type="search" />
+        <input aria-label="노트 검색" placeholder="원고 검색" value={folders.search} onChange={event => folders.setSearch(event.target.value)} type="search" />
       </Search>
 
       <nav aria-label="폴더 탐색">
@@ -149,7 +162,6 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
             <div aria-label="추가할 항목">
               <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('folder') }}><Icon name="folder" size={17} />새 폴더</button>
               <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('document') }}><Icon name="note" size={17} />새 문서</button>
-              <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('unfiled-document') }}><Icon name="note" size={17} />폴더 없이 새 문서</button>
             </div>
           </CreatePicker>
         </FolderHeading>
@@ -157,7 +169,7 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
         {folders.workspace.isPending && <p role="status">폴더와 원고를 불러오는 중입니다.</p>}
         {folders.workspace.isError && <div role="alert">
           <p>{folders.workspace.data ? '목록 갱신에 실패했습니다' : '목록을 불러오지 못했습니다'}: {folders.workspace.error.message}</p>
-          <button type="button" onClick={() => void folders.workspace.refetch()}>다시 시도</button>
+          <Retry type="button" onClick={() => void folders.workspace.refetch()}>다시 시도</Retry>
         </div>}
         {folders.workspace.data && <FolderTree
           actionsBusy={folders.busy || !!folders.pendingFolder} onFolderAction={onFolderAction} onDeleteNote={onDeleteNote} canDeleteNote={canDeleteNote}
@@ -168,6 +180,8 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
           openFolders={folders.openFolders} onFolderOpen={folders.setFolderOpen} onSelect={onSelectNote}
         />}
       </nav>
+      </SidebarBody>
+      <SidebarAccount />
     </Panel>
   )
 }

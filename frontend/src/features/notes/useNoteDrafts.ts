@@ -1,3 +1,4 @@
+import { registerDraftFlush } from '@/features/auth/authRuntime'
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import type { Note, UUID } from '@/lib/api/types'
 import type { DraftPatch } from './noteDrafts'
@@ -22,6 +23,10 @@ export function useNoteDrafts(selectedId: UUID | null, serverNote: Note | null) 
     Object.entries(entries).flatMap(([id, value]) => value.draft ? [[id, value.draft.title]] : []),
   ) }), [entries, restoredTitles])
   useEffect(() => session.connect(), [session])
+  useEffect(() => registerDraftFlush(async () => {
+    for (const [id, entry] of Object.entries(session.getSnapshot())) if (entry.draft) await session.flushLatest(id)
+    if (hasUnprotectedChanges(session.getSnapshot())) throw new Error('로컬 저장 확인이 필요합니다.')
+  }), [session])
   useEffect(() => {
     if (!selectedId) return
     session.select(selectedId)

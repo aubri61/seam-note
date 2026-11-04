@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, type RefObject } from 'react'
 import styled from '@emotion/styled'
+import { actionStyle } from '@/styles/controls'
 import { Tooltip } from '@/components/Tooltip'
 import { SyncButton } from '@/components/SyncButton'
 import { Icon } from '@/components/Icon'
@@ -27,6 +28,11 @@ const Document = styled.div(({ theme }) => ({
   [`@media (max-width: ${theme.breakpoints.mobile})`]: {
     padding: `${theme.spacing.xl} ${theme.spacing.lg} ${theme.spacing.lg}`,
   },
+}))
+
+const RecoveryActions = styled.div(({ theme }) => ({
+  display: 'flex', flexWrap: 'wrap', gap: theme.spacing.sm, marginTop: theme.spacing.sm,
+  '& button': actionStyle(theme, 'secondary', true),
 }))
 
 const Title = styled.input(({ theme }) => ({
@@ -101,7 +107,7 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
     <Panel aria-label="노트 편집기" data-note-id={visible?.noteId ?? undefined} aria-busy={loading}>
       <Document>
         {loading && <p role="status">원고 로딩 중</p>}
-        {error && <div role="alert"><p>원고 조회 실패: {error.message}</p>{canRetry && <button type="button" onClick={onRetry}>다시 시도</button>}</div>}
+        {error && <div role="alert"><p>원고 조회 실패: {error.message}</p>{canRetry && <RecoveryActions><button type="button" onClick={onRetry}>다시 시도</button></RecoveryActions>}</div>}
         {empty && <EmptyState aria-label="새 원고 시작">
           <h2>새 원고를 만들어보세요</h2>
           <p>왼쪽에서 폴더를 선택하거나 바로 원고를 생성하세요.</p>
@@ -110,12 +116,14 @@ export function NoteEditor({ draft, onEdit, localEntry, onRetryLocal, selectedNo
         {!empty && !loading && !error && !visible && <p role="status">원고를 선택해주세요.</p>}
         {localEntry?.error && localEntry.phase!=='conflict' && <div role="alert">
           <p>{localEntry.error}</p>
-          {visible && <>
-            <button type="button" onClick={() => { void copyCurrent() }}>현재 입력 복사</button>
-            <button type="button" onClick={downloadCurrent}>현재 입력 파일로 보관</button>
-            {backup?.noteId === visible.noteId && backup.revision === (localEntry?.revision ?? 0) && <p role="status">{backup.message}</p>}
-          </>}
-          <button type="button" onClick={onRetryLocal}>로컬 저장 다시 시도</button>
+          <RecoveryActions>
+            {visible && <>
+              <button type="button" onClick={() => { void copyCurrent() }}>현재 입력 복사</button>
+              <button type="button" onClick={downloadCurrent}>현재 입력 파일로 보관</button>
+            </>}
+            <button type="button" onClick={onRetryLocal}>로컬 저장 다시 시도</button>
+          </RecoveryActions>
+          {visible && backup?.noteId === visible.noteId && backup.revision === (localEntry?.revision ?? 0) && <p role="status">{backup.message}</p>}
         </div>}
         {!empty && <><Title ref={titleRef} aria-label="문서 제목" placeholder={visible ? '제목 없음' : ''} value={visible?.title ?? ''} maxLength={200}
           readOnly={!visible} onKeyDown={event=>{

@@ -1,3 +1,4 @@
+import { scopedName } from '@/features/auth/authRuntime'
 import { renameFolder } from './folderApi'
 import type { UUID } from '@/lib/api/types'
 
@@ -5,7 +6,7 @@ export async function renameFolderEntry(request: {id: UUID; name: string}) {
   const name=request.name.trim()
   if (!name || name.length>200) throw new Error('폴더 이름은 공백이 아닌 1~200자로 입력해주세요.')
   if (!navigator.locks) throw new Error('탭 간 잠금을 사용할 수 없어 이름 변경을 중단했습니다.')
-  return navigator.locks.request('seam-note:creation-sync',{mode:'exclusive',ifAvailable:true},async lock=>{
+  return navigator.locks.request(scopedName('seam-note:creation-sync'),{mode:'exclusive',ifAvailable:true},async lock=>{
     if (!lock) throw new Error('생성·동기화 작업이 진행 중입니다. 완료 후 다시 시도해주세요.')
     const {draftRepository}=await import('@/features/local-drafts/draftDatabase')
     const local=await draftRepository.localEntity(request.id)

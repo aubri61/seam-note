@@ -37,6 +37,12 @@ spring:
 server:
   port: 8080
   shutdown: graceful
+  servlet:
+    session:
+      cookie:
+        secure: true
+        http-only: true
+        same-site: lax
   error:
     include-message: never
     include-stacktrace: never
@@ -56,3 +62,14 @@ management:
 logging:
   level:
     org.hibernate.SQL: WARN
+
+seam:
+  auth:
+    cookie-secure: true
+    frontend-origin: ${FRONTEND_ORIGIN:}
+    google:
+      redirect-uri: ${GOOGLE_REDIRECT_URI:}
+    jwt:
+      # Prod requires explicit issuer/audience as well as a separate secret.
+      issuer: ${AUTH_JWT_ISSUER:}
+      audience: ${AUTH_JWT_AUDIENCE:}

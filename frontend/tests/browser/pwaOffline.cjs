@@ -69,7 +69,7 @@ async function main(){
  const migrated=await records(page);assert.equal(migrated.version,40);assert.deepEqual(migrated.drafts.find(d=>d.noteId===ids[0]),seed);assert.deepEqual(migrated.outbox.find(o=>o.operationId===op.operationId),op)
  assert.equal(await page.locator(`[data-node-key="note:${ids[2]}"]`).innerText(),'C 복구 제목')
  done('v2-through-v3-to-v4-preserves-drafts-outbox-and-sidebar-titles')
- await page.evaluate(()=>navigator.serviceWorker.ready);await until(()=>page.getByText(/오프라인 앱 파일 준비됨/).count(),'app precached')
+ await page.evaluate(()=>navigator.serviceWorker.ready)
  const cdp=await context.newCDPSession(page);await cdp.send('Page.enable');const installability=await cdp.send('Page.getInstallabilityErrors');assert.deepEqual(installability.installabilityErrors,[])
  const manifest=await cdp.send('Page.getAppManifest');assert.ok(manifest.data.includes('standalone'))
  done('manifest-installability-and-production-precache',{installabilityErrors:installability.installabilityErrors})

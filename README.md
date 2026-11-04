@@ -11,7 +11,7 @@
 | 배포 | [seamnote.vercel.app](https://seamnote.vercel.app/) |
 | 저장소 | [aubri61/seam-note](https://github.com/aubri61/seam-note) |
 
-> 현재 배포는 공유 Basic 인증을 사용하는 검증 환경입니다. 사용자별 로그인과 데이터 소유권 분리는 아직 구현하지 않았으므로, 테스트용 데이터로 사용합니다. 로컬 검증 결과와 배포 환경의 통합 검증 범위는 [검증 결과](#검증-결과)에서 구분합니다.
+> 현재 배포는 공유 Basic 인증을 사용하는 검증 환경입니다. 이 브랜치의 사용자별 로그인·소유권 분리는 로컬 검증됐으며 현재 배포에는 아직 적용되지 않았습니다. 배포 검증 환경에는 테스트용 데이터를 사용합니다. 로컬 검증 결과와 배포 환경의 통합 검증 범위는 [검증 결과](#검증-결과)에서 구분합니다.
 
 ## 만든 배경
 
@@ -147,8 +147,11 @@ docker compose up -d postgres
 
 # 백엔드: localhost:18765
 cd backend
-./gradlew bootRun
+# .env.local 로딩 + 누락된 로컬 JWT 키 최초 생성·저장
+python3 run-local.py
 ```
+
+로컬 실행 스크립트에는 Python 3이 필요합니다. `backend/.env.local`의 `KEY=value`와 따옴표 값을 읽으며 셸 명령·변수 치환은 실행하지 않습니다. 이미 설정한 셸 환경변수가 우선합니다. 파일과 비밀키는 Git에 포함되지 않습니다. 일반 `./gradlew bootRun`이나 IDE 직접 실행은 이 파일을 자동으로 읽지 않으므로 환경변수를 별도로 전달해야 합니다. 운영·테스트에는 이 스크립트를 사용하지 않습니다.
 
 다른 터미널에서 프론트엔드를 실행합니다.
 
@@ -168,11 +171,19 @@ pnpm build
 pnpm preview
 ```
 
-백엔드 테스트에는 별도의 테스트 PostgreSQL을 준비하고 `TEST_DB_URL`, `TEST_DB_USERNAME`, `TEST_DB_PASSWORD`를 설정한 뒤 `backend`에서 `./gradlew test`를 실행합니다. 개발·운영 데이터를 사용하는 DB와 분리합니다.
+백엔드 테스트에는 별도의 테스트 PostgreSQL을 준비하고 `TEST_DB_URL`, `TEST_DB_USERNAME`, `TEST_DB_PASSWORD`를 설정합니다. `TEST_JWT_SECRET_BASE64`에도 `openssl rand -base64 64`로 생성한 테스트 전용 난수 키를 설정한 뒤 `backend`에서 `./gradlew test`를 실행합니다. 키 값은 출력·커밋하지 않고, 개발·운영 키와 DB를 재사용하지 않습니다.
+
+## 인증 구현과 검증
+
+이메일·비밀번호·닉네임 가입과 Google OIDC 로그인은 같은 내부 사용자 UUID 및 HS256 Access/opaque Refresh 세션을 사용합니다. Access는 메모리, Refresh는 HttpOnly Cookie에 보관하며 서버에는 Refresh 해시만 저장합니다. API·멱등성 Ledger와 브라우저 원고/Outbox를 사용자·서버 환경별로 분리합니다. 로그아웃으로 미전송 원고를 삭제하지 않습니다.
+
+로컬 Google 로그인은 `backend/.env.example`을 참고해 `backend/.env.local`에 Client ID/Secret과 등록된 callback을 입력하고 `python3 run-local.py`로 실행합니다. frontend에는 비밀값을 입력하지 않습니다. Vite는 callback 주소에 맞춰 5173 포트를 고정합니다. 기존 소유자 없는 데이터는 비활성 보관 계정 아래 남으며 첫 가입자에게 자동 이전하지 않습니다.
+
+2026-11-04 격리 PostgreSQL의 backend 69개, frontend 233개 및 build/typecheck/lint, 일회성 production-profile Docker TLS/HTTPS 검사 24개를 통과했습니다. 실제 Chrome 두 탭의 계정 전환·미전송 원고 보존·동일 계정 재인증, 사용자 계정으로 Google localhost 왕복, production PWA의 서비스 중단 중 재실행/편집본 복구를 확인했습니다. 이 결과는 운영 배포 완료나 일반 공개 준비 완료를 의미하지 않습니다. 배포 전환은 [운영 가이드](deploy/README.md)를 따릅니다.
 
 ## 현재 한계와 다음 과제
 
-- **사용자별 인증·인가**: 공유 검증 게이트와 별도로 로그인, 원고 소유권, 사용자별 조회·Ledger 범위를 구현해야 합니다.
+- **인증 운영 전환**: 이메일/비밀번호·Google OIDC, JWT/Refresh 회전, 사용자별 API/Ledger 및 로컬 원고 격리를 구현했습니다. 운영 배포와 메일 검증·비밀번호 재설정은 별도 공개 전 필수 작업입니다.
 - **브라우저 저장소의 한계**: IndexedDB 커밋 전 메모리 입력, 사용자의 저장소 삭제, 브라우저 저장소 회수, 기기 고장에 대한 외부 백업 보장은 없습니다.
 - **원격 변경 반영**: 조회·포커스·연결 복구 등의 계기를 통해 수렴합니다. 실시간 push 기반 공동 편집과 자동 병합은 지원하지 않습니다.
 - **배포 환경 통합 검증**: 로컬 장애 주입 실험과 별도로 인증된 Vercel 환경에서 CRUD·멱등성·409·PWA 자동 동기화 전체 흐름을 검증해야 합니다.

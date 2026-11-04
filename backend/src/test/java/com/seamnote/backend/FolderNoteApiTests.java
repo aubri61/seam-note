@@ -15,6 +15,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class FolderNoteApiTests {
+    @org.springframework.beans.factory.annotation.Autowired org.springframework.jdbc.core.JdbcTemplate authJdbc;
+    @org.springframework.beans.factory.annotation.Autowired com.seamnote.backend.auth.token.AccessTokenIssuer authTokens;
+    String authToken;
+    @org.junit.jupiter.api.BeforeEach void authenticatedFixture() { authToken=TestAccounts.create(authJdbc,authTokens).token(); }
+
     @LocalServerPort int port;
     @org.springframework.beans.factory.annotation.Autowired javax.sql.DataSource dataSource;
     final HttpClient client = HttpClient.newHttpClient();
@@ -23,7 +28,7 @@ class FolderNoteApiTests {
     Reply call(String method, String path, Object body) throws Exception {
         String json = body instanceof String text ? text : mapper.writeValueAsString(body);
         var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api" + path))
-            .header("Content-Type", "application/json")
+            .header("Content-Type", "application/json").header("Authorization", "Bearer "+authToken)
             .method(method, body == null ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofString(json)).build();
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
         return new Reply(response.statusCode(), response.body().isEmpty() ? null : mapper.readTree(response.body()), response.headers().firstValue("Location").orElse(null));
