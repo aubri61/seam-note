@@ -8,6 +8,7 @@ import ts from 'typescript'
 // Exercise real TypeScript modules using the project's existing test tools.
 const temporary = mkdtempSync(join(tmpdir(), 'seam-note-api-tests-'))
 for (const name of [
+  'features/pwa/appUpdate',
   'features/auth/authRuntime', 'features/auth/accessTokenStore', 'features/auth/refreshCoordinator', 'features/auth/authApi',
   'features/notes/richTextDocument', 'features/conflicts/conflictModel', 'features/conflicts/conflictService', 'features/conflicts/lineDiff',
   'features/manual-sync/autoSyncScheduler', 'features/manual-sync/autoCreationSync', 'features/manual-sync/SyncCoordinator', 'features/manual-sync/workspaceSyncStorage', 'features/manual-sync/syncLock', 'features/manual-sync/creationSync',

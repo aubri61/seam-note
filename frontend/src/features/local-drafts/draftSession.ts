@@ -247,6 +247,21 @@ export class DraftSession {
     }
     throw new Error('입력이 계속 변경되어 최신 로컬 저장을 확정하지 못했습니다. 다시 눌러주세요.')
   }
+  async checkUpdateRecovery(selectedId: string | null, online: boolean): Promise<(() => boolean) | null> {
+    const snapshot = this.snapshot
+    if (selectedId && !snapshot[selectedId]) return null
+    for (const [id, entry] of Object.entries(snapshot)) {
+      if (entry.phase !== 'saved' || entry.revision !== entry.savedRevision) return null
+      const working = this.entries.get(id)
+      if (!working || working.writing || working.acknowledging) return null
+      // A dirty draft or an offline open note needs a readable record, including its outbox.
+      if (!working.token && !(entry.draft && isDraftDirty(entry.draft)) && (online || id !== selectedId)) continue
+      const record = await this.repository.read(id, { initial: true })
+      if (!record || record.storageToken !== working.token || record.localRevision !== entry.savedRevision
+        || !entry.draft || !sameText(record, entry.draft)) return null
+    }
+    return () => snapshot === this.snapshot
+  }
   savedHead(id: string) {
     const entry = this.entry(id)
     if (!entry.token || entry.writing || entry.acknowledging || entry.revision !== entry.savedRevision

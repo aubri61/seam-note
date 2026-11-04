@@ -7,9 +7,11 @@ import { ThemeProvider } from '@emotion/react'
 import { theme } from '@/styles/theme'
 import { GlobalStyles } from '@/styles/GlobalStyles'
 import App from '@/App.tsx'
+import { startAppUpdates } from '@/features/pwa/appUpdate'
 
 // Cold offline launches may happen before any native offline event reaches TanStack Query.
 onlineManager.setOnline(navigator.onLine !== false)
+if (import.meta.env.PROD) startAppUpdates()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
