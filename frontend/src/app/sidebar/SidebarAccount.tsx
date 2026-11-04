@@ -1,25 +1,40 @@
-import { useContext, useId, useState } from 'react'
+import { useContext, useId, useRef, useState } from 'react'
 import type { ContextType, FormEvent } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import styled from '@emotion/styled'
 import { WorkspaceAccount } from '@/features/auth/workspaceAccount'
-import { actionStyle, fieldStyle } from '@/styles/controls'
+import { Icon } from '@/components/Icon'
+import { actionStyle, controlFocus, fieldStyle } from '@/styles/controls'
 
-const Box = styled.footer(({ theme }) => ({
+const ProfilePicker = styled.details(({ theme }) => ({
+  position: 'relative',
   flexShrink: 0,
-  marginTop: theme.spacing.control,
-  padding: theme.spacing.control,
+  marginTop: theme.spacing.sm,
+  '> summary': {
+    display: 'grid', placeItems: 'center', width: 36, height: 36,
+    borderRadius: theme.radii.pill, listStyle: 'none', cursor: 'pointer',
+    '&:focus-visible': controlFocus(theme),
+    '@media (pointer: coarse)': { width: 44, height: 44 },
+  },
+  '> summary::-webkit-details-marker': { display: 'none' },
+  '> summary:hover, &[open] > summary': { background: theme.colors.selected },
+  img: { display: 'block', borderRadius: theme.radii.pill },
+}))
+
+const AccountActions = styled.div(({ theme }) => ({
+  position: 'absolute', bottom: `calc(100% + ${theme.spacing.sm})`, left: 0, zIndex: 6,
+  width: 160, padding: theme.spacing.xs,
   border: `1px solid ${theme.colors.border}`,
-  borderRadius: theme.radii.md,
-  background: theme.colors.surface,
-  fontSize: 13,
-  '& .profile': { display: 'flex', alignItems: 'center', gap: theme.spacing.sm },
-  '& .profile-name': { flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 },
-  '& img': { flexShrink: 0 },
-  '& button': { ...actionStyle(theme, 'ghost', true), paddingInline: theme.spacing.sm },
-  '& .settings-toggle': { display: 'grid', placeItems: 'center', alignSelf: 'flex-start', flexShrink: 0 },
-  '& .account-actions': { display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: theme.spacing.xxs, marginTop: theme.spacing.xs },
-  '& p': { color: theme.colors.mutedText, overflowWrap: 'anywhere', marginTop: theme.spacing.xs, fontSize: 12 },
+  borderRadius: theme.radii.md, background: theme.colors.surface, boxShadow: theme.shadow,
+  '& button': {
+    ...actionStyle(theme, 'ghost', true),
+    display: 'flex', alignItems: 'center', gap: theme.spacing.sm,
+    width: '100%', color: theme.colors.text, textAlign: 'left',
+  },
+}))
+
+const AccountNotice = styled.p(({ theme }) => ({
+  color: theme.colors.mutedText, overflowWrap: 'anywhere', marginTop: theme.spacing.xs, fontSize: 12,
 }))
 
 const Overlay = styled(Dialog.Overlay)({
@@ -68,7 +83,10 @@ const SettingsMenu = styled.nav(({ theme }) => ({
   '@media (max-width: 440px)': { padding: theme.spacing.control },
 }))
 
-function SettingsPanel({ account }: { account: NonNullable<ContextType<typeof WorkspaceAccount>> }) {
+function SettingsPanel({ account, onCloseFocus }: {
+  account: NonNullable<ContextType<typeof WorkspaceAccount>>
+  onCloseFocus: () => void
+}) {
   const nicknameId = useId()
   const [name, setName] = useState(account.nickname)
   const [saving, setSaving] = useState(false)
@@ -87,7 +105,7 @@ function SettingsPanel({ account }: { account: NonNullable<ContextType<typeof Wo
     } finally { setSaving(false) }
   }
 
-  return <Settings aria-describedby={undefined}>
+  return <Settings aria-describedby={undefined} onCloseAutoFocus={event => { event.preventDefault(); onCloseFocus() }}>
     <SettingsMenu aria-label="설정 메뉴">
       <Dialog.Title>설정</Dialog.Title>
       <ul><li aria-current="page">프로필 설정</li></ul>
@@ -120,28 +138,42 @@ function SettingsPanel({ account }: { account: NonNullable<ContextType<typeof Wo
 
 export function SidebarAccount() {
   const account = useContext(WorkspaceAccount)
+  const picker = useRef<HTMLDetailsElement>(null)
+  const trigger = useRef<HTMLElement>(null)
   if (!account) return null
 
+  function closePicker() {
+    if (picker.current) picker.current.open = false
+  }
+
   return <Dialog.Root>
-    <Box aria-label="계정">
-      <div className="profile">
+    <ProfilePicker ref={picker}
+      onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) closePicker() }}
+      onKeyDown={event => {
+        if (event.key !== 'Escape' || !event.currentTarget.open) return
+        event.preventDefault()
+        event.stopPropagation()
+        closePicker()
+        trigger.current?.focus()
+      }}>
+      <summary ref={trigger} aria-label={`${account.nickname} 프로필 메뉴`} title={account.nickname}>
         <img src="/default-avatar.svg" width={32} height={32} alt="" />
-        <span className="profile-name" title={account.nickname}>{account.nickname}</span>
-        <Dialog.Trigger className="settings-toggle" type="button" title="환경설정" aria-label="환경설정" disabled={account.busy}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true">
-            <path d="M9 4.8 9.8 2h4.4l.8 2.8 2 .9 2.6-.9 2.2 3.8-2 2v2.8l2 2-2.2 3.8-2.6-.9-2 .9-.8 2.8H9.8L9 19.2l-2-.9-2.6.9-2.2-3.8 2-2v-2.8l-2-2 2.2-3.8 2.6.9z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
+      </summary>
+      <AccountActions aria-label="프로필 작업">
+        <Dialog.Trigger asChild>
+          <button type="button" disabled={account.busy} onClick={closePicker}><Icon name="settings" size={16} />설정</button>
         </Dialog.Trigger>
-      </div>
-      <div className="account-actions">
-        <button type="button" disabled={account.busy} onClick={account.onLogout}>로그아웃</button>
-      </div>
-      {account.message && <p role="status">{account.message}</p>}
-    </Box>
+        <button type="button" disabled={account.busy} onClick={() => {
+          closePicker()
+          trigger.current?.focus()
+          account.onLogout()
+        }}><Icon name="logout" size={16} />로그아웃</button>
+      </AccountActions>
+    </ProfilePicker>
+    {account.message && <AccountNotice role="status">{account.message}</AccountNotice>}
     <Dialog.Portal>
       <Overlay />
-      <SettingsPanel account={account} />
+      <SettingsPanel account={account} onCloseFocus={() => trigger.current?.focus()} />
     </Dialog.Portal>
   </Dialog.Root>
 }

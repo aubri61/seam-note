@@ -1,20 +1,22 @@
 import { useRef } from 'react'
 import styled from '@emotion/styled'
 import { Icon } from '@/components/Icon'
-import { Eyebrow } from '@/components/primitives'
+import { controlFocus } from '@/styles/controls'
 
 const Picker = styled.details(({ theme }) => ({
   position: 'relative',
-  marginBottom: theme.spacing.md,
+  marginBottom: theme.spacing.sm,
   '> summary': {
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.sm,
-    minHeight: '64px',
-    padding: theme.spacing.md,
+    minHeight: 36,
+    padding: `${theme.spacing.xs} ${theme.spacing.control}`,
     border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.radii.md,
+    borderRadius: theme.radii.sm,
     background: theme.colors.surface,
+    color: theme.colors.text,
+    '&:focus-visible': controlFocus(theme),
     cursor: 'pointer',
     listStyle: 'none',
     transition: `background ${theme.motion.duration[100]} ${theme.motion.easing.standard}`,
@@ -25,13 +27,9 @@ const Picker = styled.details(({ theme }) => ({
   '> summary:hover': {
     background: theme.colors.selected,
   },
-  '> summary > div': {
+  '> summary strong': {
     flex: 1,
     minWidth: 0,
-  },
-  strong: {
-    display: 'block',
-    marginTop: theme.spacing.xs,
     fontSize: '13px',
     fontWeight: 550,
   },
@@ -44,11 +42,11 @@ const WorkspaceAvatar = styled.span(({ theme }) => ({
   display: 'grid',
   placeItems: 'center',
   flexShrink: 0,
-  width: '30px',
-  height: '32px',
+  width: 24,
+  height: 24,
   borderRadius: theme.radii.sm,
   background: theme.colors.accent,
-  fontSize: '13px',
+  fontSize: 12,
   fontWeight: 600,
 }))
 
@@ -69,12 +67,7 @@ const Dropdown = styled.div(({ theme }) => ({
     fontWeight: 500,
     color: theme.colors.mutedText,
   },
-  p: {
-    padding: `${theme.spacing.sm} ${theme.spacing.sm} ${theme.spacing.xs}`,
-    fontSize: '10px',
-    color: theme.colors.mutedText,
-    lineHeight: 1.6,
-  },
+
 }))
 
 const WorkspaceOption = styled.div(({ theme }) => ({
@@ -110,15 +103,14 @@ export function WorkspacePicker() {
     >
       <summary ref={summaryRef} aria-label="워크스페이스 선택: Personal">
         <WorkspaceAvatar>P</WorkspaceAvatar>
-        <div><Eyebrow>워크스페이스</Eyebrow><strong>Personal</strong></div>
-        <Icon name="chevrons" size={16} />
+        <strong>Personal</strong>
+        <Icon name="chevrons" size={14} />
       </summary>
       <Dropdown>
         <h2>워크스페이스</h2>
         <WorkspaceOption aria-label="Personal — 현재 워크스페이스">
           <WorkspaceAvatar>P</WorkspaceAvatar><span>Personal</span><Icon name="check" size={16} />
         </WorkspaceOption>
-        <p>현재 워크스페이스 · 전환 기능은 준비 중입니다.</p>
       </Dropdown>
     </Picker>
   )
