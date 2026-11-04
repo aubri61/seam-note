@@ -2,7 +2,7 @@ import { EMPTY_DOCUMENT } from '@/features/notes/richTextDocument'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { readFolderExpansion, writeFolderExpansion } from './folderExpansion'
 import { useLocation, useMatch, useNavigate } from 'react-router-dom'
-import { missingNoteError, notePath, resolveNoteRoute } from '@/app/routing/noteRoutes'
+import { missingNoteError, notePath, resolveNoteRoute, workspaceNotePattern, workspacePath } from '@/app/routing/noteRoutes'
 import { ApiError } from '@/lib/api/client'
 import { useQueryClient } from '@tanstack/react-query'
 import { useWorkspaceTreeQuery } from '@/features/workspace/workspaceQueries'
@@ -21,7 +21,7 @@ const emptyWorkspace: WorkspaceTreeResponse = { folders: [], notes: [] }
 export function useFolders() {
   const client = useQueryClient()
   const location = useLocation()
-  const match = useMatch('/notes/:noteId')
+  const match = useMatch(workspaceNotePattern)
   const navigate = useNavigate()
   const route = resolveNoteRoute(location.pathname, match?.params.noteId)
   const writing = useRef(false)
@@ -54,7 +54,7 @@ export function useFolders() {
     const refresh=()=>{void refreshWorkspace().then(async result=>{
       const {draftRepository}=await import('@/features/local-drafts/draftDatabase')
       if(selectedNoteId&&window.location.pathname===notePath(selectedNoteId)&&(await draftRepository.deletedEntities()).some(d=>d.kind==='note'&&d.id===selectedNoteId)){
-        const next=firstNoteId(buildWorkspaceTree(result.data??emptyWorkspace));void navigate(next?notePath(next):'/',{replace:true})
+        const next=firstNoteId(buildWorkspaceTree(result.data??emptyWorkspace));void navigate(next?notePath(next):workspacePath,{replace:true})
       }
     }).catch(()=>{})}
     window.addEventListener('seam-note:workspace-deleted',refresh)
@@ -96,11 +96,11 @@ export function useFolders() {
     const next = nextNoteAfterDeletion(previous, id)
     if (selectedNoteId === id) {
       if (next && previous.notes.get(next)!.note.folderId) revealFolder(previous.notes.get(next)!.note.folderId!)
-      void navigate(next ? notePath(next) : '/', { replace: true })
+      void navigate(next ? notePath(next) : workspacePath, { replace: true })
     }
   })
   const deleteFolderMutation = useDeleteFolderMutation((id,before,removed) => {
-    if(selectedNoteId&&removed.noteIds.includes(selectedNoteId)){const next=firstNoteId(buildWorkspaceTree({folders:(before?.folders??[]).filter(f=>!removed.folderIds.includes(f.id)),notes:(before?.notes??[]).filter(n=>!removed.noteIds.includes(n.id))}));void navigate(next?notePath(next):'/',{replace:true})}
+    if(selectedNoteId&&removed.noteIds.includes(selectedNoteId)){const next=firstNoteId(buildWorkspaceTree({folders:(before?.folders??[]).filter(f=>!removed.folderIds.includes(f.id)),notes:(before?.notes??[]).filter(n=>!removed.noteIds.includes(n.id))}));void navigate(next?notePath(next):workspacePath,{replace:true})}
     setSelection(current => current.folderId === id ? { ...current, folderId: null } : current)
     setSavedExpansion(current => current === null ? null : Object.fromEntries(Object.entries(current).filter(([key]) => key !== id)))
   })

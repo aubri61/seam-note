@@ -1,6 +1,10 @@
 import { updateReloadGate } from '@/features/pwa/appUpdate'
 import { WorkspaceAccount } from './workspaceAccount'
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import * as Dialog from '@radix-ui/react-dialog'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { workspacePath } from '@/app/routing/noteRoutes'
+import { LandingPage } from '@/features/landing/LandingPage'
 import type { FormEvent, ReactNode } from 'react'
 import styled from '@emotion/styled'
 import { actionStyle, fieldStyle } from '@/styles/controls'
@@ -34,7 +38,7 @@ const Card = styled.main(({ theme }) => ({
     '&:hover': { background: theme.colors.selected },
     '&[aria-disabled="true"]': { opacity: .5, cursor: 'not-allowed' },
   },
-  '& h1': { fontSize: 'clamp(28px, 5vw, 32px)', lineHeight: 1.3, fontWeight: 600, letterSpacing: '-.7px' },
+  '& h1, & h2': { fontSize: 'clamp(28px, 5vw, 32px)', lineHeight: 1.3, fontWeight: 600, letterSpacing: '-.7px' },
   '& p': { color: theme.colors.mutedText, overflowWrap: 'anywhere' },
   '& .auth-intro': { marginTop: theme.spacing.sm, fontSize: 16 },
   '& .password-field': { display: 'grid', gap: theme.spacing.sm, minWidth: 0 },
@@ -47,6 +51,19 @@ const Card = styled.main(({ theme }) => ({
   },
   '& [role="status"]': { marginTop: theme.spacing.md, fontSize: 13 },
   [`@media (max-width: ${theme.breakpoints.mobile})`]: { padding: theme.spacing.lg },
+}))
+const LoginOverlay = styled(Dialog.Overlay)({
+  position: 'fixed', inset: 0, zIndex: 20, background: 'rgba(36,35,32,.25)',
+})
+const LoginDialog = styled(Dialog.Content)(({ theme }) => ({
+  position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', zIndex: 21,
+  width: 'min(440px, calc(100% - 32px))', maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto',
+  borderRadius: theme.radii.panel, boxShadow: theme.shadow,
+  '& > div': { width: '100%', margin: 0, position: 'relative' },
+  '& button.auth-close': {
+    ...actionStyle(theme, 'ghost'), position: 'absolute', top: theme.spacing.md, right: theme.spacing.md,
+    minWidth: 44, minHeight: 44, fontSize: 22, padding: 0,
+  },
 }))
 const Brand = styled.div(({ theme }) => ({
   display: 'flex', alignItems: 'center', gap: theme.spacing.sm, fontSize: 17, fontWeight: 600,
@@ -154,6 +171,12 @@ async function finishPendingLogout() {
   }
 }
 export function AuthBoundary({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+  const publicPage = pathname === '/' || /^\/(login|register)\/?$/.test(pathname)
+  const [dialogOpen, setDialogOpen] = useState(() => !!authPage())
+  const opener = useRef<HTMLButtonElement>(null)
+  const landing = useRef<HTMLDivElement>(null)
   const [mode, setMode] = useState<'checking' | 'login' | 'register' | 'workspace'>(() => authPage() ?? 'checking')
   const [message, setMessage] = useState(() => location.search === '?oauth=failed' ? 'Google 로그인을 완료하지 못했습니다. 기존 이메일 계정이 있다면 이메일로 로그인해주세요.' : location.search === '?registered=1' ? '가입 요청을 처리했습니다. 이메일과 비밀번호로 로그인해주세요.' : '')
   const [busy, setBusy] = useState(false)
@@ -183,12 +206,20 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
       const user = await refreshAuthentication()
       if (!active) return
       if (generation !== accessTokenStore.generation() || fence !== localStorage.getItem(AUTH_FENCE)) throw new Error('계정이 변경되었습니다.')
-      if (!documentAccount) { saveAccount(user); location.replace('/'); return }
+      if (!documentAccount) {
+        saveAccount(user)
+        location.replace(location.pathname.replace(/\/$/, '') === '/auth/complete' ? workspacePath : location.href)
+        return
+      }
       const scope = sessionScope()
       if (!scope || !sameAccount(documentAccount, user)) throw new Error('계정이 변경되었습니다.')
       sessionStorage.setItem(VERIFIED_SESSION, scope)
       setNickname(user.nickname)
       setBusinessAccess(true)
+      if (location.pathname.replace(/\/$/, '') === '/auth/complete') {
+        location.replace(workspacePath)
+        return
+      }
       setMode('workspace')
     }
     const recover = async () => {
@@ -250,13 +281,14 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
     await finishPendingLogout()
     const user = await withAuthLock(() => loginWithPassword({ email, password }))
     saveAccount(user)
-    location.replace('/')
+    location.replace(publicPage ? workspacePath : location.href)
   })
   const register = (input: { email: string; password: string; nickname: string }) => void act(async () => {
     await prepareAuthChange()
     await finishPendingLogout()
     await signupWithPassword(input)
-    location.replace('/login?registered=1')
+    setMode('login')
+    setMessage('가입 요청을 처리했습니다. 이메일과 비밀번호로 로그인해주세요.')
   })
   const logout = () => void act(async () => {
     await prepareAuthChange()
@@ -264,24 +296,68 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
     localStorage.setItem(LOGOUT_PENDING, '1')
     localStorage.removeItem(ACTIVE_ACCOUNT)
     try { await finishPendingLogout() } catch { /* pending marker blocks future silent refresh */ }
-    location.replace('/login')
+    location.replace('/')
   })
-  if (mode === 'checking') return <Card><p role="status">로그인 상태 확인 중…</p></Card>
-  if (mode === 'login' || mode === 'register') return <Card>
-    <Brand><img src="/seam-note-icon.png" alt="" /></Brand>
-    <h1>{mode === 'register' ? '이메일로 가입하기' : 'Seam Note'}</h1>
-    <p className="auth-intro">당신의 생각이 끊기지 않도록</p>
+  const heading = mode === 'register' ? '이메일로 가입하기' : 'Seam Note'
+  const authForm = <>
     {mode === 'register' ? <RegisterForm busy={busy} onSubmit={register} /> : <LoginForm busy={busy} onSubmit={login} />}
     <div className="auth-options">
       {googleEnabled && <button data-google type="button" disabled={busy} onClick={() => void act(async () => {
         await prepareAuthChange(); await finishPendingLogout(); localStorage.removeItem(ACTIVE_ACCOUNT); location.assign('/api/auth/oauth2/authorization/google')
       })}><img src="/google-g.png" alt="" />Google로 계속하기</button>}
-      <a data-quiet href={mode === 'register' ? '/login' : '/register'}
-        aria-disabled={busy || undefined} onClick={event => { if (busy) event.preventDefault() }}>
-        {mode === 'register' ? '로그인으로 돌아가기' : '이메일로 가입하기'}
-      </a>
+      <button type="button" disabled={busy} onClick={() => {
+        setMessage('')
+        setMode(mode === 'register' ? 'login' : 'register')
+      }}>{mode === 'register' ? '로그인으로 돌아가기' : '이메일로 가입하기'}</button>
     </div>
     {message && <p role="status">{message}</p>}
+  </>
+  if (publicPage) return <>
+    <div ref={landing}>
+      <LandingPage signedIn={mode === 'workspace' && !frozen} onStart={button => {
+        if (mode === 'workspace' && !frozen) {
+          location.assign(workspacePath)
+          return
+        }
+        opener.current = button
+        if (mode === 'register' || frozen) setMode('login')
+        setDialogOpen(true)
+      }} />
+    </div>
+    <Dialog.Root open={dialogOpen} onOpenChange={open => {
+      if (busy) return
+      setDialogOpen(open)
+      if (!open && pathname !== '/') void navigate('/', { replace: true })
+    }}>
+      <Dialog.Portal>
+        <LoginOverlay />
+        <LoginDialog
+          onEscapeKeyDown={event => { if (busy) event.preventDefault() }}
+          onPointerDownOutside={event => { if (busy) event.preventDefault() }}
+          onCloseAutoFocus={event => {
+            event.preventDefault()
+            const button = opener.current ?? landing.current?.querySelector('header button')
+            if (button instanceof HTMLElement) button.focus()
+          }}>
+          <Card as="div">
+            <Dialog.Close asChild><button className="auth-close" type="button" disabled={busy} aria-label="닫기">×</button></Dialog.Close>
+            <Brand><img src="/seam-note-icon.png" alt="" /></Brand>
+            <Dialog.Title>{heading}</Dialog.Title>
+            <Dialog.Description className="auth-intro">당신의 생각이 끊기지 않도록</Dialog.Description>
+            {mode === 'checking' ? <p role="status">로그인 상태 확인 중…</p>
+              : mode === 'workspace' ? <div className="auth-options"><a data-quiet href={workspacePath}>워크스페이스 열기</a></div>
+                : authForm}
+          </Card>
+        </LoginDialog>
+      </Dialog.Portal>
+    </Dialog.Root>
+  </>
+  if (mode === 'checking') return <Card><p role="status">로그인 상태 확인 중…</p></Card>
+  if (mode === 'login' || mode === 'register') return <Card>
+    <Brand><img src="/seam-note-icon.png" alt="" /></Brand>
+    <h1>{heading}</h1>
+    <p className="auth-intro">당신의 생각이 끊기지 않도록</p>
+    {authForm}
   </Card>
   return <WorkspaceAccount.Provider value={frozen ? null : {
     nickname, busy, message, onLogout: logout,

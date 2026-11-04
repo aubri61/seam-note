@@ -5,11 +5,14 @@ export class NoteRouteError extends Error {
   readonly status: 400 | 404
   constructor(status: 400 | 404, message: string) { super(message); this.name = 'NoteRouteError'; this.status = status }
 }
+export const workspacePath = '/workspace'
+export const workspaceNotePattern = `${workspacePath}/notes/:noteId`
+
 export function notePath(noteId: string): string {
-  return `/notes/${encodeURIComponent(noteId)}`
+  return `${workspacePath}/notes/${encodeURIComponent(noteId)}`
 }
 export function resolveNoteRoute(pathname: string, parameter?: string) {
-  if (pathname === '/') return { home: true, noteId: null, error: null }
+  if (pathname === workspacePath || pathname === `${workspacePath}/`) return { home: true, noteId: null, error: null }
   if (parameter === undefined) return { home: false, noteId: null, error: new NoteRouteError(404, '404 · 페이지를 찾을 수 없습니다.') }
   if (!uuid.test(parameter)) return { home: false, noteId: null, error: new NoteRouteError(400, '잘못된 원고 주소입니다. UUID 형식을 확인해주세요.') }
   return { home: false, noteId: parameter.toLowerCase(), error: null }
