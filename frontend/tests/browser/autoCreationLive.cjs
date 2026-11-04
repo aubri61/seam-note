@@ -36,7 +36,7 @@ async function main(){try{
  results.push({name:'online-folder-note-immediate-POST-ACK-no-auto-PUT',passed:true});await close(ctx);console.log('PASS: '+results.at(-1).name)
  // Offline hierarchy, close/restart under the same PWA origin, reconnect from two tabs.
  const profile=path.join(work,'offline');ctx=await launch(profile);await install(ctx);p=await visit(ctx)
- await p.evaluate(()=>navigator.serviceWorker.ready);await until(()=>p.getByText(/오프라인 앱 파일 준비됨/).count(),'PWA precached');await p.reload();await until(async()=>await p.getByLabel('문서 제목',{exact:true}).getAttribute('readonly')===null,'controlled app')
+ await p.evaluate(()=>navigator.serviceWorker.ready);await p.reload();await until(async()=>await p.getByLabel('문서 제목',{exact:true}).getAttribute('readonly')===null,'controlled app')
  await ctx.setOffline(true);const start=events.length,a=await folder(p,'offline A'),b=await folder(p,'offline B',false),c=await note(p)
  await p.getByLabel('문서 제목',{exact:true}).fill('offline title');await p.getByLabel('문서 내용',{exact:true}).fill('offline manuscript')
  await until(async()=>(await records(p)).drafts.find(d=>d.noteId===c)?.content==='offline manuscript','offline committed');assert.equal(events.length,start)

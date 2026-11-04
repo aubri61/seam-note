@@ -59,6 +59,10 @@ public class AuthController {
     public void logout(@CookieValue(name = RefreshCookie.NAME, required = false) String raw, HttpServletResponse response) {
         sessions.logout(raw); cookies.clear(response);
     }
+    @PatchMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public VerifiedUser rename(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody RenameProfile request) {
+        return users.rename(UUID.fromString(jwt.getSubject()), request.nickname());
+    }
     @GetMapping("/me")
     public VerifiedUser me(@AuthenticationPrincipal Jwt jwt) { return users.get(UUID.fromString(jwt.getSubject())); }
 }

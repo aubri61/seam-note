@@ -116,7 +116,7 @@ export default function ConflictDialog({id,session,folders,initialFolderId,onClo
       leftTitle={preview.mine.title} rightTitle={other.title} onReady={onDiffReady}
       leftAction={<SyncButton type="button" disabled={disabled||!!pendingSave&&pendingSave.choice!=='mine'} onClick={()=>{void choose('mine')}}>{pendingSave?.choice==='mine'?'현재 원고 서버 저장 재시도':'현재 원고 선택'}</SyncButton>}
       rightAction={<SyncButton type="button" disabled={disabled||!!pendingSave&&pendingSave.choice!=='other'} onClick={()=>{void choose('other')}}>{pendingSave?.choice==='other'?'선택한 원고 서버 저장 재시도':preview.server?'서버 원고 선택':'다른 탭 원고 선택'}</SyncButton>}/>}
-    {deleted&&<><h3>복구할 로컬 원고</h3><p><strong>{mine?.title||'제목 없음'}</strong></p><textarea aria-label="복구할 로컬 원고 본문" readOnly value={mine ? documentText(mine.content,true) : ''} rows={5}/><p>서버가 NOTE_NOT_FOUND를 반환했습니다. 기존 UUID로 재생성하지 않고 새 UUID와 NOTE_CREATE로 복구합니다.</p>
+    {deleted&&<><h3>복구할 로컬 원고</h3><p><strong>{mine?.title||'제목 없음'}</strong></p><textarea aria-label="복구할 로컬 원고 본문" readOnly value={mine ? documentText(mine.content,true) : ''} rows={5}/>
       <label>새 원고를 보관할 폴더 <select value={folderId} onChange={e=>setFolderId(e.target.value)} disabled={busy}><option value="">폴더 없이 생성</option>{folders.map(f=><option key={f.id} value={f.id}>{f.name}</option>)}</select></label></>}
     {deleted&&<><p>로컬 원고를 삭제하면 이 브라우저의 원고와 대기 작업도 제거되며 복구할 수 없습니다.</p><div style={{marginTop:16,display:'flex',flexWrap:'wrap',gap:12}}><SyncButton type="button" disabled={disabled} onClick={()=>{void choose('recover')}}>새 원고로 복구</SyncButton><SyncButton type="button" disabled={disabled||!!pendingSave} onClick={()=>{void discard()}}>로컬 원고 삭제</SyncButton></div></>}
   </Content></Dialog.Portal></Dialog.Root>

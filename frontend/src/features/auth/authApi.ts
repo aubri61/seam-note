@@ -1,4 +1,4 @@
-import { ApiError, getJson, postJson, postEmpty } from '@/lib/api/client'
+import { ApiError, getJson, patchJson, postJson, postEmpty } from '@/lib/api/client'
 import { accessTokenStore } from './accessTokenStore'
 import { createRefreshCoordinator, withAuthLock } from './refreshCoordinator'
 import { documentAccount, sameAccount } from './authRuntime'
@@ -54,6 +54,19 @@ export const refreshAuthentication = createRefreshCoordinator(async (): Promise<
   accessTokenStore.complete(generation, result.accessToken, result.expiresIn)
   return result.user
 })
+export async function renameProfile(nickname: string): Promise<AuthUser> {
+  const generation = accessTokenStore.generation()
+  const requireSameSession = () => {
+    if (generation !== accessTokenStore.generation()) throw new Error('계정이 변경되었습니다. 다시 로그인해주세요.')
+  }
+  if (!accessTokenStore.get()) await refreshAuthentication()
+  requireSameSession()
+  const user = await patchJson<unknown>('/auth/me', { nickname })
+  requireSameSession()
+  if (!validUser(user) || !sameAccount(documentAccount, user)) throw invalidResponse()
+  return user
+}
+
 export async function logoutOnServer(): Promise<void> {
   accessTokenStore.clear()
   await withAuthLock(async () => {

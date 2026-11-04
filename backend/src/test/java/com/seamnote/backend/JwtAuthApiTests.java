@@ -59,6 +59,23 @@ class JwtAuthApiTests {
         assertEquals(401,get("/api/auth/me",null).statusCode());
         assertEquals(403,get("/api/auth/private",token).statusCode());
     }
+    @Test void renameRequiresBearerAndUpdatesOnlyTheAuthenticatedAccount() throws Exception {
+        UUID a = user(), b = user();
+        String bearer = issuer.issue(a);
+        var path = URI.create("http://127.0.0.1:" + port + "/api/auth/me?userId=" + b);
+        var valid = HttpRequest.BodyPublishers.ofString(json.writeValueAsString(Map.of("nickname", "  새 이름  ")));
+        var request = HttpRequest.newBuilder(path).header("Content-Type", "application/json").method("PATCH", valid);
+        assertEquals(401, client.send(request.copy().header("Cookie", "seam_refresh=untrusted").build(),
+            HttpResponse.BodyHandlers.ofString()).statusCode());
+        request.header("Authorization", "Bearer " + bearer);
+        assertEquals(400, client.send(request.copy().method("PATCH", HttpRequest.BodyPublishers.ofString("{\"nickname\":\"x\"}")).build(),
+            HttpResponse.BodyHandlers.ofString()).statusCode());
+        var result = client.send(request.build(), HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, result.statusCode());
+        assertEquals("새 이름", json.readTree(result.body()).get("nickname").asString());
+        assertEquals("새 이름", json.readTree(get("/api/auth/me", bearer).body()).get("nickname").asString());
+        assertEquals("JWT 사용자", json.readTree(get("/api/auth/me", issuer.issue(b)).body()).get("nickname").asString());
+    }
     @Test void rejectsWrongClaimsAndNeverEchoesBearer() throws Exception {
         UUID id=user(); var now=Instant.now();
         Map<String,String> cases=new LinkedHashMap<>();

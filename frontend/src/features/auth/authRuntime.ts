@@ -2,7 +2,6 @@ import { accessTokenStore } from './accessTokenStore'
 
 export interface AccountScope { id: string; issuer: string; audience: string; nickname: string }
 export const ACTIVE_ACCOUNT = 'seam-note:active-account:v1'
-export const LAST_ACCOUNT = 'seam-note:last-account:v1'
 export const LOGOUT_PENDING = 'seam-note:logout-pending:v1'
 export const AUTH_FENCE = 'seam-note:auth-fence:v1'
 export function parseAccount(raw: string | null): AccountScope | null {
@@ -28,7 +27,6 @@ export const documentAccount = readAccount()
 export const scopedName = (base: string) => accountNamespace(base, documentAccount, typeof location === 'undefined' ? '' : location.origin)
 export function saveAccount(account: AccountScope) {
   const value = JSON.stringify({ id: account.id, issuer: account.issuer, audience: account.audience, nickname: account.nickname })
-  localStorage.setItem(LAST_ACCOUNT, value)
   localStorage.setItem(ACTIVE_ACCOUNT, value)
 }
 let allowed = true
@@ -48,6 +46,6 @@ export async function prepareAuthChange() {
     await flushAccountDrafts()
   } catch {
     setBusinessAccess(previous)
-    throw new Error('로컬 저장을 확인하지 못해 계정 전환을 중단했습니다. 현재 입력을 보관하고 다시 시도해주세요.')
+    throw new Error('로컬 저장을 확인하지 못해 요청을 중단했습니다. 현재 입력을 보관하고 다시 시도해주세요.')
   }
 }

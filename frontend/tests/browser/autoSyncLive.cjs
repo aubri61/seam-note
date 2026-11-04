@@ -51,7 +51,7 @@ async function verifyOfflineCreation(){
  await cc.setOffline(true)
  async function newFolder(name){await cp.getByLabel('폴더 또는 문서 추가',{exact:true}).click();await cp.getByRole('button',{name:'새 폴더',exact:true}).click();const input=cp.getByRole('textbox',{name:'새 폴더 이름',exact:true});await input.fill(name);await input.press('Enter');await input.waitFor({state:'hidden'});return cp.getByRole('treeitem',{name,exact:true}).getAttribute('data-node-key')}
  const parent=(await newFolder('Offline auto parent')).slice(7),child=(await newFolder('Offline auto child')).slice(7)
- await cp.getByLabel('폴더 또는 문서 추가',{exact:true}).click();await cp.locator('details[open]').getByRole('button',{name:'새 문서',exact:true}).click();await until(()=>!cp.url().endsWith(anchor.id),'local new note URL');const id=cp.url().split('/').at(-1)
+ await cp.getByLabel('폴더 또는 문서 추가',{exact:true}).click();await cp.getByLabel('추가할 항목',{exact:true}).getByRole('button',{name:'새 문서',exact:true}).click();await until(()=>!cp.url().endsWith(anchor.id),'local new note URL');const id=cp.url().split('/').at(-1)
  await title(cp).fill('Offline auto manuscript');await editor(cp).fill('offline new manuscript first');await saved(cp,id,'offline new manuscript first')
  assert.equal((await state(cp,id)).creations.length,3);await close(cc)
  const restored=await launch('creation-hierarchy',true),rp=await open(restored,id);assert.ok((await editor(rp).innerText()).includes('offline new manuscript first'))

@@ -39,7 +39,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(rules -> rules
                 .requestMatchers(HttpMethod.GET, "/api/auth/csrf", "/api/auth/config").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/signup", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/auth/me").hasRole("USER")
+                .requestMatchers("/api/auth/me").hasRole("USER")
                 .anyRequest().denyAll())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .securityContext(context -> context.securityContextRepository(new NullSecurityContextRepository()))
@@ -53,7 +53,9 @@ public class SecurityConfig {
             .authenticationEntryPoint((req, res, ex) -> responses.error(res, 401, "AUTHENTICATION_REQUIRED", "인증이 필요합니다."))
             .accessDeniedHandler((req, res, ex) -> responses.error(res, 403, "ACCESS_DENIED", "요청 권한을 확인해주세요.")));
         http.csrf(csrf -> csrf.requireCsrfProtectionMatcher(request ->
-            !Set.of("GET", "HEAD", "OPTIONS", "TRACE").contains(request.getMethod())));
+            !Set.of("GET", "HEAD", "OPTIONS", "TRACE").contains(request.getMethod())
+                // Profile edits require an explicit Bearer token, never a cookie.
+                && !("PATCH".equals(request.getMethod()) && "/api/auth/me".equals(request.getServletPath()))));
         // CSRF session is not an authenticated login session.
         errors(http, responses);
         return http.build();

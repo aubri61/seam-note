@@ -1,3 +1,4 @@
+import { WorkspaceAccount } from './workspaceAccount'
 import { useEffect, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import styled from '@emotion/styled'
@@ -5,10 +6,10 @@ import { actionStyle, fieldStyle } from '@/styles/controls'
 import { ApiError, configureAuthRecovery, getJson } from '@/lib/api/client'
 import { queryClient } from '@/lib/query/queryClient'
 import { accessTokenStore } from './accessTokenStore'
-import { loginWithPassword, logoutOnServer, refreshAuthentication, signupWithPassword } from './authApi'
+import { loginWithPassword, logoutOnServer, refreshAuthentication, renameProfile, signupWithPassword } from './authApi'
 import { withAuthLock } from './refreshCoordinator'
-import { ACTIVE_ACCOUNT, AUTH_FENCE, LAST_ACCOUNT, LOGOUT_PENDING, documentAccount, flushAccountDrafts,
-  prepareAuthChange, readAccount, sameAccount, saveAccount, setBusinessAccess } from './authRuntime'
+import { ACTIVE_ACCOUNT, AUTH_FENCE, LOGOUT_PENDING, documentAccount, flushAccountDrafts,
+  businessAccess, prepareAuthChange, readAccount, sameAccount, saveAccount, setBusinessAccess } from './authRuntime'
 
 // No business request is allowed before the bootstrap identity check.
 setBusinessAccess(false)
@@ -50,16 +51,16 @@ const Brand = styled.div(({ theme }) => ({
   display: 'flex', alignItems: 'center', gap: theme.spacing.sm, fontSize: 17, fontWeight: 600,
   marginBottom: theme.spacing.lg, '& img': { width: 32, height: 32 },
 }))
-const Bar = styled.aside(({ theme }) => ({
-  display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: theme.spacing.sm,
-  padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-  borderBottom: `1px solid ${theme.colors.border}`, background: theme.colors.sidebar,
-  fontSize: 13, color: theme.colors.mutedText,
-  '& > span': { overflowWrap: 'anywhere', minWidth: 0 },
-  '& > span[role="status"]': { flexBasis: '100%' },
-  '& button': actionStyle(theme, 'ghost', true),
-}))
-const OFFLINE_OPEN = 'seam-note:open-offline:v1'
+const VERIFIED_SESSION = 'seam-note:verified-session:v1'
+
+function sessionScope() {
+  if (localStorage.getItem(LOGOUT_PENDING) || !sameAccount(documentAccount, readAccount())) return null
+  return JSON.stringify([documentAccount?.id, documentAccount?.issuer, documentAccount?.audience, localStorage.getItem(AUTH_FENCE)])
+}
+
+function isNetworkError(error: unknown) {
+  return error instanceof ApiError && error.code === 'NETWORK_ERROR'
+}
 
 function checkSignupPassword(value: string) {
   // Match PasswordPolicy: Unicode code points, Java whitespace and UTF-8 length.
@@ -156,51 +157,83 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
   const [message, setMessage] = useState(() => location.search === '?oauth=failed' ? 'Google 로그인을 완료하지 못했습니다. 기존 이메일 계정이 있다면 이메일로 로그인해주세요.' : location.search === '?registered=1' ? '가입 요청을 처리했습니다. 이메일과 비밀번호로 로그인해주세요.' : '')
   const [busy, setBusy] = useState(false)
   const [googleEnabled, setGoogleEnabled] = useState(false)
+  const [nickname, setNickname] = useState(documentAccount?.nickname || '개인 계정')
   const [frozen, setFrozen] = useState(false)
   useEffect(() => {
     let active = true
     void getJson<{googleEnabled: boolean}>('/auth/config').then(config => { if (active) setGoogleEnabled(config.googleEnabled === true) }).catch(() => {})
-    configureAuthRecovery(async () => {
-      try {
-        await finishPendingLogout()
-        await refreshAuthentication()
-      } catch (error) {
-        setBusinessAccess(false)
-        if (active) setMessage('인증을 다시 확인해주세요. 로컬 원고와 미전송 작업은 유지됩니다.')
-        throw error
-      }
-    })
-    const changed = (event: StorageEvent) => {
-      if (![ACTIVE_ACCOUNT, AUTH_FENCE, LOGOUT_PENDING].includes(event.key ?? '')) return
-      setBusinessAccess(false); accessTokenStore.clear()
+    const freeze = (notice: string) => {
+      sessionStorage.removeItem(VERIFIED_SESSION)
+      setBusinessAccess(false)
+      accessTokenStore.clear()
       void queryClient.cancelQueries()
       setFrozen(true)
-      setMessage('다른 탭에서 로그인 상태를 변경했습니다. 이 탭의 원고와 전송 작업은 기존 계정에 보존합니다.')
-      void flushAccountDrafts().catch(() => setMessage('다른 탭의 계정 변경으로 전송을 중단했습니다. 저장되지 않은 입력이 있어 이 탭을 닫지 말고 원고를 확인해주세요.'))
+      setMessage(notice)
+      void flushAccountDrafts().catch(() => setMessage('저장되지 않은 입력이 있어 이 탭을 닫지 말고 다시 로그인해주세요.'))
+    }
+    const verify = async () => {
+      const fence = localStorage.getItem(AUTH_FENCE)
+      await finishPendingLogout()
+      const generation = accessTokenStore.generation()
+      const user = await refreshAuthentication()
+      if (!active) return
+      if (generation !== accessTokenStore.generation() || fence !== localStorage.getItem(AUTH_FENCE)) throw new Error('계정이 변경되었습니다.')
+      if (!documentAccount) { saveAccount(user); location.replace('/'); return }
+      const scope = sessionScope()
+      if (!scope || !sameAccount(documentAccount, user)) throw new Error('계정이 변경되었습니다.')
+      sessionStorage.setItem(VERIFIED_SESSION, scope)
+      setNickname(user.nickname)
+      setBusinessAccess(true)
+      setMode('workspace')
+    }
+    const recover = async () => {
+      try {
+        await verify()
+      } catch (error) {
+        if (active && !isNetworkError(error)) freeze('다시 로그인해주세요.')
+        throw error
+      }
+    }
+    configureAuthRecovery(recover)
+    const changed = (event: StorageEvent) => {
+      if (![ACTIVE_ACCOUNT, AUTH_FENCE, LOGOUT_PENDING, null].includes(event.key)) return
+      freeze('다른 탭에서 로그인 상태를 변경했습니다. 다시 로그인해주세요.')
+    }
+    const reconnected = () => {
+      const scope = sessionScope()
+      if (!authPage() && !businessAccess() && scope && sessionStorage.getItem(VERIFIED_SESSION) === scope) {
+        void recover().catch(() => {})
+      }
     }
     window.addEventListener('storage', changed)
+    window.addEventListener('online', reconnected)
     const bootstrap = async () => {
-      if (authPage()) return
-      if (sessionStorage.getItem(OFFLINE_OPEN) && documentAccount) {
-        sessionStorage.removeItem(OFFLINE_OPEN)
-        if (active) { setMode('workspace'); setMessage('이 기기에 저장된 원고를 열었습니다. 서버 전송은 로그인 확인 전까지 중단됩니다.') }
+      if (authPage()) {
+        sessionStorage.removeItem(VERIFIED_SESSION)
         return
       }
+      const scope = sessionScope()
       try {
-        await finishPendingLogout()
-        const user = await refreshAuthentication()
-        if (!active) return
-        if (!documentAccount) { saveAccount(user); location.replace('/'); return }
-        if (!sameAccount(documentAccount, user)) throw new Error('계정 또는 서버 환경이 변경되었습니다.')
-        setBusinessAccess(true); setMode('workspace')
+        await verify()
       } catch (error) {
         if (!active) return
-        setBusinessAccess(false); setMode('login')
-        setMessage(error instanceof ApiError && error.status === 401 ? '로그인해주세요. 기존 로컬 원고는 유지됩니다.' : '서버 연결 또는 로그인 상태를 확인해주세요. 기존 로컬 원고는 유지됩니다.')
+        const verified = scope && scope === sessionScope() && sessionStorage.getItem(VERIFIED_SESSION) === scope
+        if (verified && isNetworkError(error)) {
+          setMode('workspace')
+          return
+        }
+        sessionStorage.removeItem(VERIFIED_SESSION)
+        setBusinessAccess(false)
+        setMode('login')
       }
     }
     void bootstrap()
-    return () => { active = false; configureAuthRecovery(undefined); window.removeEventListener('storage', changed) }
+    return () => {
+      active = false
+      configureAuthRecovery(undefined)
+      window.removeEventListener('storage', changed)
+      window.removeEventListener('online', reconnected)
+    }
   }, [])
   const act = async (action: () => Promise<void>) => {
     setBusy(true); setMessage('')
@@ -220,7 +253,6 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
     await signupWithPassword(input)
     location.replace('/login?registered=1')
   })
-  const loginPage = () => void act(async () => { await prepareAuthChange(); location.assign('/login') })
   const logout = () => void act(async () => {
     await prepareAuthChange()
     // Persist before contacting the server: offline logout must survive reload.
@@ -229,18 +261,11 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
     try { await finishPendingLogout() } catch { /* pending marker blocks future silent refresh */ }
     location.replace('/login')
   })
-  const offline = () => void act(async () => {
-    const account = readAccount(LAST_ACCOUNT)
-    if (!account) throw new Error('이 브라우저에서 확인된 계정의 로컬 원고가 없습니다.')
-    setBusinessAccess(false)
-    if (sameAccount(documentAccount, account)) { setMode('workspace'); setFrozen(false); setMessage('로컬 원고를 열었습니다. 서버 전송은 중단됩니다.'); return }
-    saveAccount(account); sessionStorage.setItem(OFFLINE_OPEN, '1'); location.replace('/')
-  })
   if (mode === 'checking') return <Card><p role="status">로그인 상태 확인 중…</p></Card>
   if (mode === 'login' || mode === 'register') return <Card>
-    <Brand><img src="/seam-note-icon.png" alt="" />seam note</Brand>
-    <h1>{mode === 'register' ? '이메일로 가입하기' : '다시, 이어 쓰기'}</h1>
-    <p className="auth-intro">당신의 생각이 끊기지 않도록.</p>
+    <Brand><img src="/seam-note-icon.png" alt="" /></Brand>
+    <h1>{mode === 'register' ? '이메일로 가입하기' : 'Seam Note'}</h1>
+    <p className="auth-intro">당신의 생각이 끊기지 않도록</p>
     {mode === 'register' ? <RegisterForm busy={busy} onSubmit={register} /> : <LoginForm busy={busy} onSubmit={login} />}
     <div className="auth-options">
       {googleEnabled && <button data-google type="button" disabled={busy} onClick={() => void act(async () => {
@@ -250,17 +275,24 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
         aria-disabled={busy || undefined} onClick={event => { if (busy) event.preventDefault() }}>
         {mode === 'register' ? '로그인으로 돌아가기' : '이메일로 가입하기'}
       </a>
-      {mode === 'login' && readAccount(LAST_ACCOUNT) && <button type="button" onClick={offline} disabled={busy}>이 기기의 로컬 원고 열기</button>}
     </div>
     {message && <p role="status">{message}</p>}
   </Card>
-  return <>
-    <Bar aria-label="계정 상태"><span>{documentAccount?.nickname} · 개인 공간</span>
-      <button type="button" onClick={loginPage} disabled={busy}>로그인 / 계정 전환</button>
-      <button type="button" onClick={logout} disabled={busy}>로그아웃</button>
-      {message && <span role="status">{message}</span>}
-      {frozen && <button type="button" onClick={() => { setFrozen(false); setBusinessAccess(false) }}>이 탭의 로컬 원고 확인 · 전송 중단</button>}
-    </Bar>
+  return <WorkspaceAccount.Provider value={frozen ? null : {
+    nickname, busy, message, onLogout: logout,
+    onRename: async (nextName) => {
+      if (!businessAccess()) throw new Error('이름을 바꾸려면 다시 로그인해주세요.')
+      const user = await renameProfile(nextName)
+      setNickname(user.nickname)
+    },
+  }}>
+    {frozen && <Card>
+      <h1>Seam Note</h1>
+      {message && <p role="status">{message}</p>}
+      <div className="auth-options">
+        <button type="button" disabled={busy} onClick={logout}>로그아웃</button>
+      </div>
+    </Card>}
     <div hidden={frozen} inert={frozen || busy}>{children}</div>
-  </>
+  </WorkspaceAccount.Provider>
 }

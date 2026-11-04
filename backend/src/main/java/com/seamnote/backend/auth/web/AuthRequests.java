@@ -15,6 +15,9 @@ public final class AuthRequests {
         public Login { if (email != null) email = email.strip(); }
         @Override public String toString() { return "Login[REDACTED]"; }
     }
+    public record RenameProfile(@NotBlank @Size(min = 2, max = 30) String nickname) {
+        public RenameProfile { if (nickname != null) nickname = nickname.strip(); }
+    }
     public record VerifiedUser(UUID id, String email, String nickname, boolean emailVerified, String issuer, String audience) {}
     public record LoginResponse(VerifiedUser user, String accessToken, String tokenType, long expiresIn) {
         @Override public String toString() { return "LoginResponse[REDACTED]"; }

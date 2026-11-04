@@ -1,3 +1,4 @@
+import { SidebarAccount } from './SidebarAccount'
 import { shortcutLabel } from '@/lib/keyboard/shortcutLabel'
 import { useRef } from 'react'
 import type { ReactNode } from 'react'
@@ -13,12 +14,20 @@ import type { useFolders } from '@/features/folders/useFolders'
 const Panel = styled.aside(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  minHeight: '100%',
-  height: '100%',
+  height: `calc(100svh - 2 * ${theme.spacing.xs} - 2px)`,
+  [`@media (max-width: ${theme.breakpoints.tablet})`]: { height: '100%' },
   padding: `${theme.spacing.lg} ${theme.spacing.md} ${theme.spacing.md}`,
   borderRight: `1px solid ${theme.colors.border}`,
   background: theme.colors.sidebar,
 }))
+
+const SidebarBody = styled.div({
+  flex: 1,
+  minHeight: 0,
+  overflowY: 'auto',
+  padding: '2px',
+  margin: '-2px',
+})
 
 const Retry = styled.button(({ theme }) => actionStyle(theme, 'secondary', true))
 
@@ -114,7 +123,7 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
   folders: ReturnType<typeof useFolders>
   draftTitles: Readonly<Partial<Record<string, string>>>
   onSelectNote: (id: string) => void
-  onCreate: (kind: 'folder' | 'root-folder' | 'document' | 'unfiled-document') => void
+  onCreate: (kind: 'folder' | 'root-folder' | 'document') => void
   onFolderAction: (id: string, action: FolderAction) => void
   onDeleteNote:(id:string)=>void
   canDeleteNote:(id:string)=>boolean
@@ -124,6 +133,7 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
 
   return (
     <Panel aria-label="폴더 사이드바">
+      <SidebarBody>
       <Brand>
         <img src="/seam-note-icon.png" alt="" width={42} height={42} />
         <div>
@@ -152,7 +162,6 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
             <div aria-label="추가할 항목">
               <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('folder') }}><Icon name="folder" size={17} />새 폴더</button>
               <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('document') }}><Icon name="note" size={17} />새 문서</button>
-              <button type="button" disabled={folders.busy || !!folders.pendingFolder || !folders.workspace.data} onClick={() => { if (createRef.current) createRef.current.open = false; onCreate('unfiled-document') }}><Icon name="note" size={17} />폴더 없이 새 문서</button>
             </div>
           </CreatePicker>
         </FolderHeading>
@@ -171,6 +180,8 @@ export function Sidebar({ onClose, folders, draftTitles, onSelectNote, onCreate,
           openFolders={folders.openFolders} onFolderOpen={folders.setFolderOpen} onSelect={onSelectNote}
         />}
       </nav>
+      </SidebarBody>
+      <SidebarAccount />
     </Panel>
   )
 }
