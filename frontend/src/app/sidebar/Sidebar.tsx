@@ -70,6 +70,7 @@ const Search = styled.label(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.sm,
   padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+  marginInline: theme.spacing.xs,
   marginBottom: theme.spacing.lg,
   border: 0,
   borderRadius: theme.radii.pill,
@@ -77,6 +78,7 @@ const Search = styled.label(({ theme }) => ({
   '&:hover, &:focus-within': { background: theme.colors.surface },
   '&:focus-within': controlFocus(theme),
   color: theme.colors.mutedText,
+  '& > svg': { color: theme.colors.secondary, flexShrink: 0 },
   input: {
     width: '100%',
     minWidth: 0,

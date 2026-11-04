@@ -5,7 +5,7 @@ import { controlFocus } from '@/styles/controls'
 
 const Picker = styled.details(({ theme }) => ({
   position: 'relative',
-  marginBottom: theme.spacing.sm,
+  marginBottom: theme.spacing.control,
   '> summary': {
     display: 'flex',
     alignItems: 'center',
@@ -14,7 +14,7 @@ const Picker = styled.details(({ theme }) => ({
     padding: `${theme.spacing.xs} ${theme.spacing.control}`,
     border: `1px solid ${theme.colors.border}`,
     borderRadius: theme.radii.sm,
-    background: theme.colors.surface,
+    background: theme.colors.sidebar,
     color: theme.colors.text,
     '&:focus-visible': controlFocus(theme),
     cursor: 'pointer',
