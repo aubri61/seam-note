@@ -477,3 +477,45 @@ test('first-write CAS conflict cannot be reset to pristine when the competing ro
   assert.equal(repo.attempts.length, attempts)
   assert.equal(get().draft.content, 'my first input')
 })
+
+test('update waits for the local commit, then restores the unsent draft in a fresh session', async t => {
+  const { repo, session } = setup(t)
+  await ready(session)
+  assert.equal(await session.checkUpdateRecovery('A', false), null)
+  session.edit('A', { content: '편집 중인 원고' })
+  assert.equal(await session.checkUpdateRecovery('A', true), null)
+  repo.writeGate = deferred()
+  const saving = session.flushLatest('A')
+  assert.equal(await session.checkUpdateRecovery('A', true), null)
+  repo.writeGate.resolve()
+  await saving
+  const safe = await session.checkUpdateRecovery('A', false)
+  assert.ok(safe())
+  const restored = new DraftSession(repo, 'after-update')
+  restored.select('A')
+  await settle()
+  assert.equal(restored.getSnapshot().A.draft.content, '편집 중인 원고')
+  assert.ok(isDraftDirty(restored.getSnapshot().A.draft))
+  session.edit('A', { content: '확인 직후 새 입력' })
+  assert.equal(safe(), false)
+})
+
+test('an unreadable or replaced local record cannot authorize an update reload', async t => {
+  const { repo, session } = setup(t, stored())
+  await ready(session)
+  repo.failRead = new Error('IndexedDB unavailable')
+  await assert.rejects(session.checkUpdateRecovery('A', true), /unavailable/)
+  repo.failRead = undefined
+  repo.records.set('A', { ...stored(), storageToken: 'another-tab-token' })
+  assert.equal(await session.checkUpdateRecovery('A', true), null)
+})
+
+test('a failed local save keeps a draft in the original page', async t => {
+  const { repo, session } = setup(t)
+  await ready(session)
+  repo.failWrite = new Error('save failed')
+  session.edit('A', { content: '보존해야 하는 입력' })
+  await assert.rejects(session.flushLatest('A'))
+  assert.equal(await session.checkUpdateRecovery('A', true), null)
+  assert.equal(session.getSnapshot().A.draft.content, '보존해야 하는 입력')
+})

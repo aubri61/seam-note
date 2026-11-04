@@ -1,5 +1,6 @@
+import { updateReloadGate } from '@/features/pwa/appUpdate'
 import { WorkspaceAccount } from './workspaceAccount'
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import styled from '@emotion/styled'
 import { actionStyle, fieldStyle } from '@/styles/controls'
@@ -159,6 +160,10 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
   const [googleEnabled, setGoogleEnabled] = useState(false)
   const [nickname, setNickname] = useState(documentAccount?.nickname || '개인 계정')
   const [frozen, setFrozen] = useState(false)
+  useLayoutEffect(() => updateReloadGate.register(() => {
+    if (busy || mode === 'checking') return null
+    return () => mode !== 'workspace' || navigator.onLine !== false || !!sessionScope()
+  }), [busy, mode])
   useEffect(() => {
     let active = true
     void getJson<{googleEnabled: boolean}>('/auth/config').then(config => { if (active) setGoogleEnabled(config.googleEnabled === true) }).catch(() => {})

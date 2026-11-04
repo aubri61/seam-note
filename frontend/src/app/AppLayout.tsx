@@ -1,7 +1,7 @@
 import { businessAccess, subscribeBusinessAccess } from '@/features/auth/authRuntime'
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import type { ComponentProps } from 'react'
-import { lazy, Suspense, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react'
+import { lazy, Suspense, useEffect, useEffectEvent, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useConflictList } from '@/features/conflicts/useConflictList'
 import { useTheme } from '@emotion/react'
 import styled from '@emotion/styled'
@@ -19,7 +19,7 @@ import { ApiError } from '@/lib/api/client'
 import { useNoteDrafts } from '@/features/notes/useNoteDrafts'
 import { notePath } from '@/app/routing/noteRoutes'
 import { useConnectivity } from '@/features/offline/useConnectivity'
-import { PwaStatus } from '@/features/pwa/PwaStatus'
+import { updateReloadGate } from '@/features/pwa/appUpdate'
 import { useWorkspaceSync } from '@/features/manual-sync/useWorkspaceSync'
 import { localDraftStatus } from '@/features/local-drafts/localDraftStatus'
 import type { NoteEditor } from '@/features/notes/NoteEditor'
@@ -97,6 +97,12 @@ export function AppLayout() {
   const createDocumentGate = useRef(false)
   const pendingCreatedFocus = useRef<{noteId:string;reached:boolean}|null>(null)
   const [createdFocusRequest,setCreatedFocusRequest] = useState<string|null>(null)
+  useLayoutEffect(() => updateReloadGate.register(async () => {
+    if (folders.pendingFolder || folders.editingFolderId || folders.busy || createDocumentGate.current) return null
+    const onlineAtCheck = navigator.onLine !== false
+    const ready = await drafts.session.checkUpdateRecovery(folders.selectedNoteId, onlineAtCheck)
+    return () => !!ready?.() && !createDocumentGate.current && (navigator.onLine !== false) === onlineAtCheck
+  }), [drafts.session, folders.pendingFolder, folders.editingFolderId, folders.busy, folders.selectedNoteId])
   const sidebarId = 'folders-sidebar'
   const onSidebarShortcut = useEffectEvent((event: KeyboardEvent) => {
     if (event.defaultPrevented || event.isComposing || event.altKey || event.shiftKey
@@ -258,7 +264,6 @@ export function AppLayout() {
           canDelete={serverAvailable&&!folders.busy&&!!folders.selectedNoteId&&!folders.localNote&&!folders.routeError&&folders.tree.notes.has(folders.selectedNoteId)} onDelete={()=>openDeleteNote()}
           path={folders.ancestors.map(item => item.name)}
         />
-        <PwaStatus />
         {ManualSyncDelayPanel && <Suspense fallback={null}><ManualSyncDelayPanel noteId={folders.selectedNoteId}/></Suspense>}
         {conflicts.error&&<p role="alert">{conflicts.error}</p>}
         {folders.selectedNoteId && !drafts.recovering && !drafts.draft && offlineDetail && <p role="alert" style={{ padding: '8px 24px' }}>오프라인에서 이 원고를 열 수 없습니다. 인터넷에 연결한 뒤 다시 열어주세요.</p>}

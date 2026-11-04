@@ -29,7 +29,13 @@ export default defineConfig({
       navigateFallback: 'index.html',
       navigateFallbackAllowlist: [/^\/$/, /^\/notes\/[^/]+\/?$/, /^\/(login|register)\/?$/, /^\/auth\/complete\/?$/],
       navigateFallbackDenylist: [/^\/api(?:\/|$)/],
-      runtimeCaching: [], cleanupOutdatedCaches: true, skipWaiting: false, clientsClaim: false,
+      importScripts: ['/sw-retain-assets.js'],
+      runtimeCaching: [{
+        urlPattern: ({ sameOrigin, url }) => sameOrigin && /^\/assets\/[^/]+-[\w-]{8,}\.(?:js|css)$/.test(url.pathname),
+        handler: 'CacheFirst',
+        options: { cacheName: 'seam-note-previous-assets', expiration: { maxEntries: 200 } },
+      }],
+      cleanupOutdatedCaches: true, skipWaiting: true, clientsClaim: true,
     },
   })],
   server: {

@@ -29,9 +29,9 @@ async function launch(offline=false){
 }
 async function main(){
  try{
- const sourceNames=['frontend/vite.config.ts','frontend/src/main.tsx','frontend/src/app/AppLayout.tsx','frontend/src/features/folders/useFolders.ts','frontend/src/features/local-drafts/draftDatabase.ts','frontend/src/features/offline/workspaceCache.ts','frontend/src/features/pwa/PwaStatus.tsx']
+ const sourceNames=['frontend/vite.config.ts','frontend/src/main.tsx','frontend/src/app/AppLayout.tsx','frontend/src/features/folders/useFolders.ts','frontend/src/features/local-drafts/draftDatabase.ts','frontend/src/features/offline/workspaceCache.ts','frontend/src/features/pwa/appUpdate.ts']
  const sourceHashes=Object.fromEntries(sourceNames.map(name=>[name,sha(fs.readFileSync(path.join(root,name)))]))
- buildDir=build('A');const buildB=build('B')
+ buildDir=build('A')
  server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,'http://fixture'),p=url.pathname;res.setHeader('Cache-Control','no-store')
   const json=(status,value,headers={})=>{res.writeHead(status,{'Content-Type':'application/json',...headers});res.end(JSON.stringify(value))}
@@ -98,22 +98,11 @@ async function main(){
  onlineGetsFail=true;await page.reload();await until(async()=>await body(page).inputValue()===edited,'503 fallback');assert.equal((await records(page)).workspace[0].data.notes.length,3)
  assert.ok((await records(page)).drafts.find(d=>d.noteId===ids[0]).content===edited);onlineGetsFail=false
  done('server-503-preserves-workspace-and-manuscript')
- await title(page).fill('업데이트 중 메모리 제목');let last='업데이트 대기 중 작성한 합성 본문';await body(page).fill(last)
- buildDir=buildB;await page.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration();await r.update()})
- await page.getByText(/새 앱 버전이 준비됐습니다/).waitFor()
- assert.equal(await page.locator('meta[name="fixture-build"]').getAttribute('content'),'A');assert.equal(await body(page).inputValue(),last)
- last += ' · 대기 중 최신 입력';await body(page).fill(last)
- assert.notEqual((await records(page)).drafts.find(d=>d.noteId===ids[0]).content,last,'input is still only in memory during waiting update')
- assert.equal(await body(page).inputValue(),last);assert.equal(await page.locator('meta[name="fixture-build"]').getAttribute('content'),'A')
- await localSaved(page,last);const beforeUpdate=await records(page),token=beforeUpdate.drafts.find(d=>d.noteId===ids[0]).storageToken
- assert.ok(await page.evaluate(async()=>!!(await navigator.serviceWorker.getRegistration()).waiting))
- done('new-worker-waits-no-editor-reload',{contentHash:sha(last)})
- await context.close();context=null;page=await launch(true);await page.goto(origin+'/notes/'+ids[0]);await until(async()=>await body(page).inputValue()===last,'updated offline launch')
- assert.equal(await page.locator('meta[name="fixture-build"]').getAttribute('content'),'B');assert.equal((await records(page)).drafts.find(d=>d.noteId===ids[0]).storageToken,token)
- assert.equal(puts.length,2)
+ let last=edited
+ await context.setOffline(true)
  const cacheEntries=await page.evaluate(async()=>{const names=await caches.keys(),urls=[];for(const name of names)for(const req of await(await caches.open(name)).keys())urls.push(new URL(req.url).pathname);return urls})
  assert.ok(cacheEntries.length>0);assert.ok(cacheEntries.every(p=>!p.startsWith('/api/')))
- done('waiting-worker-activates-after-close-keeps-draft-outbox',{cacheEntries:cacheEntries.length,apiCacheEntries:0})
+ done('offline-cache-excludes-api',{cacheEntries:cacheEntries.length,apiCacheEntries:0})
  // Both tabs edit before their pagehide flush. The loser is determined by actual IDB CAS.
  const otherTab=await context.newPage();await otherTab.goto(origin+'/notes/'+ids[0]);await until(async()=>await body(otherTab).inputValue()===last,'second offline tab')
  await Promise.all([body(page).fill('offline CAS A synthetic'),body(otherTab).fill('offline CAS B synthetic')]);await Promise.all([page.evaluate(()=>window.dispatchEvent(new Event('pagehide'))),otherTab.evaluate(()=>window.dispatchEvent(new Event('pagehide')))])
